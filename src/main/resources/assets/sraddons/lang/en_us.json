@@ -1,0 +1,33 @@
+{
+  "modmenu.nameTranslation.sraddons": "SR-Addons",
+  "modmenu.descriptionTranslation.sraddons": "All-in-one client mod: EntityFire, PartyCommands, StarredMobHighlighter",
+
+  "key.sraddons.open": "Open Command Chat",
+  "key.sraddons.gui": "Open Config GUI",
+  "key.sraddons.toggle": "Toggle PartyCommands",
+  "key.category.sraddons.general": "SR-Addons",
+
+  "sraddons.command.reloaded": "Config reloaded!",
+  "sraddons.command.gui.opening": "Opening config GUI...",
+  "sraddons.command.version": "SR-Addons v%s",
+  "sraddons.command.author": "Made by Admin_SR40",
+  "sraddons.command.update.checking": "Checking for updates...",
+  "sraddons.command.update.available": "Update available! Latest: v%s (current: v%s)",
+  "sraddons.command.update.latest": "You are on the latest version! (v%s)",
+  "sraddons.command.update.error": "Unable to check for updates (network error)",
+  "sraddons.command.help.reload": "Reload config",
+  "sraddons.command.help.config": "Open config GUI",
+  "sraddons.command.help.gui": "Open config GUI",
+  "sraddons.command.help.version": "Show version info",
+  "sraddons.command.help.update": "Check for updates",
+
+  "sraddons.gui.title": "SR-Addons",
+  "sraddons.gui.entityfire": "EntityFire",
+  "sraddons.gui.entityfire.tooltip": "Hide entity fire effect",
+  "sraddons.gui.entityfire.hidden_fire": "Hidden Fire",
+  "sraddons.gui.entityfire.hidden_fire.desc": "Hide fire effect on burning entities",
+  "sraddons.gui.partycommands": "PartyCommands",
+  "sraddons.gui.partycommands.tooltip": "Party commands configuration",
+  "sraddons.gui.starredmob": "StarredMob",
+  "sraddons.gui.starredmob.tooltip": "Starred mob highlighter configuration"
+}

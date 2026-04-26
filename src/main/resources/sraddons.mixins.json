@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "com.sraddons.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "HiddenEntityFireMixin",
+    "ChatMixin",
+    "ChatScreenMixin",
+    "CommandSuggestionsMixin",
+    "ClientPacketListenerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

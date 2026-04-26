@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "sraddons",
+  "version": "${version}",
+  "name": "SR-Addons",
+  "description": "All-in-one client mod · 多合一综合客户端 Mod",
+  "authors": ["Admin_SR40"],
+  "license": "MIT",
+  "icon": "assets/sraddons/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.sraddons.SRAddonsMod"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "sraddons.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.21",
+    "java": ">=21",
+    "fabric-api": "*",
+    "fabric-language-kotlin": ">=1.13.0",
+    "yet_another_config_lib_v3": ">=3.8.0"
+  }
+}

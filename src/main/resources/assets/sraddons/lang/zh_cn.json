@@ -1,0 +1,33 @@
+{
+  "modmenu.nameTranslation.sraddons": "SR-Addons",
+  "modmenu.descriptionTranslation.sraddons": "多合一综合客户端 Mod：实体火焰隐藏、队伍快捷指令、星号怪物高亮",
+
+  "key.sraddons.open": "打开命令聊天",
+  "key.sraddons.gui": "打开配置界面",
+  "key.sraddons.toggle": "开关队伍命令",
+  "key.category.sraddons.general": "SR-Addons",
+
+  "sraddons.command.reloaded": "配置已重新加载！",
+  "sraddons.command.gui.opening": "正在打开配置界面...",
+  "sraddons.command.version": "SR-Addons v%s",
+  "sraddons.command.author": "作者 Admin_SR40",
+  "sraddons.command.update.checking": "正在检查更新...",
+  "sraddons.command.update.available": "发现新版本！最新：v%s（当前：v%s）",
+  "sraddons.command.update.latest": "你已是最新版本！（v%s）",
+  "sraddons.command.update.error": "无法检查更新（网络错误）",
+  "sraddons.command.help.reload": "重新加载配置",
+  "sraddons.command.help.config": "打开配置界面",
+  "sraddons.command.help.gui": "打开配置界面",
+  "sraddons.command.help.version": "显示版本信息",
+  "sraddons.command.help.update": "检查版本更新",
+
+  "sraddons.gui.title": "SR-Addons",
+  "sraddons.gui.entityfire": "EntityFire",
+  "sraddons.gui.entityfire.tooltip": "隐藏实体火焰效果",
+  "sraddons.gui.entityfire.hidden_fire": "隐藏火焰",
+  "sraddons.gui.entityfire.hidden_fire.desc": "隐藏燃烧实体的火焰效果",
+  "sraddons.gui.partycommands": "PartyCommands",
+  "sraddons.gui.partycommands.tooltip": "队伍命令配置",
+  "sraddons.gui.starredmob": "StarredMob",
+  "sraddons.gui.starredmob.tooltip": "星号怪物高亮配置"
+}

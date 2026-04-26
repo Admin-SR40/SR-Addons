@@ -1,0 +1,12 @@
+build/
+.gradle/
+.kotlin/
+*.class
+*.jar
+*.log
+.idea/
+.vscode/
+*.iml
+out/
+run/
+.DS_Store
