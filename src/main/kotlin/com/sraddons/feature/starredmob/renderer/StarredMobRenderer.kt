@@ -90,10 +90,10 @@ object StarredMobRenderer {
             val renderMode = SRConfig.settings.starredMob.renderMode.uppercase()
             val lineWidth = SRConfig.settings.starredMob.lineWidth.coerceIn(1, 10).toFloat()
             val maxDistance = SRConfig.settings.starredMob.maxDistance.coerceIn(10, 128)
-            val partialTicks = mc.deltaTracker.getGameTimeDeltaPartialTick(true)
+            val partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)
 
-            val cameraEntity = mc.cameraEntity ?: return@register
-            val cameraPos = cameraEntity.position()
+            val camera = mc.gameRenderer.mainCamera
+            val cameraPos = camera.position()
             val poseStack = context.matrices()
 
             poseStack.pushPose()
@@ -244,7 +244,7 @@ object StarredMobRenderer {
         val b = color.blue
         val a = (color.alpha * 0.3f).toInt().coerceIn(0, 255)
 
-        // Bottom
+        // Bottom face
         buffer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a)
@@ -252,7 +252,7 @@ object StarredMobRenderer {
         buffer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a)
 
-        // Top
+        // Top face
         buffer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a)
@@ -260,7 +260,7 @@ object StarredMobRenderer {
         buffer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a)
 
-        // North
+        // North face
         buffer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a)
@@ -268,7 +268,7 @@ object StarredMobRenderer {
         buffer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a)
 
-        // South
+        // South face
         buffer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a)
@@ -276,7 +276,7 @@ object StarredMobRenderer {
         buffer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a)
 
-        // West
+        // West face
         buffer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, minX, minY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a)
@@ -284,7 +284,7 @@ object StarredMobRenderer {
         buffer.addVertex(pose, minX, maxY, maxZ).setColor(r, g, b, a)
         buffer.addVertex(pose, minX, maxY, minZ).setColor(r, g, b, a)
 
-        // East
+        // East face
         buffer.addVertex(pose, maxX, minY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, minZ).setColor(r, g, b, a)
         buffer.addVertex(pose, maxX, maxY, maxZ).setColor(r, g, b, a)
@@ -305,19 +305,19 @@ object StarredMobRenderer {
         val b = color.blue
         val a = color.alpha
 
-        // Bottom
+        // Bottom edges
         addLine(pose, buffer, minX, minY, minZ, maxX, minY, minZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, maxX, minY, minZ, maxX, minY, maxZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, maxX, minY, maxZ, minX, minY, maxZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, minX, minY, maxZ, minX, minY, minZ, r, g, b, a, lineWidth)
 
-        // Top
+        // Top edges
         addLine(pose, buffer, minX, maxY, minZ, maxX, maxY, minZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, maxX, maxY, minZ, maxX, maxY, maxZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, maxX, maxY, maxZ, minX, maxY, maxZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, minX, maxY, maxZ, minX, maxY, minZ, r, g, b, a, lineWidth)
 
-        // Vertical
+        // Vertical edges
         addLine(pose, buffer, minX, minY, minZ, minX, maxY, minZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, maxX, minY, minZ, maxX, maxY, minZ, r, g, b, a, lineWidth)
         addLine(pose, buffer, maxX, minY, maxZ, maxX, maxY, maxZ, r, g, b, a, lineWidth)
