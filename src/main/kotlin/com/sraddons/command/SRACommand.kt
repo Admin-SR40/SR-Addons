@@ -6,9 +6,11 @@ import com.sraddons.update.UpdateChecker
 import com.sraddons.util.Constants
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import kotlinx.coroutines.CoroutineScope
+import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -83,17 +85,19 @@ object SRACommand {
                         val mc = net.minecraft.client.Minecraft.getInstance()
                         mc.execute {
                             if (result.downloadUrl != null) {
-                                val link = Component.literal(result.downloadUrl)
-                                    .withColor(0x55FFFF)
-                                    .withStyle(Style.EMPTY
-                                        .withUnderlined(true))
+                                val clickStyle = Style.EMPTY
+                                    .withUnderlined(true)
+                                    .withClickEvent(ClickEvent.OpenUrl(URI.create(result.downloadUrl)))
 
                                 context.source.sendFeedback(
                                     prefix.copy()
                                         .append(Component.literal("Update available! Latest: v${result.latestVersion} (current: v${Constants.MOD_VERSION})").withColor(0x55FF55))
                                 )
                                 context.source.sendFeedback(
-                                    prefix.copy().append(link)
+                                    prefix.copy()
+                                        .append(Component.literal("Click ").withColor(0xFFFFFF))
+                                        .append(Component.literal("HERE").withColor(0x55FFFF).withStyle(clickStyle))
+                                        .append(Component.literal(" to check it out!").withColor(0xFFFFFF))
                                 )
                             } else if (result.latestVersion == "unknown") {
                                 context.source.sendFeedback(

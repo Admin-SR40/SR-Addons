@@ -101,7 +101,7 @@ On first launch, old configs from EntityFire, PartyCommands, and StarredMobHighl
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
-5. Download `SR-Addons-1.1.1.jar` and place it in `.minecraft/mods/`
+5. Download `SR-Addons-1.1.2.jar` and place it in `.minecraft/mods/`
 
 ## Building from Source
 
@@ -109,7 +109,7 @@ On first launch, old configs from EntityFire, PartyCommands, and StarredMobHighl
 ./gradlew build
 ```
 
-Output: `build/libs/SR-Addons-1.1.1.jar`
+Output: `build/libs/SR-Addons-1.1.2.jar`
 
 Requirements: JDK 21
 
