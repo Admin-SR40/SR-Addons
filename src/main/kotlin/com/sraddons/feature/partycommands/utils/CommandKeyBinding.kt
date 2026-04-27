@@ -3,6 +3,7 @@ package com.sraddons.feature.partycommands.utils
 import com.sraddons.config.SRConfig
 import com.sraddons.gui.SRConfigGui
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.minecraft.network.chat.Component
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.gui.screens.ChatScreen
@@ -56,14 +57,20 @@ object CommandKeyBinding {
 
             while (guiKey.consumeClick()) {
                 SRConfigGui.open()
-                modMessage("\u00a7aOpening config GUI...")
+                modMessage(Component.translatable("sraddons.command.gui.opening").withColor(0x55FF55))
             }
 
             while (toggleKey.consumeClick()) {
                 SRConfig.settings.partyCommands.enabled = !SRConfig.settings.partyCommands.enabled
                 SRConfig.save()
-                val status = if (SRConfig.settings.partyCommands.enabled) "\u00a7aenabled" else "\u00a7cdisabled"
-                modMessage("\u00a7eSR-Addons PartyCommands \u00a77is now $status")
+                val statusKey = if (SRConfig.settings.partyCommands.enabled) "sraddons.key.toggle.enabled" else "sraddons.key.toggle.disabled"
+                val statusColor = if (SRConfig.settings.partyCommands.enabled) 0x55FF55 else 0xFF5555
+                modMessage(
+                    Component.literal("§e")
+                        .append(Component.translatable("sraddons.key.toggle.status"))
+                        .append(Component.literal(" §7is now "))
+                        .append(Component.translatable(statusKey).withColor(statusColor))
+                )
             }
         }
     }

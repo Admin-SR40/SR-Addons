@@ -24,13 +24,12 @@ object SRACommand {
             val reloadNode = ClientCommandManager.literal("reload")
                 .executes { context ->
                     SRConfig.load()
-                    // PartyCommands dispatcher rebuild will be handled if the feature is initialized
                     try {
                         com.sraddons.feature.partycommands.commands.Commands.rebuildDispatcher()
                     } catch (_: Exception) {}
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("Config reloaded!").withColor(0x55FF55))
+                            .append(Component.translatable("sraddons.command.reloaded").withColor(0x55FF55))
                     )
                     1
                 }
@@ -41,7 +40,7 @@ object SRACommand {
                     SRConfigGui.open()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("Opening config GUI...").withColor(0x55FF55))
+                            .append(Component.translatable("sraddons.command.gui.opening").withColor(0x55FF55))
                     )
                     1
                 }
@@ -51,7 +50,7 @@ object SRACommand {
                     SRConfigGui.open()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("Opening config GUI...").withColor(0x55FF55))
+                            .append(Component.translatable("sraddons.command.gui.opening").withColor(0x55FF55))
                     )
                     1
                 }
@@ -62,11 +61,11 @@ object SRACommand {
                     val prefix = Constants.makePrefix()
                     context.source.sendFeedback(
                         prefix.copy()
-                            .append(Component.literal("SR-Addons v${Constants.MOD_VERSION}").withColor(0xFFFFFF))
+                            .append(Component.translatable("sraddons.command.version", Constants.MOD_VERSION).withColor(0xFFFFFF))
                     )
                     context.source.sendFeedback(
                         prefix.copy()
-                            .append(Component.literal("Made by Admin_SR40").withColor(0xAAAAAA))
+                            .append(Component.translatable("sraddons.command.author").withColor(0xAAAAAA))
                     )
                     1
                 }
@@ -77,7 +76,7 @@ object SRACommand {
                     val prefix = Constants.makePrefix()
                     context.source.sendFeedback(
                         prefix.copy()
-                            .append(Component.literal("Checking for updates...").withColor(0xFFFF55))
+                            .append(Component.translatable("sraddons.command.update.checking").withColor(0xFFFF55))
                     )
 
                     CoroutineScope(Dispatchers.IO).launch {
@@ -91,23 +90,23 @@ object SRACommand {
 
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("Update available! Latest: v${result.latestVersion} (current: v${Constants.MOD_VERSION})").withColor(0x55FF55))
+                                        .append(Component.translatable("sraddons.command.update.available", result.latestVersion, Constants.MOD_VERSION).withColor(0x55FF55))
                                 )
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("Click ").withColor(0xFFFFFF))
-                                        .append(Component.literal("HERE").withColor(0x55FFFF).withStyle(clickStyle))
-                                        .append(Component.literal(" to check it out!").withColor(0xFFFFFF))
+                                        .append(Component.translatable("sraddons.command.update.click").withColor(0xFFFFFF))
+                                        .append(Component.translatable("sraddons.command.update.here").withColor(0x55FFFF).withStyle(clickStyle))
+                                        .append(Component.translatable("sraddons.command.update.check_out").withColor(0xFFFFFF))
                                 )
                             } else if (result.latestVersion == "unknown") {
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("Unable to check for updates (network error)").withColor(0xFF5555))
+                                        .append(Component.translatable("sraddons.command.update.error").withColor(0xFF5555))
                                 )
                             } else {
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("You are on the latest version! (v${Constants.MOD_VERSION})").withColor(0x55FF55))
+                                        .append(Component.translatable("sraddons.command.update.latest", Constants.MOD_VERSION).withColor(0x55FF55))
                                 )
                             }
                         }
@@ -120,13 +119,28 @@ object SRACommand {
                 val prefix = Constants.makePrefix()
                 context.source.sendFeedback(
                     prefix.copy()
-                        .append(Component.literal("SR-Addons v${Constants.MOD_VERSION}").withColor(0xFFFFFF))
+                        .append(Component.translatable("sraddons.command.version", Constants.MOD_VERSION).withColor(0xFFFFFF))
                 )
-                context.source.sendFeedback(Component.literal("§7/sra reload §8- §fReload config"))
-                context.source.sendFeedback(Component.literal("§7/sra config §8- §fOpen config GUI"))
-                context.source.sendFeedback(Component.literal("§7/sra gui §8- §fOpen config GUI"))
-                context.source.sendFeedback(Component.literal("§7/sra version §8- §fShow version info"))
-                context.source.sendFeedback(Component.literal("§7/sra update §8- §fCheck for updates"))
+                context.source.sendFeedback(
+                    Component.literal("§7/sra reload §8- §f")
+                        .append(Component.translatable("sraddons.command.help.reload_desc"))
+                )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra config §8- §f")
+                        .append(Component.translatable("sraddons.command.help.config_desc"))
+                )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra gui §8- §f")
+                        .append(Component.translatable("sraddons.command.help.gui_desc"))
+                )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra version §8- §f")
+                        .append(Component.translatable("sraddons.command.help.version_desc"))
+                )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra update §8- §f")
+                        .append(Component.translatable("sraddons.command.help.update_desc"))
+                )
                 1
             }
 

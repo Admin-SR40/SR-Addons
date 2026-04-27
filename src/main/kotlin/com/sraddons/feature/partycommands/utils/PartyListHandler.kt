@@ -1,6 +1,7 @@
 package com.sraddons.feature.partycommands.utils
 
 import com.sraddons.config.SRConfig
+import net.minecraft.network.chat.Component
 
 object PartyListHandler {
 
@@ -50,7 +51,10 @@ object PartyListHandler {
             silentMode = false
             lastMessageWasSeparator = false
             if (!wasSilent) {
-                modMessage(formatResponse("Party Status", "\u00a7cFailed to get party list (timeout)", ""))
+                modMessage(formatResponse(
+                    Component.translatable("sraddons.pc.party_list.title"),
+                    Component.translatable("sraddons.pc.party_list.timeout").withColor(0xFF5555)
+                ))
             }
         }
     }
@@ -112,7 +116,10 @@ object PartyListHandler {
             lastMessageWasNotInParty = true
             PartyUtils.disband()
             if (!silentMode) {
-                modMessage(formatResponse("Party Status", "\u00a7cYou are not in a party!", ""))
+                modMessage(formatResponse(
+                    Component.translatable("sraddons.pc.party_list.title"),
+                    Component.translatable("sraddons.pc.party_list.not_in_party").withColor(0xFF5555)
+                ))
             } else {
                 silentMode = false
             }
@@ -224,16 +231,21 @@ object PartyListHandler {
         val myName = mc.player?.name?.string ?: ""
         val isLeader = leader?.noControlCodes == myName
 
-        modMessage("\u00a7b\u00a7lParty Status")
+        modMessage(Component.literal("§b§l").append(Component.translatable("sraddons.pc.party_list.title")))
 
         if (leader != null) {
             val leaderClean = leader.noControlCodes
             val isLeaderOffline = PartyUtils.isOffline(leaderClean)
-            val displayLeader = if (isLeaderOffline) "$leader \u00a7c(Offline)" else leader
-            rawMessage("\u00a7e\u00a7lLeader:")
-            rawMessage(" \u00a77- $displayLeader")
+            val offlineText = Component.translatable("sraddons.pc.party_list.offline").withColor(0xFF5555)
+            val displayLeader = if (isLeaderOffline) "$leader §c(${offlineText.string})" else leader
+            rawMessage(Component.literal("§e§l").append(Component.translatable("sraddons.pc.party_list.leader"))
+                .append(Component.literal(":")))
+            rawMessage(Component.literal(" §7- $displayLeader"))
         } else {
-            rawMessage("\u00a7e\u00a7lLeader: \u00a77Unknown")
+            rawMessage(Component.literal("§e§l")
+                .append(Component.translatable("sraddons.pc.party_list.leader"))
+                .append(Component.literal(": §7"))
+                .append(Component.translatable("sraddons.pc.party_list.unknown")))
         }
 
         val otherMembers = members.filter {
@@ -244,7 +256,7 @@ object PartyListHandler {
         }.toMutableList()
 
         if (!isLeader && myName.isNotEmpty()) {
-            otherMembers.add(0, "\u00a7dYou")
+            otherMembers.add(0, "§d${Component.translatable("sraddons.pc.party_list.you").string}")
         }
 
         val totalMembers = otherMembers.size
@@ -255,20 +267,22 @@ object PartyListHandler {
         val offlineMembers = totalMembers - onlineMembers
 
         val membersCountStr = if (offlineMembers > 0) {
-            "\u00a77(\u00a7a$onlineMembers\u00a77/\u00a7f$totalMembers\u00a77)"
+            "§7(§a$onlineMembers§7/§f$totalMembers§7)"
         } else {
-            "\u00a77(\u00a7f$totalMembers\u00a77)"
+            "§7(§f$totalMembers§7)"
         }
-        rawMessage("\u00a7e\u00a7lMembers $membersCountStr:")
+        rawMessage(Component.literal("§e§l").append(Component.translatable("sraddons.pc.party_list.members"))
+            .append(Component.literal(" $membersCountStr:")))
 
         if (otherMembers.isEmpty()) {
-            rawMessage(" \u00a77- \u00a7cNone")
+            rawMessage(Component.literal(" §7- §c").append(Component.translatable("sraddons.pc.party_list.none")))
         } else {
             for (member in otherMembers) {
                 val memberClean = member.noControlCodes
                 val isOffline = PartyUtils.isOffline(memberClean) && memberClean != myName
-                val displayMember = if (isOffline) "$member \u00a7c(Offline)" else member
-                rawMessage(" \u00a77- $displayMember")
+                val offlineText = Component.translatable("sraddons.pc.party_list.offline").string
+                val displayMember = if (isOffline) "$member §c($offlineText)" else member
+                rawMessage(Component.literal(" §7- $displayMember"))
             }
         }
     }

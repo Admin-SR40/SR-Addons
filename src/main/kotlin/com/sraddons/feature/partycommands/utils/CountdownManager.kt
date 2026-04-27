@@ -3,6 +3,7 @@ package com.sraddons.feature.partycommands.utils
 import com.sraddons.config.SRConfig
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import kotlin.concurrent.thread
 
@@ -38,7 +39,10 @@ object CountdownManager {
             if (PartyUtils.isInParty) {
                 sendPartyChat("Countdown - $displayLabel - Started: $timeStr")
             } else {
-                modMessage(formatResponse("Countdown", "\u00a7aStarted: $timeStr ($displayLabel)", ""))
+                modMessage(formatResponse(
+                    cdLabel(),
+                    Component.translatable("sraddons.pc.countdown.started", Component.literal("$timeStr ($displayLabel)")).withColor(0x55FF55)
+                ))
             }
         } else {
             if (PartyUtils.isInParty) {
@@ -48,8 +52,11 @@ object CountdownManager {
                     sendPartyChat("Type !cancel to abort the queue")
                 }
             } else {
-                modMessage(formatResponse("Countdown", "\u00a7aStarted: $timeStr ($displayLabel)", ""))
-                modMessage("\u00a77Type \u00a7c!clear \u00a77to stop the timer")
+                modMessage(formatResponse(
+                    cdLabel(),
+                    Component.translatable("sraddons.pc.countdown.started", Component.literal("$timeStr ($displayLabel)")).withColor(0x55FF55)
+                ))
+                modMessage(Component.translatable("sraddons.pc.cd.stop_hint", Component.literal("§c!clear")).withColor(0xAAAAAA))
             }
         }
         return true
@@ -58,9 +65,9 @@ object CountdownManager {
     fun clearCountdown() {
         if (currentCountdown != null) {
             currentCountdown = null
-            modMessage(formatResponse("Countdown", "\u00a7cCleared", ""))
+            modMessage(formatResponse(cdLabel(), Component.translatable("sraddons.pc.countdown.cleared").withColor(0xFF5555)))
         } else {
-            modMessage(formatResponse("Countdown", "\u00a77No active countdown", ""))
+            modMessage(formatResponse(cdLabel(), Component.translatable("sraddons.pc.countdown.no_active").withColor(0xAAAAAA)))
         }
     }
 
@@ -75,13 +82,19 @@ object CountdownManager {
             if (PartyUtils.isInParty) {
                 sendPartyChat("Countdown - ${countdown.label} - Time's up!")
             } else {
-                modMessage(formatResponse("Countdown", "\u00a7a\u00a7lTime's up! (${countdown.label})", ""))
+                modMessage(formatResponse(
+                    cdLabel(),
+                    Component.translatable("sraddons.pc.countdown.times_up", Component.literal(countdown.label)).withColor(0x55FF55)
+                ))
             }
             if (countdown.label != "Custom") {
                 val instanceId = floorInstances[countdown.label]
                 if (instanceId != null) {
                     sendCommand("joininstance $instanceId")
-                    modMessage(formatResponse("Queue", "\u00a7eAuto-joining ${countdown.label}...", ""))
+                    modMessage(formatResponse(
+                        Component.translatable("sraddons.pc.queue.label"),
+                        Component.translatable("sraddons.pc.countdown.auto_join", Component.literal(countdown.label)).withColor(0xFFFF55)
+                    ))
                 }
             }
             currentCountdown = null
@@ -105,18 +118,24 @@ object CountdownManager {
             if (PartyUtils.isInParty) {
                 sendPartyChat("Countdown - Custom - $timeStr remaining")
             } else {
-                modMessage(formatResponse("Countdown", "\u00a7e$timeStr \u00a77remaining", ""))
+                modMessage(formatResponse(
+                    cdLabel(),
+                    Component.translatable("sraddons.pc.cd.remaining", Component.literal(timeStr)).withColor(0xFFFF55)
+                ))
             }
         } else {
             val color = when {
-                countdown.remainingSeconds <= 5 -> "\u00a7c"
-                countdown.remainingSeconds <= 10 -> "\u00a76"
-                else -> "\u00a7e"
+                countdown.remainingSeconds <= 5 -> 0xFF5555
+                countdown.remainingSeconds <= 10 -> 0xFFAA00
+                else -> 0xFFFF55
             }
             if (PartyUtils.isInParty) {
                 sendPartyChat("Countdown - ${countdown.label} - $timeStr remaining")
             } else {
-                modMessage(formatResponse("Countdown", "$color$timeStr \u00a77remaining (${countdown.label})", ""))
+                modMessage(formatResponse(
+                    cdLabel(),
+                    Component.translatable("sraddons.pc.countdown.remaining", Component.literal(timeStr), Component.literal(countdown.label)).withColor(color)
+                ))
             }
         }
     }
@@ -154,7 +173,10 @@ object CountdownManager {
             if (PartyUtils.isInParty) {
                 sendPartyChat("Countdown - Custom - $timeStr remaining")
             } else {
-                modMessage(formatResponse("Countdown", "\u00a7e$timeStr \u00a77remaining", ""))
+                modMessage(formatResponse(
+                    cdLabel(),
+                    Component.translatable("sraddons.pc.cd.remaining", Component.literal(timeStr)).withColor(0xFFFF55)
+                ))
             }
         }
     }
@@ -226,4 +248,6 @@ object CountdownManager {
         sendPartyChat("Countdown cancelled by $playerName")
         return true
     }
+
+    private fun cdLabel() = Component.translatable("sraddons.pc.label.cd")
 }

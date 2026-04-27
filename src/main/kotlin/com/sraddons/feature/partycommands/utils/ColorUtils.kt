@@ -1,33 +1,33 @@
 package com.sraddons.feature.partycommands.utils
 
-fun getPingColor(ping: Int): String = when {
-    ping >= 300 -> "\u00a7c"
-    ping >= 250 -> "\u00a76"
-    ping >= 200 -> "\u00a7e"
-    ping >= 150 -> "\u00a7a"
-    else -> "\u00a7a"
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+
+fun getPingColor(ping: Int): Int = when {
+    ping >= 300 -> 0xFF5555
+    ping >= 250 -> 0xFFAA00
+    ping >= 200 -> 0xFFFF55
+    ping >= 150 -> 0x55FF55
+    else -> 0x55FF55
 }
 
-fun getTpsColor(tps: Double): String = when {
-    tps >= 19.5 -> "\u00a7a"
-    tps >= 18.0 -> "\u00a7e"
-    tps >= 15.0 -> "\u00a76"
-    else -> "\u00a7c"
+fun getTpsColor(tps: Double): Int = when {
+    tps >= 19.5 -> 0x55FF55
+    tps >= 18.0 -> 0xFFFF55
+    tps >= 15.0 -> 0xFFAA00
+    else -> 0xFF5555
 }
 
-fun getFpsColor(fps: Int): String = when {
-    fps >= 120 -> "\u00a7a"
-    fps >= 60 -> "\u00a7a"
-    fps >= 30 -> "\u00a7e"
-    fps >= 15 -> "\u00a76"
-    else -> "\u00a7c"
+fun getFpsColor(fps: Int): Int = when {
+    fps >= 120 -> 0x55FF55
+    fps >= 60 -> 0x55FF55
+    fps >= 30 -> 0xFFFF55
+    fps >= 15 -> 0xFFAA00
+    else -> 0xFF5555
 }
 
-const val RESPONSE_PREFIX = "\u00a7b"
-const val RESPONSE_LABEL = "\u00a7e"
-const val RESPONSE_VALUE = "\u00a7f"
-const val RESPONSE_SEPARATOR = "\u00a77"
-
-fun formatResponse(label: String, value: String, valueColor: String = RESPONSE_VALUE): String {
-    return "${RESPONSE_PREFIX}$label${RESPONSE_SEPARATOR}: $valueColor$value"
+fun formatResponse(label: Component, value: Component): MutableComponent {
+    return Component.literal("§b").append(label)
+        .append(Component.literal("§7: "))
+        .append(value)
 }

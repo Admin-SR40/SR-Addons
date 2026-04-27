@@ -6,9 +6,13 @@ import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.utils.*
 import net.minecraft.client.Minecraft
 import net.minecraft.commands.SharedSuggestionProvider
+import net.minecraft.network.chat.Component
 
 object PartyManagementCommands {
     private val mc = Minecraft.getInstance()
+
+    private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
+    private fun error(key: String, vararg args: Any) = Component.translatable("sraddons.pc.error.$key", *args).withColor(0xFF5555)
 
     fun register() {
         Commands.add(object : Command("warp", "Warp party members", "w") {
@@ -17,8 +21,8 @@ object PartyManagementCommands {
                     if (SRConfig.settings.partyCommands.warp) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("party warp")
-                            respond(formatResponse("Warp", "\u00a7aSent warp request", ""))
-                        } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                            respond(formatResponse(label("warp"), Component.translatable("sraddons.pc.warp.sent").withColor(0x55FF55)))
+                        } else { respond(formatResponse(label("error"), error("not_leader"))) }
                     } else { respondDisabled("warp") }
                     Command.SINGLE_SUCCESS
                 }
@@ -31,8 +35,8 @@ object PartyManagementCommands {
                     if (SRConfig.settings.partyCommands.allinvite) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("party settings allinvite")
-                            respond(formatResponse("All Invite", "\u00a7aEnabled", ""))
-                        } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                            respond(formatResponse(label("all_invite"), Component.translatable("sraddons.pc.allinvite.enabled").withColor(0x55FF55)))
+                        } else { respond(formatResponse(label("error"), error("not_leader"))) }
                     } else { respondDisabled("allinvite") }
                     Command.SINGLE_SUCCESS
                 }
@@ -52,17 +56,17 @@ object PartyManagementCommands {
                     }
                     .executes { ctx ->
                         if (!PartyUtils.isInParty) {
-                            respond(formatResponse("Error", "\u00a7cYou are not in a party!", ""))
+                            respond(formatResponse(label("error"), error("not_in_party")))
                         } else if (PartyUtils.isLeader()) {
                             val input = StringArgumentType.getString(ctx, "player")
                             val target = PartyUtils.findMember(input)
                             sendCommand("p transfer $target")
-                            respond(formatResponse("Transfer", "\u00a7aTransferred to $target", ""))
-                        } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                            respond(formatResponse(label("transfer"), Component.translatable("sraddons.pc.transfer.success", Component.literal(target)).withColor(0x55FF55)))
+                        } else { respond(formatResponse(label("error"), error("not_leader"))) }
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
-                    respond(formatResponse("Usage", "\u00a7c!transfer <player>", ""))
+                    respond(formatResponse(label("usage"), Component.literal("§c!transfer <player>")))
                     Command.SINGLE_SUCCESS
                 }
             }
@@ -85,14 +89,14 @@ object PartyManagementCommands {
                                 val input = StringArgumentType.getString(ctx, "player")
                                 val target = PartyUtils.findMember(input)
                                 sendCommand("party promote $target")
-                                respond(formatResponse("Promote", "\u00a7aPromoted $target", ""))
-                            } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                                respond(formatResponse(label("promote"), Component.translatable("sraddons.pc.promote.success", Component.literal(target)).withColor(0x55FF55)))
+                            } else { respond(formatResponse(label("error"), error("not_leader"))) }
                         } else { respondDisabled("promote") }
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
                     if (SRConfig.settings.partyCommands.promote) {
-                        respond(formatResponse("Usage", "\u00a7c!promote <player>", ""))
+                        respond(formatResponse(label("usage"), Component.literal("§c!promote <player>")))
                     } else { respondDisabled("promote") }
                     Command.SINGLE_SUCCESS
                 }
@@ -116,14 +120,14 @@ object PartyManagementCommands {
                                 val input = StringArgumentType.getString(ctx, "player")
                                 val target = PartyUtils.findMember(input)
                                 sendCommand("party demote $target")
-                                respond(formatResponse("Demote", "\u00a7aDemoted $target", ""))
-                            } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                                respond(formatResponse(label("demote"), Component.translatable("sraddons.pc.demote.success", Component.literal(target)).withColor(0x55FF55)))
+                            } else { respond(formatResponse(label("error"), error("not_leader"))) }
                         } else { respondDisabled("demote") }
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
                     if (SRConfig.settings.partyCommands.demote) {
-                        respond(formatResponse("Usage", "\u00a7c!demote <player>", ""))
+                        respond(formatResponse(label("usage"), Component.literal("§c!demote <player>")))
                     } else { respondDisabled("demote") }
                     Command.SINGLE_SUCCESS
                 }
@@ -136,8 +140,8 @@ object PartyManagementCommands {
                     if (SRConfig.settings.partyCommands.disband) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("p disband")
-                            modMessage(formatResponse("Disband", "\u00a7aParty disbanded", ""))
-                        } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                            modMessage(formatResponse(label("disband"), Component.translatable("sraddons.pc.disband.done").withColor(0x55FF55)))
+                        } else { respond(formatResponse(label("error"), error("not_leader"))) }
                     } else { respondDisabled("disband") }
                     Command.SINGLE_SUCCESS
                 }
@@ -149,7 +153,7 @@ object PartyManagementCommands {
                 builder.executes {
                     if (SRConfig.settings.partyCommands.leave) {
                         sendCommand("p leave")
-                        modMessage(formatResponse("Leave", "\u00a7aLeft party", ""))
+                        modMessage(formatResponse(label("leave"), Component.translatable("sraddons.pc.leave.done").withColor(0x55FF55)))
                     } else { respondDisabled("leave") }
                     Command.SINGLE_SUCCESS
                 }
@@ -179,8 +183,8 @@ object PartyManagementCommands {
                                         Thread.sleep(500)
                                         mc.execute { sendCommand("p kick $target") }
                                     }.start()
-                                    respond(formatResponse("Kick", "\u00a7aKicked $target", ""))
-                                } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                                    respond(formatResponse(label("kick"), Component.translatable("sraddons.pc.kick.success", Component.literal(target)).withColor(0x55FF55)))
+                                } else { respond(formatResponse(label("error"), error("not_leader"))) }
                             } else { respondDisabled("kick") }
                             Command.SINGLE_SUCCESS
                         })
@@ -190,13 +194,13 @@ object PartyManagementCommands {
                                 val input = StringArgumentType.getString(ctx, "player")
                                 val target = PartyUtils.findMember(input)
                                 sendCommand("p kick $target")
-                                respond(formatResponse("Kick", "\u00a7aKicked $target", ""))
-                            } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                                respond(formatResponse(label("kick"), Component.translatable("sraddons.pc.kick.success", Component.literal(target)).withColor(0x55FF55)))
+                            } else { respond(formatResponse(label("error"), error("not_leader"))) }
                         } else { respondDisabled("kick") }
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
-                    respond(formatResponse("Usage", "\u00a7c!kick <player> [reason]", ""))
+                    respond(formatResponse(label("usage"), Component.literal("§c!kick <player> [reason]")))
                     Command.SINGLE_SUCCESS
                 }
             }
@@ -208,8 +212,8 @@ object PartyManagementCommands {
                     if (SRConfig.settings.partyCommands.kickoffline) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("p kickoffline")
-                            respond(formatResponse("Kickoffline", "\u00a7aKicked offline members", ""))
-                        } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                            respond(formatResponse(label("kickoffline"), Component.translatable("sraddons.pc.kickoffline.done").withColor(0x55FF55)))
+                        } else { respond(formatResponse(label("error"), error("not_leader"))) }
                     } else { respondDisabled("kickoffline") }
                     Command.SINGLE_SUCCESS
                 }
@@ -245,9 +249,9 @@ object PartyManagementCommands {
                                             mc.execute { sendCommand("p kick $target") }
                                         }.start()
                                     }
-                                    respond(formatResponse("Kickall", "\u00a7aKicking ${toKick.size} member(s)", ""))
-                                } else { respond(formatResponse("Kickall", "\u00a7cNo members to kick", "")) }
-                            } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                                    respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.kicking", toKick.size.toString()).withColor(0x55FF55)))
+                                } else { respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.none").withColor(0xFF5555))) }
+                            } else { respond(formatResponse(label("error"), error("not_leader"))) }
                         } else { respondDisabled("kickall") }
                         Command.SINGLE_SUCCESS
                     })
@@ -264,9 +268,9 @@ object PartyManagementCommands {
                                         mc.execute { sendCommand("p kick $target") }
                                     }.start()
                                 }
-                                respond(formatResponse("Kickall", "\u00a7aKicking ${toKick.size} member(s)", ""))
-                            } else { respond(formatResponse("Kickall", "\u00a7cNo members to kick", "")) }
-                        } else { respond(formatResponse("Error", "\u00a7cYou are not the leader!", "")) }
+                                respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.kicking", toKick.size.toString()).withColor(0x55FF55)))
+                            } else { respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.none").withColor(0xFF5555))) }
+                        } else { respond(formatResponse(label("error"), error("not_leader"))) }
                     } else { respondDisabled("kickall") }
                     Command.SINGLE_SUCCESS
                 }
@@ -280,12 +284,12 @@ object PartyManagementCommands {
                         if (SRConfig.settings.partyCommands.invite) {
                             val target = StringArgumentType.getString(ctx, "player")
                             sendCommand("p invite $target")
-                            respond(formatResponse("Invite", "\u00a7aInvited $target", ""))
+                            respond(formatResponse(label("invite"), Component.translatable("sraddons.pc.invite.success", Component.literal(target)).withColor(0x55FF55)))
                         } else { respondDisabled("invite") }
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
-                    respond(formatResponse("Usage", "\u00a7c!invite <player>", ""))
+                    respond(formatResponse(label("usage"), Component.literal("§c!invite <player>")))
                     Command.SINGLE_SUCCESS
                 }
             }

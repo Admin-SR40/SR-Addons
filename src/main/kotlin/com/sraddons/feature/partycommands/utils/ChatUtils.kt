@@ -8,16 +8,16 @@ import net.minecraft.network.chat.Component
 val mc: Minecraft
     get() = Minecraft.getInstance()
 
-fun modMessage(message: String) {
+fun modMessage(message: Component) {
     mc.execute {
         val prefix = Constants.makePrefix()
-        mc.gui?.chat?.addMessage(prefix.copy().append(Component.literal(message)))
+        mc.gui?.chat?.addMessage(prefix.copy().append(message))
     }
 }
 
-fun rawMessage(message: String) {
+fun rawMessage(message: Component) {
     mc.execute {
-        mc.gui?.chat?.addMessage(Component.literal(message))
+        mc.gui?.chat?.addMessage(message)
     }
 }
 
@@ -49,15 +49,18 @@ fun Double.toFixed(decimals: Int = 1): String = String.format("%.${decimals}f", 
 val String.noControlCodes: String
     get() = this.replace(Regex("\u00a7[0-9a-fk-or]"), "")
 
-fun respond(message: String) {
+fun respond(component: Component) {
     if (SRConfig.settings.partyCommands.respondInPartyChat && PartyUtils.isInParty) {
-        sendPartyChat("CMD >> " + message.noControlCodes)
+        sendPartyChat("CMD >> " + component.string)
     }
     if (SRConfig.settings.partyCommands.showResponseLocally) {
-        modMessage("\u00a7f$message")
+        modMessage(Component.literal("§f").append(component))
     }
 }
 
 fun respondDisabled(command: String) {
-    respond(formatResponse("Error", "\u00a7c!$command is disabled in config.", ""))
+    respond(formatResponse(
+        Component.translatable("sraddons.pc.label.error"),
+        Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
+    ))
 }

@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.utils.*
 import net.minecraft.commands.SharedSuggestionProvider
+import net.minecraft.network.chat.Component
 
 object QueueCommands {
     private val floorInstances = mapOf(
@@ -18,6 +19,8 @@ object QueueCommands {
         "t4" to "kuudra_fiery", "t5" to "kuudra_infernal"
     )
 
+    private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
+
     fun register() {
         floorInstances.keys.forEach { cmd ->
             Commands.add(object : Command(cmd, "Queue $cmd") {
@@ -28,14 +31,14 @@ object QueueCommands {
                                 val seconds = StringArgumentType.getString(ctx, "seconds").toIntOrNull()
                                 if (seconds != null && seconds > 0) {
                                     CountdownManager.startCountdown(minOf(seconds, 300), cmd.uppercase())
-                                } else { respond(formatResponse("Error", "\u00a7cInvalid time!", "")) }
+                                } else { respond(formatResponse(label("error"), Component.translatable("sraddons.pc.queue.invalid_time").withColor(0xFF5555))) }
                             } else { respondDisabled(cmd) }
                             Command.SINGLE_SUCCESS
                         })
                     builder.executes {
                         if (SRConfig.settings.partyCommands.queueInstance) {
                             val instance = floorInstances[cmd]!!
-                            respond(formatResponse("Queue", "\u00a7e${cmd.uppercase()}", ""))
+                            respond(formatResponse(Component.translatable("sraddons.pc.queue.label"), Component.literal("§e${cmd.uppercase()}")))
                             sendCommand("joininstance $instance")
                         } else { respondDisabled(cmd) }
                         Command.SINGLE_SUCCESS

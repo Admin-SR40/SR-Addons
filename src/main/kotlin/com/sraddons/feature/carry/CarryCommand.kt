@@ -48,7 +48,7 @@ object CarryCommand {
         if (!SRConfig.settings.carry.enabled) {
             source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("Carry module is disabled in config.").withColor(0xFF5555))
+                    .append(Component.translatable("sraddons.carry.disabled").withColor(0xFF5555))
             )
             return false
         }
@@ -65,28 +65,33 @@ object CarryCommand {
         builder.buildFuture()
     }
 
+    private fun buildHelpLine(syntax: String, descKey: String): Component {
+        return Component.literal(syntax)
+            .append(Component.translatable(descKey))
+    }
+
     private fun showHelp(source: FabricClientCommandSource) {
         source.sendFeedback(
             Constants.makePrefix().copy()
-                .append(Component.literal("SR-Addons Carry Module").withColor(0xFFFFFF))
+                .append(Component.translatable("sraddons.carry.help.title").withColor(0xFFFFFF))
         )
-        source.sendFeedback(Component.literal("§7/cm add-type §b<type> §8- §fAdd a carry type"))
-        source.sendFeedback(Component.literal("§7/cm add §d<player> §b<type> §f<amount> §8- §fAdd a client"))
-        source.sendFeedback(Component.literal("§7/cm set-price §b<type> §6<price> §8- §fSet price (e.g. 1.8M, 500K)"))
-        source.sendFeedback(Component.literal("§7/cm set-bulk-price §b<type> §6<price> §f<threshold> §8- §fSet bulk price"))
-        source.sendFeedback(Component.literal("§7/cm add-amount §d<player> §f<amount> §8- §fIncrease carry count"))
-        source.sendFeedback(Component.literal("§7/cm set-amount §d<player> §f<amount> §7[§ftrue|false§7] §8- §fSet carry count and bulk toggle"))
-        source.sendFeedback(Component.literal("§7/cm remove-amount §d<player> §f<amount> §8- §fDecrease carry count"))
-        source.sendFeedback(Component.literal("§7/cm calc-price §d<player> §8- §fCalculate total price"))
-        source.sendFeedback(Component.literal("§7/cm remove §d<player> §8- §fRemove a client"))
-        source.sendFeedback(Component.literal("§7/cm remove-type §b<type> §8- §fRemove a carry type"))
-        source.sendFeedback(Component.literal("§7/cm list-client §8- §fShow all clients"))
-        source.sendFeedback(Component.literal("§7/cm list-type §8- §fShow all carry types"))
-        source.sendFeedback(Component.literal("§7/cm done §f<amount> §d<player> §8- §fRecord completed carries"))
-        source.sendFeedback(Component.literal("§7/cm refund §d<player> §8- §fCalculate refund"))
-        source.sendFeedback(Component.literal("§7/cm status §8- §fShow total earnings"))
-        source.sendFeedback(Component.literal("§7/cm clear-client §8- §fRemove all clients"))
-        source.sendFeedback(Component.literal("§7/cm clear-history §8- §fReset earnings history"))
+        source.sendFeedback(buildHelpLine("§7/cm add-type §b<type> §8- §f", "sraddons.carry.help.add_type_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm add §d<player> §b<type> §f<amount> §8- §f", "sraddons.carry.help.add_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm set-price §b<type> §6<price> §8- §f", "sraddons.carry.help.set_price_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm set-bulk-price §b<type> §6<price> §f<threshold> §8- §f", "sraddons.carry.help.set_bulk_price_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm add-amount §d<player> §f<amount> §8- §f", "sraddons.carry.help.add_amount_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm set-amount §d<player> §f<amount> §7[§ftrue|false§7] §8- §f", "sraddons.carry.help.set_amount_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm remove-amount §d<player> §f<amount> §8- §f", "sraddons.carry.help.remove_amount_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm calc-price §d<player> §8- §f", "sraddons.carry.help.calc_price_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm remove §d<player> §8- §f", "sraddons.carry.help.remove_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm remove-type §b<type> §8- §f", "sraddons.carry.help.remove_type_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm list-client §8- §f", "sraddons.carry.help.list_client_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm list-type §8- §f", "sraddons.carry.help.list_type_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm done §f<amount> §d<player> §8- §f", "sraddons.carry.help.done_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm refund §d<player> §8- §f", "sraddons.carry.help.refund_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm status §8- §f", "sraddons.carry.help.status_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm clear-client §8- §f", "sraddons.carry.help.clear_client_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm clear-history §8- §f", "sraddons.carry.help.clear_history_desc"))
     }
 
     // ---- /cm add-type <typeName> ----
@@ -101,7 +106,8 @@ object CarryCommand {
                     if (CarryState.types.containsKey(key)) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cCarry type §b$typeName §calready exists."))
+                                .append(Component.translatable("sraddons.carry.type_already_exists",
+                                    Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
@@ -109,7 +115,8 @@ object CarryCommand {
                     CarryState.saveData()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("§aAdded carry type: §b$typeName"))
+                            .append(Component.translatable("sraddons.carry.type_added",
+                                Component.literal(typeName).withColor(0x55FFFF)).withColor(0x55FF55))
                     )
                     1
                 }
@@ -136,14 +143,16 @@ object CarryCommand {
                                     if (!CarryState.types.containsKey(typeKey)) {
                                         context.source.sendFeedback(
                                             Constants.makePrefix().copy()
-                                                .append(Component.literal("§cCarry type §b$typeName §cnot found."))
+                                                .append(Component.translatable("sraddons.carry.type_not_found",
+                                                    Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                                         )
                                         return@executes 1
                                     }
                                     if (CarryState.clients.containsKey(clientKey)) {
                                         context.source.sendFeedback(
                                             Constants.makePrefix().copy()
-                                                .append(Component.literal("§cPlayer §d$playerName §cis already a client."))
+                                                .append(Component.translatable("sraddons.carry.client_already_exists",
+                                                    Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                                         )
                                         return@executes 1
                                     }
@@ -155,7 +164,11 @@ object CarryCommand {
                                     CarryState.saveData()
                                     context.source.sendFeedback(
                                         Constants.makePrefix().copy()
-                                            .append(Component.literal("§aAdded §d$playerName §aas client, requested §f$amount §b$typeName"))
+                                            .append(Component.translatable("sraddons.carry.client_added",
+                                                Component.literal(playerName).withColor(0xFF55FF),
+                                                Component.literal(amount.toString()).withColor(0xFFFFFF),
+                                                Component.literal(typeName).withColor(0x55FFFF)
+                                            ).withColor(0x55FF55))
                                     )
                                     1
                                 }
@@ -180,7 +193,8 @@ object CarryCommand {
                             if (type == null) {
                                 context.source.sendFeedback(
                                     Constants.makePrefix().copy()
-                                        .append(Component.literal("§cCarry type §b$typeName §cnot found."))
+                                        .append(Component.translatable("sraddons.carry.type_not_found",
+                                            Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                                 )
                                 return@executes 1
                             }
@@ -188,7 +202,7 @@ object CarryCommand {
                             if (parsed == null) {
                                 context.source.sendFeedback(
                                     Constants.makePrefix().copy()
-                                        .append(Component.literal("§cInvalid price format. Use raw numbers, K, or M (e.g. 1.8M, 500K)."))
+                                        .append(Component.translatable("sraddons.carry.price_invalid").withColor(0xFF5555))
                                 )
                                 return@executes 1
                             }
@@ -196,7 +210,10 @@ object CarryCommand {
                             CarryState.saveData()
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
-                                    .append(Component.literal("§aSet §b${type.name} §aprice to §6${CarryPriceUtil.formatPrice(parsed)} §acoins."))
+                                    .append(Component.translatable("sraddons.carry.price_set",
+                                        Component.literal(type.name).withColor(0x55FFFF),
+                                        Component.literal(CarryPriceUtil.formatPrice(parsed)).withColor(0xFFAA00)
+                                    ).withColor(0x55FF55))
                             )
                             1
                         }
@@ -223,7 +240,8 @@ object CarryCommand {
                                     if (type == null) {
                                         context.source.sendFeedback(
                                             Constants.makePrefix().copy()
-                                                .append(Component.literal("§cCarry type §b$typeName §cnot found."))
+                                                .append(Component.translatable("sraddons.carry.type_not_found",
+                                                    Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                                         )
                                         return@executes 1
                                     }
@@ -231,7 +249,7 @@ object CarryCommand {
                                     if (parsed == null) {
                                         context.source.sendFeedback(
                                             Constants.makePrefix().copy()
-                                                .append(Component.literal("§cInvalid price format. Use raw numbers, K, or M (e.g. 1.8M, 500K)."))
+                                                .append(Component.translatable("sraddons.carry.price_invalid").withColor(0xFF5555))
                                         )
                                         return@executes 1
                                     }
@@ -240,7 +258,11 @@ object CarryCommand {
                                     CarryState.saveData()
                                     context.source.sendFeedback(
                                         Constants.makePrefix().copy()
-                                            .append(Component.literal("§aSet §b${type.name} §abulk price to §6${CarryPriceUtil.formatPrice(parsed)} §acoins §7(§f${threshold}+§7)."))
+                                            .append(Component.translatable("sraddons.carry.bulk_price_set",
+                                                Component.literal(type.name).withColor(0x55FFFF),
+                                                Component.literal(CarryPriceUtil.formatPrice(parsed)).withColor(0xFFAA00),
+                                                Component.literal(threshold.toString()).withColor(0xFFFFFF)
+                                            ).withColor(0x55FF55))
                                     )
                                     1
                                 }
@@ -264,7 +286,8 @@ object CarryCommand {
                             if (client == null) {
                                 context.source.sendFeedback(
                                     Constants.makePrefix().copy()
-                                        .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                            Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                                 )
                                 return@executes 1
                             }
@@ -272,11 +295,15 @@ object CarryCommand {
                             CarryState.saveData()
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
-                                    .append(Component.literal("§aAdded §f$amount §acarries to §d${client.playerName}"))
+                                    .append(Component.translatable("sraddons.carry.amount_added",
+                                        Component.literal(amount.toString()).withColor(0xFFFFFF),
+                                        Component.literal(client.playerName).withColor(0xFF55FF)
+                                    ).withColor(0x55FF55))
                             )
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
-                                    .append(Component.literal("§7There are total §f${client.amount} §7carries now"))
+                                    .append(Component.translatable("sraddons.carry.amount_total",
+                                        Component.literal(client.amount.toString()).withColor(0xFFFFFF)).withColor(0xAAAAAA))
                             )
                             1
                         }
@@ -299,7 +326,8 @@ object CarryCommand {
                             if (client == null) {
                                 context.source.sendFeedback(
                                     Constants.makePrefix().copy()
-                                        .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                            Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                                 )
                                 return@executes 1
                             }
@@ -311,11 +339,15 @@ object CarryCommand {
                             CarryState.saveData()
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
-                                    .append(Component.literal("§aRemoved §f$actualRemove §acarries from §d${client.playerName}"))
+                                    .append(Component.translatable("sraddons.carry.amount_removed",
+                                        Component.literal(actualRemove.toString()).withColor(0xFFFFFF),
+                                        Component.literal(client.playerName).withColor(0xFF55FF)
+                                    ).withColor(0x55FF55))
                             )
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
-                                    .append(Component.literal("§7There are total §f${client.amount} §7carries now"))
+                                    .append(Component.translatable("sraddons.carry.amount_total",
+                                        Component.literal(client.amount.toString()).withColor(0xFFFFFF)).withColor(0xAAAAAA))
                             )
                             1
                         }
@@ -338,7 +370,8 @@ object CarryCommand {
                             if (client == null) {
                                 context.source.sendFeedback(
                                     Constants.makePrefix().copy()
-                                        .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                            Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                                 )
                                 return@executes 1
                             }
@@ -350,7 +383,11 @@ object CarryCommand {
                             CarryState.saveData()
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
-                                    .append(Component.literal("§aSet §d${client.playerName}§a's carries to §f$amount §7(bulk: §ffalse§7)"))
+                                    .append(Component.translatable("sraddons.carry.amount_set",
+                                        Component.literal(client.playerName).withColor(0xFF55FF),
+                                        Component.literal(amount.toString()).withColor(0xFFFFFF),
+                                        Component.translatable("sraddons.carry.bool.false").withColor(0xFFFFFF)
+                                    ).withColor(0x55FF55))
                             )
                             1
                         }
@@ -365,7 +402,8 @@ object CarryCommand {
                                     if (client == null) {
                                         context.source.sendFeedback(
                                             Constants.makePrefix().copy()
-                                                .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                                .append(Component.translatable("sraddons.carry.client_not_found",
+                                                    Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                                         )
                                         return@executes 1
                                     }
@@ -375,9 +413,14 @@ object CarryCommand {
                                         client.completed = client.amount
                                     }
                                     CarryState.saveData()
+                                    val bulkKey = if (useBulk) "sraddons.carry.bool.true" else "sraddons.carry.bool.false"
                                     context.source.sendFeedback(
                                         Constants.makePrefix().copy()
-                                            .append(Component.literal("§aSet §d${client.playerName}§a's carries to §f$amount §7(bulk: §f$useBulk§7)"))
+                                            .append(Component.translatable("sraddons.carry.amount_set",
+                                                Component.literal(client.playerName).withColor(0xFF55FF),
+                                                Component.literal(amount.toString()).withColor(0xFFFFFF),
+                                                Component.translatable(bulkKey).withColor(0xFFFFFF)
+                                            ).withColor(0x55FF55))
                                     )
                                     1
                                 }
@@ -398,7 +441,8 @@ object CarryCommand {
                     if (client == null) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                .append(Component.translatable("sraddons.carry.client_not_found",
+                                    Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
@@ -406,22 +450,34 @@ object CarryCommand {
                     if (type == null) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cReferenced type §b${client.typeName} §cnot found."))
+                                .append(Component.translatable("sraddons.carry.type_not_found",
+                                    Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
                     val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount, client.useBulk)
                     val total = unitPrice * client.amount
                     val usingBulk = client.useBulk && type.bulkPrice != null && client.amount >= type.bulkThreshold
-                    val msg = if (usingBulk) {
-                        "§fIt would be §f${client.amount} §7* §6${CarryPriceUtil.formatPrice(unitPrice)} §7(bulk, §f${type.bulkThreshold}+§7) §7= §6${CarryPriceUtil.formatPrice(total)} §fcoins in total"
+                    if (usingBulk) {
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.translatable("sraddons.carry.calc_price.bulk",
+                                    Component.literal(client.amount.toString()).withColor(0xFFFFFF),
+                                    Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
+                                    Component.literal(type.bulkThreshold.toString()).withColor(0xFFFFFF),
+                                    Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
+                                ).withColor(0xFFFFFF))
+                        )
                     } else {
-                        "§fIt would be §f${client.amount} §7* §6${CarryPriceUtil.formatPrice(unitPrice)} §7= §6${CarryPriceUtil.formatPrice(total)} §fcoins in total"
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.translatable("sraddons.carry.calc_price.standard",
+                                    Component.literal(client.amount.toString()).withColor(0xFFFFFF),
+                                    Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
+                                    Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
+                                ).withColor(0xFFFFFF))
+                        )
                     }
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.literal(msg))
-                    )
                     1
                 }
         )
@@ -440,13 +496,15 @@ object CarryCommand {
                     if (removed == null) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                .append(Component.translatable("sraddons.carry.client_not_found",
+                                    Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("§aRemoved §d${removed.playerName} §afrom client list."))
+                            .append(Component.translatable("sraddons.carry.client_removed",
+                                Component.literal(removed.playerName).withColor(0xFF55FF)).withColor(0x55FF55))
                     )
                     1
                 }
@@ -466,7 +524,8 @@ object CarryCommand {
                     if (type == null) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cCarry type §b$typeName §cnot found."))
+                                .append(Component.translatable("sraddons.carry.type_not_found",
+                                    Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
@@ -476,7 +535,8 @@ object CarryCommand {
                     if (referencingClients.isNotEmpty()) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cCannot remove type §b$typeName§c: it is in use by active clients."))
+                                .append(Component.translatable("sraddons.carry.type_in_use",
+                                    Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
@@ -484,7 +544,8 @@ object CarryCommand {
                     CarryState.saveData()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("§aRemoved carry type: §b$typeName"))
+                            .append(Component.translatable("sraddons.carry.type_removed",
+                                Component.literal(typeName).withColor(0x55FFFF)).withColor(0x55FF55))
                     )
                     1
                 }
@@ -498,16 +559,23 @@ object CarryCommand {
             if (CarryState.clients.isEmpty()) {
                 context.source.sendFeedback(
                     Constants.makePrefix().copy()
-                        .append(Component.literal("§eYou have 0 clients."))
+                        .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFFFF55))
                 )
             } else {
                 context.source.sendFeedback(
                     Constants.makePrefix().copy()
-                        .append(Component.literal("§fYou have §f${CarryState.clients.size} §fclient(s):"))
+                        .append(Component.translatable("sraddons.carry.client_count",
+                            Component.literal(CarryState.clients.size.toString()).withColor(0xFFFFFF)
+                        ).withColor(0xFFFFFF))
                 )
                 CarryState.clients.values.forEach { client ->
                     context.source.sendFeedback(
-                        Component.literal(" §7- §d${client.playerName} §7| §b${client.typeName} §7| §f${client.amount} §7(done: §f${client.completed}§7)")
+                        Component.translatable("sraddons.carry.client_list_entry",
+                            Component.literal(client.playerName).withColor(0xFF55FF),
+                            Component.literal(client.typeName).withColor(0x55FFFF),
+                            Component.literal(client.amount.toString()).withColor(0xFFFFFF),
+                            Component.literal(client.completed.toString()).withColor(0xFFFFFF)
+                        ).withColor(0xAAAAAA)
                     )
                 }
             }
@@ -522,18 +590,24 @@ object CarryCommand {
             if (CarryState.types.isEmpty()) {
                 context.source.sendFeedback(
                     Constants.makePrefix().copy()
-                        .append(Component.literal("§eNo carry types defined."))
+                        .append(Component.translatable("sraddons.carry.types_empty").withColor(0xFFFF55))
                 )
             } else {
                 context.source.sendFeedback(
                     Constants.makePrefix().copy()
-                        .append(Component.literal("§fAvailable types:"))
+                        .append(Component.translatable("sraddons.carry.types_available").withColor(0xFFFFFF))
                 )
                 CarryState.types.values.forEach { type ->
-                    val priceStr = CarryPriceUtil.formatPrice(type.price)
-                    val bulkStr = type.bulkPrice?.let { " §7/ §6${CarryPriceUtil.formatPrice(it)} §7(§f${type.bulkThreshold}+§7)" } ?: ""
+                    val priceStr = Component.literal(CarryPriceUtil.formatPrice(type.price)).withColor(0xFFAA00)
+                    val bulkStr = type.bulkPrice?.let {
+                        Component.literal(" / ${CarryPriceUtil.formatPrice(it)} (${type.bulkThreshold}+)").withColor(0xAAAAAA)
+                    } ?: Component.literal("")
                     context.source.sendFeedback(
-                        Component.literal(" §7- §b${type.name} §7| §6${priceStr}$bulkStr")
+                        Component.translatable("sraddons.carry.type_list_entry",
+                            Component.literal(type.name).withColor(0x55FFFF),
+                            priceStr,
+                            bulkStr
+                        )
                     )
                 }
             }
@@ -552,14 +626,15 @@ object CarryCommand {
                     if (clientCount == 0) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cYou have 0 clients."))
+                                .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
                         )
                         return@executes 1
                     }
                     if (clientCount > 1) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cYou have §f$clientCount §cclients. Specify the player name."))
+                                .append(Component.translatable("sraddons.carry.specify_player",
+                                    Component.literal(clientCount.toString()).withColor(0xFFFFFF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
@@ -578,7 +653,8 @@ object CarryCommand {
                             if (client == null) {
                                 context.source.sendFeedback(
                                     Constants.makePrefix().copy()
-                                        .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                            Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                                 )
                                 return@executes 1
                             }
@@ -593,7 +669,8 @@ object CarryCommand {
         if (type == null) {
             source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("§cReferenced type §b${client.typeName} §cnot found."))
+                    .append(Component.translatable("sraddons.carry.type_not_found",
+                        Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
             )
             return
         }
@@ -601,7 +678,8 @@ object CarryCommand {
         if (remaining <= 0) {
             source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("§e${client.playerName} has no remaining carries to complete."))
+                    .append(Component.translatable("sraddons.carry.no_remaining",
+                        Component.literal(client.playerName).withColor(0xFF55FF)).withColor(0xFFFF55))
             )
             return
         }
@@ -621,16 +699,22 @@ object CarryCommand {
 
             source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("§aIt looks like you've finished the carry!"))
+                    .append(Component.translatable("sraddons.carry.finished").withColor(0x55FF55))
             )
             source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("§aAutomatically removed §d${client.playerName} §afrom client list."))
+                    .append(Component.translatable("sraddons.carry.auto_removed",
+                        Component.literal(client.playerName).withColor(0xFF55FF)).withColor(0x55FF55))
             )
         } else {
             source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("§fRecorded §f$actualDone §fcarry(s) for §d${client.playerName}§f. Progress: §f${client.completed}§7/§f${client.amount}"))
+                    .append(Component.translatable("sraddons.carry.progress",
+                        Component.literal(actualDone.toString()).withColor(0xFFFFFF),
+                        Component.literal(client.playerName).withColor(0xFF55FF),
+                        Component.literal(client.completed.toString()).withColor(0xFFFFFF),
+                        Component.literal(client.amount.toString()).withColor(0xFFFFFF)
+                    ).withColor(0xFFFFFF))
             )
         }
     }
@@ -648,7 +732,8 @@ object CarryCommand {
                     if (client == null) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                .append(Component.translatable("sraddons.carry.client_not_found",
+                                    Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
@@ -656,7 +741,8 @@ object CarryCommand {
                     if (type == null) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§cReferenced type §b${client.typeName} §cnot found."))
+                                .append(Component.translatable("sraddons.carry.type_not_found",
+                                    Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
                         )
                         return@executes 1
                     }
@@ -666,18 +752,26 @@ object CarryCommand {
 
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("§d${client.playerName} §frequested §f${client.amount} §fcarries, did §f${client.completed} §fso far"))
+                            .append(Component.translatable("sraddons.carry.refund_info",
+                                Component.literal(client.playerName).withColor(0xFF55FF),
+                                Component.literal(client.amount.toString()).withColor(0xFFFFFF),
+                                Component.literal(client.completed.toString()).withColor(0xFFFFFF)
+                            ).withColor(0xFFFFFF))
                     )
 
                     if (remaining > 0) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§fYou need refund §f$remaining §7* §6${CarryPriceUtil.formatPrice(unitPrice)} §7= §6${CarryPriceUtil.formatPrice(refundAmount)} §fcoins"))
+                                .append(Component.translatable("sraddons.carry.refund_amount",
+                                    Component.literal(remaining.toString()).withColor(0xFFFFFF),
+                                    Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
+                                    Component.literal(CarryPriceUtil.formatPrice(refundAmount)).withColor(0xFFAA00)
+                                ).withColor(0xFFFFFF))
                         )
                     } else {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
-                                .append(Component.literal("§eNo carries remaining to refund."))
+                                .append(Component.translatable("sraddons.carry.refund_none").withColor(0xFFFF55))
                         )
                     }
 
@@ -692,11 +786,12 @@ object CarryCommand {
                     CarryState.saveData()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("§aIt looks like you've finished the carry!"))
+                            .append(Component.translatable("sraddons.carry.finished").withColor(0x55FF55))
                     )
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
-                            .append(Component.literal("§aAutomatically removed §d${client.playerName} §afrom client list."))
+                            .append(Component.translatable("sraddons.carry.auto_removed",
+                                Component.literal(client.playerName).withColor(0xFF55FF)).withColor(0x55FF55))
                     )
                     1
                 }
@@ -711,16 +806,21 @@ object CarryCommand {
             if (s.totalOrders == 0 && s.totalCarries == 0 && s.totalEarned == 0L) {
                 context.source.sendFeedback(
                     Constants.makePrefix().copy()
-                        .append(Component.literal("§eNo completed orders yet."))
+                        .append(Component.translatable("sraddons.carry.no_orders").withColor(0xFFFF55))
                 )
             } else {
                 context.source.sendFeedback(
                     Constants.makePrefix().copy()
-                        .append(Component.literal("§fYou've finished §f${s.totalOrders} §forder(s), totalling §f${s.totalCarries} §fcarries."))
+                        .append(Component.translatable("sraddons.carry.orders_summary",
+                            Component.literal(s.totalOrders.toString()).withColor(0xFFFFFF),
+                            Component.literal(s.totalCarries.toString()).withColor(0xFFFFFF)
+                        ).withColor(0xFFFFFF))
                 )
                 context.source.sendFeedback(
                     Constants.makePrefix().copy()
-                        .append(Component.literal("§fYou've earned §6${CarryPriceUtil.formatPrice(s.totalEarned)} §fcoins so far."))
+                        .append(Component.translatable("sraddons.carry.earnings_summary",
+                            Component.literal(CarryPriceUtil.formatPrice(s.totalEarned)).withColor(0xFFAA00)
+                        ).withColor(0xFFFFFF))
                 )
             }
             1
@@ -735,7 +835,7 @@ object CarryCommand {
             CarryState.saveData()
             context.source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("§eCleared all clients from the list."))
+                    .append(Component.translatable("sraddons.carry.all_cleared").withColor(0xFFFF55))
             )
             1
         }
@@ -749,7 +849,7 @@ object CarryCommand {
             CarryState.saveHistory()
             context.source.sendFeedback(
                 Constants.makePrefix().copy()
-                    .append(Component.literal("§eEarnings history has been reset."))
+                    .append(Component.translatable("sraddons.carry.history_reset").withColor(0xFFFF55))
             )
             1
         }

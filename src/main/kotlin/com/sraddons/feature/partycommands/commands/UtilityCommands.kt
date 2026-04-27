@@ -5,9 +5,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.sraddons.config.SRConfig
 import com.sraddons.gui.SRConfigGui
 import com.sraddons.feature.partycommands.utils.*
+import com.sraddons.util.Constants
 import net.minecraft.commands.SharedSuggestionProvider
+import net.minecraft.network.chat.Component
 
 object UtilityCommands {
+    private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
+
     fun register() {
         Commands.add(object : Command("forward", "Toggle party chat forwarding") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
@@ -15,8 +19,12 @@ object UtilityCommands {
                     SRConfig.settings.partyCommands.respondInPartyChat = !SRConfig.settings.partyCommands.respondInPartyChat
                     SRConfig.save()
                     Commands.rebuildDispatcher()
-                    val status = if (SRConfig.settings.partyCommands.respondInPartyChat) "\u00a7aON" else "\u00a7cOFF"
-                    respond(formatResponse("Forward", status, ""))
+                    val statusKey = if (SRConfig.settings.partyCommands.respondInPartyChat) "sraddons.pc.forward.on" else "sraddons.pc.forward.off"
+                    val statusColor = if (SRConfig.settings.partyCommands.respondInPartyChat) 0x55FF55 else 0xFF5555
+                    respond(formatResponse(
+                        Component.literal("Forward"),
+                        Component.translatable(statusKey).withColor(statusColor)
+                    ))
                     Command.SINGLE_SUCCESS
                 }
             }
@@ -27,7 +35,10 @@ object UtilityCommands {
                 builder.executes {
                     SRConfig.load()
                     Commands.rebuildDispatcher()
-                    respond(formatResponse("Config", "\u00a7aReloaded", ""))
+                    respond(formatResponse(
+                        Component.literal("Config"),
+                        Component.translatable("sraddons.pc.reload.done").withColor(0x55FF55)
+                    ))
                     Command.SINGLE_SUCCESS
                 }
             }
@@ -43,7 +54,7 @@ object UtilityCommands {
                             if (seconds != null) {
                                 CountdownManager.startCountdown(seconds, "Custom")
                             } else {
-                                respond(formatResponse("Error", "\u00a7cInvalid time! Use: 60, 5m, 1h, 5m30s (max 12h)", ""))
+                                respond(formatResponse(label("error"), Component.translatable("sraddons.pc.error.invalid_time").withColor(0xFF5555)))
                             }
                         } else {
                             respondDisabled("cd")
@@ -57,9 +68,15 @@ object UtilityCommands {
                             val remaining = currentCountdown.remainingSeconds
                             val timeStr = CountdownManager.formatTime(remaining)
                             val label = if (currentCountdown.label == "Custom") "" else " (${currentCountdown.label})"
-                            respond(formatResponse("Countdown", "\u00a7e$timeStr \u00a77remaining$label", ""))
+                            respond(formatResponse(
+                                Component.literal("Countdown"),
+                                Component.translatable("sraddons.pc.cd.remaining", Component.literal("$timeStr$label")).withColor(0xFFFF55)
+                            ))
                         } else {
-                            respond(formatResponse("Countdown", "\u00a77No active countdown", ""))
+                            respond(formatResponse(
+                                Component.literal("Countdown"),
+                                Component.translatable("sraddons.pc.cd.no_active").withColor(0xAAAAAA)
+                            ))
                         }
                     } else {
                         respondDisabled("cd")
@@ -89,7 +106,10 @@ object UtilityCommands {
                         val message = StringArgumentType.getString(ctx, "message")
                         SRConfig.settings.partyCommands.note = message
                         SRConfig.save()
-                        respond(formatResponse("Note", "\u00a7aSaved: \u00a7f$message", ""))
+                        respond(formatResponse(
+                            Component.literal("Note"),
+                            Component.translatable("sraddons.pc.note.saved", Component.literal(message)).withColor(0x55FF55)
+                        ))
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
@@ -97,12 +117,21 @@ object UtilityCommands {
                     if (note.isNotEmpty()) {
                         if (PartyUtils.isInParty) {
                             sendPartyChat(note)
-                            modMessage(formatResponse("Note", "\u00a7aSent to party", ""))
+                            modMessage(formatResponse(
+                                Component.literal("Note"),
+                                Component.translatable("sraddons.pc.note.sent").withColor(0x55FF55)
+                            ))
                         } else {
-                            modMessage(formatResponse("Note", "\u00a7cYou are not in a party!", ""))
+                            modMessage(formatResponse(
+                                Component.literal("Note"),
+                                Component.translatable("sraddons.pc.note.not_in_party").withColor(0xFF5555)
+                            ))
                         }
                     } else {
-                        respond(formatResponse("Note", "\u00a7cNo note saved. Use !note <message> to set one.", ""))
+                        respond(formatResponse(
+                            Component.literal("Note"),
+                            Component.translatable("sraddons.pc.note.not_set").withColor(0xFF5555)
+                        ))
                     }
                     Command.SINGLE_SUCCESS
                 }
@@ -113,7 +142,10 @@ object UtilityCommands {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
                     SRConfigGui.open()
-                    modMessage(formatResponse("GUI", "\u00a7aOpening config GUI...", ""))
+                    modMessage(formatResponse(
+                        Component.literal("GUI"),
+                        Component.translatable("sraddons.pc.gui.opening").withColor(0x55FF55)
+                    ))
                     Command.SINGLE_SUCCESS
                 }
             }
@@ -122,12 +154,22 @@ object UtilityCommands {
         Commands.add(object : Command("ver", "Show version info", "version") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    rawMessage("\u00a7b\u00a7l===== SR-Addons =====")
-                    rawMessage("\u00a7eVersion: \u00a7a1.0.0")
-                    rawMessage("\u00a7eFeatures: \u00a7aEntityFire, PartyCommands, StarredMob")
-                    rawMessage("\u00a7eAuthor: \u00a7aAdmin_SR40")
-                    rawMessage("\u00a7eGitHub: \u00a7aAdmin-SR40/SR-Addons")
-                    rawMessage("\u00a7b\u00a7l=======================")
+                    rawMessage(Component.literal("§b§l===== ")
+                        .append(Component.translatable("sraddons.pc.ver.title"))
+                        .append(Component.literal(" =====")))
+                    rawMessage(Component.literal("§e")
+                        .append(Component.translatable("sraddons.pc.ver.version"))
+                        .append(Component.literal(": §a${Constants.MOD_VERSION}")))
+                    rawMessage(Component.literal("§e")
+                        .append(Component.translatable("sraddons.pc.ver.features"))
+                        .append(Component.literal(": §aEntityFire, PartyCommands, StarredMob, CarryModule")))
+                    rawMessage(Component.literal("§e")
+                        .append(Component.translatable("sraddons.pc.ver.author"))
+                        .append(Component.literal(": §aAdmin_SR40")))
+                    rawMessage(Component.literal("§e")
+                        .append(Component.translatable("sraddons.pc.ver.github"))
+                        .append(Component.literal(": §aAdmin-SR40/SR-Addons")))
+                    rawMessage(Component.literal("§b§l======================="))
                     Command.SINGLE_SUCCESS
                 }
             }

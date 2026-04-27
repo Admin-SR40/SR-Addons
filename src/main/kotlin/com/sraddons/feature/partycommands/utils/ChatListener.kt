@@ -128,9 +128,9 @@ object ChatListener {
 
         Thread {
             Thread.sleep(500)
-            mc.execute { sendPartyChat("Using SR-Addons Mod by Admin_SR40") }
+            mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.mod").string) }
             Thread.sleep(300)
-            mc.execute { sendPartyChat("Available at GitHub (Admin-SR40/SR-Addons)") }
+            mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.github").string) }
         }.start()
     }
 

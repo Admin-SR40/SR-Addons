@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.utils.*
 import net.minecraft.commands.SharedSuggestionProvider
+import net.minecraft.network.chat.Component
 import kotlin.random.Random
 
 object FunCommands {
@@ -23,45 +24,54 @@ object FunCommands {
                 builder.then(Command.literal("cf")
                     .executes {
                         if (SRConfig.settings.partyCommands.coinflip) {
-                            val result = if (Random.nextBoolean()) "\u00a76heads" else "\u00a7ftails"
-                            respond(formatResponse("Coinflip", result, ""))
+                            val result = if (Random.nextBoolean()) "heads" else "tails"
+                            val color = if (Random.nextBoolean()) 0xFFAA00 else 0xFFFFFF
+                            respond(formatResponse(
+                                Component.translatable("sraddons.pc.fun.coinflip.label"),
+                                Component.literal(result).withColor(color)
+                            ))
                         } else { respondDisabled("fun cf") }
                         Command.SINGLE_SUCCESS
                     })
-
                 builder.then(Command.literal("8ball")
                     .executes {
                         if (SRConfig.settings.partyCommands.eightball) {
-                            respond(formatResponse("8-Ball", eightBallResponses.random(), "\u00a7d"))
+                            respond(formatResponse(
+                                Component.translatable("sraddons.pc.fun.eightball.label"),
+                                Component.literal(eightBallResponses.random()).withColor(0xFF55FF)
+                            ))
                         } else { respondDisabled("fun 8ball") }
                         Command.SINGLE_SUCCESS
                     })
-
                 builder.then(Command.literal("dice")
                     .executes {
                         if (SRConfig.settings.partyCommands.dice) {
                             val roll = (1..6).random()
-                            val color = when (roll) { 6 -> "\u00a72"; 5 -> "\u00a7a"; 4 -> "\u00a7e"; 3 -> "\u00a76"; else -> "\u00a7c" }
-                            respond(formatResponse("Dice Roll", roll.toString(), color))
+                            val color = when (roll) { 6 -> 0x00AA00; 5 -> 0x55FF55; 4 -> 0xFFFF55; 3 -> 0xFFAA00; else -> 0xFF5555 }
+                            respond(formatResponse(
+                                Component.translatable("sraddons.pc.fun.dice.label"),
+                                Component.literal(roll.toString()).withColor(color)
+                            ))
                         } else { respondDisabled("fun dice") }
                         Command.SINGLE_SUCCESS
                     })
-
                 builder.then(Command.literal("boop")
                     .then(Command.argument("player", StringArgumentType.word())
                         .executes { ctx ->
                             if (SRConfig.settings.partyCommands.boop) {
                                 val target = StringArgumentType.getString(ctx, "player")
                                 sendCommand("boop $target")
-                                respond(formatResponse("Boop", "\u00a7aBooped $target", ""))
+                                respond(formatResponse(
+                                    Component.literal("Boop"),
+                                    Component.translatable("sraddons.pc.fun.boop.success", Component.literal(target)).withColor(0x55FF55)
+                                ))
                             } else { respondDisabled("fun boop") }
                             Command.SINGLE_SUCCESS
                         })
                     .executes {
-                        respond(formatResponse("Usage", "\u00a7c!fun boop <player>", ""))
+                        respond(formatResponse(label("usage"), Component.literal("§c!fun boop <player>")))
                         Command.SINGLE_SUCCESS
                     })
-
                 builder.then(Command.literal("random")
                     .then(Command.argument("min", StringArgumentType.word())
                         .then(Command.argument("max", StringArgumentType.word())
@@ -71,12 +81,12 @@ object FunCommands {
                                 val min = minStr.toIntOrNull()
                                 val max = maxStr.toIntOrNull()
                                 if (min == null || max == null) {
-                                    respond(formatResponse("Error", "\u00a7cInvalid numbers! Usage: !fun random <min> <max>", ""))
+                                    respond(formatResponse(label("error"), Component.translatable("sraddons.pc.fun.random.error_range").withColor(0xFF5555)))
                                 } else {
                                     val actualMin = minOf(min, max)
                                     val actualMax = maxOf(min, max)
                                     val result = (actualMin..actualMax).random()
-                                    respond("\u00a7bRandom Value: \u00a7e$result \u00a77[\u00a7f$actualMin\u00a77-\u00a7f$actualMax\u00a77]")
+                                    respond(buildRandomResult(result, actualMin, actualMax))
                                 }
                                 Command.SINGLE_SUCCESS
                             })
@@ -84,24 +94,32 @@ object FunCommands {
                             val maxStr = StringArgumentType.getString(ctx, "min")
                             val max = maxStr.toIntOrNull()
                             if (max == null || max < 1) {
-                                respond(formatResponse("Error", "\u00a7cInvalid number! Usage: !fun random <max>", ""))
+                                respond(formatResponse(label("error"), Component.translatable("sraddons.pc.fun.random.error_single").withColor(0xFF5555)))
                             } else {
                                 val result = (1..max).random()
-                                respond("\u00a7bRandom Value: \u00a7e$result \u00a77[\u00a7f1\u00a77-\u00a7f$max\u00a77]")
+                                respond(buildRandomResult(result, 1, max))
                             }
                             Command.SINGLE_SUCCESS
                         })
                     .executes {
                         val result = (1..100).random()
-                        respond("\u00a7bRandom Value: \u00a7e$result \u00a77[\u00a7f1\u00a77-\u00a7f100\u00a77]")
+                        respond(buildRandomResult(result, 1, 100))
                         Command.SINGLE_SUCCESS
                     })
-
                 builder.executes {
-                    respond(formatResponse("Fun Commands", "\u00a7ecf, 8ball, dice, boop <player>, random [min] [max]", ""))
+                    respond(Component.translatable("sraddons.pc.fun.help").withColor(0xFFFF55))
                     Command.SINGLE_SUCCESS
                 }
             }
         })
+    }
+
+    private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
+    private fun buildRandomResult(result: Int, min: Int, max: Int): Component {
+        return Component.translatable("sraddons.pc.fun.random.result",
+            Component.literal(result.toString()).withColor(0xFFFF55),
+            Component.literal(min.toString()).withColor(0xFFFFFF),
+            Component.literal(max.toString()).withColor(0xFFFFFF)
+        ).withColor(0x55FFFF)
     }
 }
