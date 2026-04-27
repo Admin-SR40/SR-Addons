@@ -28,17 +28,17 @@ Type commands directly in chat using the `!` prefix (no `/pc` prefix needed). De
 Highlights mobs with the `✯` star symbol in their name tag. Features configurable wireframe outlines and fill rendering with X-ray (see-through-walls) support. Useful for Hypixel SkyBlock dungeons.
 
 ### CarryModule
-Track carry orders, calculate prices, and record earnings via `/cm` commands. Designed for Hypixel SkyBlock carry services.
+Track carry orders, calculate prices, and record earnings via `/cm` commands. Highlight client players and their spawned bosses with configurable wireframe outlines, fill, and X-ray support. Designed for Hypixel SkyBlock carry services.
 
 #### Available Commands
 
 **Setup:** `/cm add-type <type>` `/cm add <player> <type> <amount>` `/cm set-price <type> <price>` `/cm set-bulk-price <type> <price> <threshold>`
 
-**Management:** `/cm add-amount <player> <amount>` `/cm remove-amount <player> <amount>` `/cm remove <player>` `/cm remove-type <type>`
+**Management:** `/cm add-amount <player> <amount>` `/cm set-amount <player> <amount> [true|false]` `/cm remove-amount <player> <amount>` `/cm remove <player>` `/cm remove-type <type>`
 
 **Info:** `/cm list-client` `/cm list-type` `/cm calc-price <player>` `/cm status`
 
-**Complete:** `/cm done <amount> <player>` `/cm refund <player>`
+**Complete:** `/cm done <amount> [player]` `/cm refund <player>`
 
 **Utility:** `/cm clear-client` `/cm clear-history`
 
@@ -60,13 +60,14 @@ Track carry orders, calculate prices, and record earnings via `/cm` commands. De
 /cm set-price <type> <p>    — Set price (e.g. 1.8M, 500K)
 /cm set-bulk-price <t> <p> <n> — Set bulk price (n+)
 /cm add-amount <player> <n> — Increase carry count
+/cm set-amount <player> <n> [true|false] — Set carry count and bulk toggle
 /cm remove-amount <p> <n>   — Decrease carry count
 /cm calc-price <player>     — Calculate total price
 /cm remove <player>         — Remove a client
 /cm remove-type <type>      — Remove a carry type
 /cm list-client             — Show all clients
 /cm list-type               — Show all carry types
-/cm done <n> <player>       — Record completed carries
+/cm done <n> [player]       — Record completed carries (player optional if 1 client)
 /cm refund <player>         — Calculate refund
 /cm status                  — Show total earnings
 /cm clear-client            — Clear all clients
@@ -88,7 +89,7 @@ All settings are managed through the YACL config GUI (`/sra gui`) with four tabs
 1. **EntityFire** — Toggle hidden fire
 2. **PartyCommands** — Prefix, command toggles, response settings, note & sound
 3. **StarredMob** — Enabled, color picker, render mode, line width, max distance, see-through-walls
-4. **Carry** — Master toggle for `/cm` commands
+4. **Carry** — Master toggle, client/boss highlight colors, render mode, line width, max distance, see-through-walls
 
 Config file: `.minecraft/config/sraddons.json`
 
@@ -100,7 +101,7 @@ On first launch, old configs from EntityFire, PartyCommands, and StarredMobHighl
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
-5. Download `SR-Addons-1.1.0.jar` and place it in `.minecraft/mods/`
+5. Download `SR-Addons-1.1.1.jar` and place it in `.minecraft/mods/`
 
 ## Building from Source
 
@@ -108,7 +109,7 @@ On first launch, old configs from EntityFire, PartyCommands, and StarredMobHighl
 ./gradlew build
 ```
 
-Output: `build/libs/SR-Addons-1.1.0.jar`
+Output: `build/libs/SR-Addons-1.1.1.jar`
 
 Requirements: JDK 21
 

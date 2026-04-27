@@ -1,5 +1,6 @@
 package com.sraddons.feature.carry
 
+import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.suggestion.SuggestionProvider
@@ -26,6 +27,7 @@ object CarryCommand {
                 .then(addNode())
                 .then(setPriceNode())
                 .then(setBulkPriceNode())
+                .then(setAmountNode())
                 .then(addAmountNode())
                 .then(removeAmountNode())
                 .then(calcPriceNode())
@@ -73,6 +75,7 @@ object CarryCommand {
         source.sendFeedback(Component.literal("§7/cm set-price §b<type> §6<price> §8- §fSet price (e.g. 1.8M, 500K)"))
         source.sendFeedback(Component.literal("§7/cm set-bulk-price §b<type> §6<price> §f<threshold> §8- §fSet bulk price"))
         source.sendFeedback(Component.literal("§7/cm add-amount §d<player> §f<amount> §8- §fIncrease carry count"))
+        source.sendFeedback(Component.literal("§7/cm set-amount §d<player> §f<amount> §7[§ftrue|false§7] §8- §fSet carry count and bulk toggle"))
         source.sendFeedback(Component.literal("§7/cm remove-amount §d<player> §f<amount> §8- §fDecrease carry count"))
         source.sendFeedback(Component.literal("§7/cm calc-price §d<player> §8- §fCalculate total price"))
         source.sendFeedback(Component.literal("§7/cm remove §d<player> §8- §fRemove a client"))
@@ -103,6 +106,7 @@ object CarryCommand {
                         return@executes 1
                     }
                     CarryState.types[key] = CarryType(name = typeName)
+                    CarryState.saveData()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
                             .append(Component.literal("§aAdded carry type: §b$typeName"))
@@ -148,6 +152,7 @@ object CarryCommand {
                                         typeName = typeName,
                                         amount = amount
                                     )
+                                    CarryState.saveData()
                                     context.source.sendFeedback(
                                         Constants.makePrefix().copy()
                                             .append(Component.literal("§aAdded §d$playerName §aas client, requested §f$amount §b$typeName"))
@@ -188,6 +193,7 @@ object CarryCommand {
                                 return@executes 1
                             }
                             type.price = parsed
+                            CarryState.saveData()
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
                                     .append(Component.literal("§aSet §b${type.name} §aprice to §6${CarryPriceUtil.formatPrice(parsed)} §acoins."))
@@ -231,6 +237,7 @@ object CarryCommand {
                                     }
                                     type.bulkPrice = parsed
                                     type.bulkThreshold = threshold
+                                    CarryState.saveData()
                                     context.source.sendFeedback(
                                         Constants.makePrefix().copy()
                                             .append(Component.literal("§aSet §b${type.name} §abulk price to §6${CarryPriceUtil.formatPrice(parsed)} §acoins §7(§f${threshold}+§7)."))
@@ -262,6 +269,7 @@ object CarryCommand {
                                 return@executes 1
                             }
                             client.amount += amount
+                            CarryState.saveData()
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
                                     .append(Component.literal("§aAdded §f$amount §acarries to §d${client.playerName}"))
@@ -300,6 +308,7 @@ object CarryCommand {
                             if (client.completed > client.amount) {
                                 client.completed = client.amount
                             }
+                            CarryState.saveData()
                             context.source.sendFeedback(
                                 Constants.makePrefix().copy()
                                     .append(Component.literal("§aRemoved §f$actualRemove §acarries from §d${client.playerName}"))
@@ -310,6 +319,69 @@ object CarryCommand {
                             )
                             1
                         }
+                )
+        )
+
+    // ---- /cm set-amount <playerName> <amount> [useBulk] ----
+
+    private fun setAmountNode() = ClientCommandManager.literal("set-amount")
+        .then(
+            ClientCommandManager.argument("playerName", StringArgumentType.word())
+                .suggests(suggestClients)
+                .then(
+                    ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
+                        .executes { context ->
+                            if (!enabledCheck(context.source)) return@executes 1
+                            val playerName = StringArgumentType.getString(context, "playerName")
+                            val amount = IntegerArgumentType.getInteger(context, "amount")
+                            val client = CarryState.clients[playerName.lowercase()]
+                            if (client == null) {
+                                context.source.sendFeedback(
+                                    Constants.makePrefix().copy()
+                                        .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                )
+                                return@executes 1
+                            }
+                            client.amount = amount
+                            client.useBulk = false
+                            if (client.completed > client.amount) {
+                                client.completed = client.amount
+                            }
+                            CarryState.saveData()
+                            context.source.sendFeedback(
+                                Constants.makePrefix().copy()
+                                    .append(Component.literal("§aSet §d${client.playerName}§a's carries to §f$amount §7(bulk: §ffalse§7)"))
+                            )
+                            1
+                        }
+                        .then(
+                            ClientCommandManager.argument("useBulk", BoolArgumentType.bool())
+                                .executes { context ->
+                                    if (!enabledCheck(context.source)) return@executes 1
+                                    val playerName = StringArgumentType.getString(context, "playerName")
+                                    val amount = IntegerArgumentType.getInteger(context, "amount")
+                                    val useBulk = BoolArgumentType.getBool(context, "useBulk")
+                                    val client = CarryState.clients[playerName.lowercase()]
+                                    if (client == null) {
+                                        context.source.sendFeedback(
+                                            Constants.makePrefix().copy()
+                                                .append(Component.literal("§cPlayer §d$playerName §cis not a client."))
+                                        )
+                                        return@executes 1
+                                    }
+                                    client.amount = amount
+                                    client.useBulk = useBulk
+                                    if (client.completed > client.amount) {
+                                        client.completed = client.amount
+                                    }
+                                    CarryState.saveData()
+                                    context.source.sendFeedback(
+                                        Constants.makePrefix().copy()
+                                            .append(Component.literal("§aSet §d${client.playerName}§a's carries to §f$amount §7(bulk: §f$useBulk§7)"))
+                                    )
+                                    1
+                                }
+                        )
                 )
         )
 
@@ -338,9 +410,9 @@ object CarryCommand {
                         )
                         return@executes 1
                     }
-                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
+                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount, client.useBulk)
                     val total = unitPrice * client.amount
-                    val usingBulk = type.bulkPrice != null && client.amount >= type.bulkThreshold
+                    val usingBulk = client.useBulk && type.bulkPrice != null && client.amount >= type.bulkThreshold
                     val msg = if (usingBulk) {
                         "§fIt would be §f${client.amount} §7* §6${CarryPriceUtil.formatPrice(unitPrice)} §7(bulk, §f${type.bulkThreshold}+§7) §7= §6${CarryPriceUtil.formatPrice(total)} §fcoins in total"
                     } else {
@@ -364,6 +436,7 @@ object CarryCommand {
                     if (!enabledCheck(context.source)) return@executes 1
                     val playerName = StringArgumentType.getString(context, "playerName")
                     val removed = CarryState.clients.remove(playerName.lowercase())
+                    CarryState.saveData()
                     if (removed == null) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
@@ -408,6 +481,7 @@ object CarryCommand {
                         return@executes 1
                     }
                     CarryState.types.remove(key)
+                    CarryState.saveData()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
                             .append(Component.literal("§aRemoved carry type: §b$typeName"))
@@ -466,11 +540,33 @@ object CarryCommand {
             1
         }
 
-    // ---- /cm done <amount> <playerName> ----
+    // ---- /cm done <amount> [playerName] ----
 
     private fun doneNode() = ClientCommandManager.literal("done")
         .then(
             ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
+                .executes { context ->
+                    if (!enabledCheck(context.source)) return@executes 1
+                    val amount = IntegerArgumentType.getInteger(context, "amount")
+                    val clientCount = CarryState.clients.size
+                    if (clientCount == 0) {
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.literal("§cYou have 0 clients."))
+                        )
+                        return@executes 1
+                    }
+                    if (clientCount > 1) {
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.literal("§cYou have §f$clientCount §cclients. Specify the player name."))
+                        )
+                        return@executes 1
+                    }
+                    val client = CarryState.clients.values.first()
+                    executeDone(context.source, amount, client)
+                    1
+                }
                 .then(
                     ClientCommandManager.argument("playerName", StringArgumentType.word())
                         .suggests(suggestClients)
@@ -486,53 +582,58 @@ object CarryCommand {
                                 )
                                 return@executes 1
                             }
-                            val type = CarryState.types[client.typeName.lowercase()]
-                            if (type == null) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.literal("§cReferenced type §b${client.typeName} §cnot found."))
-                                )
-                                return@executes 1
-                            }
-                            val remaining = client.amount - client.completed
-                            if (remaining <= 0) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.literal("§e${client.playerName} has no remaining carries to complete."))
-                                )
-                                return@executes 1
-                            }
-                            val actualDone = amount.coerceAtMost(remaining)
-                            client.completed += actualDone
-
-                            sendPartyChat("${client.completed}/${client.amount}")
-
-                            if (client.completed >= client.amount) {
-                                val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
-                                CarryState.status.totalOrders++
-                                CarryState.status.totalCarries += client.amount
-                                CarryState.status.totalEarned += unitPrice * client.amount
-                                CarryState.saveHistory()
-                                CarryState.clients.remove(playerName.lowercase())
-
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.literal("§aIt looks like you've finished the carry!"))
-                                )
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.literal("§aAutomatically removed §d${client.playerName} §afrom client list."))
-                                )
-                            } else {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.literal("§fRecorded §f$actualDone §fcarry(s) for §d${client.playerName}§f. Progress: §f${client.completed}§7/§f${client.amount}"))
-                                )
-                            }
+                            executeDone(context.source, amount, client)
                             1
                         }
                 )
         )
+
+    private fun executeDone(source: FabricClientCommandSource, amount: Int, client: CarryClient) {
+        val type = CarryState.types[client.typeName.lowercase()]
+        if (type == null) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.literal("§cReferenced type §b${client.typeName} §cnot found."))
+            )
+            return
+        }
+        val remaining = client.amount - client.completed
+        if (remaining <= 0) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.literal("§e${client.playerName} has no remaining carries to complete."))
+            )
+            return
+        }
+        val actualDone = amount.coerceAtMost(remaining)
+        client.completed += actualDone
+
+        sendPartyChat("${client.completed}/${client.amount}")
+
+        if (client.completed >= client.amount) {
+            val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount, client.useBulk)
+            CarryState.status.totalOrders++
+            CarryState.status.totalCarries += client.amount
+            CarryState.status.totalEarned += unitPrice * client.amount
+            CarryState.saveHistory()
+            CarryState.clients.remove(client.playerName.lowercase())
+            CarryState.saveData()
+
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.literal("§aIt looks like you've finished the carry!"))
+            )
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.literal("§aAutomatically removed §d${client.playerName} §afrom client list."))
+            )
+        } else {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.literal("§fRecorded §f$actualDone §fcarry(s) for §d${client.playerName}§f. Progress: §f${client.completed}§7/§f${client.amount}"))
+            )
+        }
+    }
 
     // ---- /cm refund <playerName> ----
 
@@ -560,7 +661,7 @@ object CarryCommand {
                         return@executes 1
                     }
                     val remaining = client.amount - client.completed
-                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
+                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount, client.useBulk)
                     val refundAmount = remaining * unitPrice
 
                     context.source.sendFeedback(
@@ -588,6 +689,7 @@ object CarryCommand {
                     }
 
                     CarryState.clients.remove(playerName.lowercase())
+                    CarryState.saveData()
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
                             .append(Component.literal("§aIt looks like you've finished the carry!"))
@@ -630,6 +732,7 @@ object CarryCommand {
         .executes { context ->
             if (!enabledCheck(context.source)) return@executes 1
             CarryState.clients.clear()
+            CarryState.saveData()
             context.source.sendFeedback(
                 Constants.makePrefix().copy()
                     .append(Component.literal("§eCleared all clients from the list."))

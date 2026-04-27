@@ -64,8 +64,22 @@ object SRConfig {
         var countdownSound: Boolean = true
     )
 
+    data class CarryHighlightConfig(
+        var enabled: Boolean = true,
+        var colorRed: Int = 255,
+        var colorGreen: Int = 255,
+        var colorBlue: Int = 0,
+        var colorAlpha: Int = 200
+    )
+
     data class CarryConfigData(
-        var enabled: Boolean = true
+        var enabled: Boolean = true,
+        var clientHighlight: CarryHighlightConfig = CarryHighlightConfig(colorRed = 57, colorGreen = 255, colorBlue = 20, colorAlpha = 200),
+        var bossHighlight: CarryHighlightConfig = CarryHighlightConfig(colorRed = 255, colorGreen = 50, colorBlue = 50, colorAlpha = 200),
+        var seeThroughWalls: Boolean = false,
+        var renderMode: String = "BOTH",
+        var lineWidth: Int = 3,
+        var maxDistance: Int = 64
     )
 
     data class StarredMobConfigData(

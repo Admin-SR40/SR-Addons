@@ -3,6 +3,7 @@ package com.sraddons
 import com.sraddons.command.SRACommand
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.carry.CarryCommand
+import com.sraddons.feature.carry.CarryHighlightRenderer
 import com.sraddons.feature.carry.CarryState
 import com.sraddons.feature.partycommands.commands.Commands
 import com.sraddons.feature.partycommands.commands.PartyCommandHandler
@@ -17,8 +18,10 @@ class SRAddonsMod : ClientModInitializer {
     override fun onInitializeClient() {
         SRConfig.load()
         CarryState.loadHistory()
+        CarryState.loadData()
         SRACommand.register()
         CarryCommand.register()
+        CarryHighlightRenderer.init()
         StarredMobRenderer.init()
         Commands.init()
         PartyCommandHandler.init()

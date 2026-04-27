@@ -327,19 +327,153 @@ object SRConfigGui {
         return ConfigCategory.createBuilder()
             .name(Component.literal("Carry"))
             .tooltip(Component.literal("Carry module configuration"))
-            .group(
-                OptionGroup.createBuilder()
-                    .name(Component.literal("General"))
-                    .description(OptionDescription.of(Component.literal("Carry module settings")))
-                    .collapsed(false)
-                    .option(
-                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                            .name(Component.literal("Enabled"))
-                            .description(OptionDescription.of(Component.literal("Master toggle for /cm commands")))
-                            .binding(true, { SRConfig.settings.carry.enabled }, { SRConfig.settings.carry.enabled = it })
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
+            .group(createCarryGeneralGroup())
+            .group(createCarryHighlightGroup("Client Highlight", "Highlight client players",
+                { SRConfig.settings.carry.clientHighlight.enabled },
+                { SRConfig.settings.carry.clientHighlight.enabled = it },
+                {
+                    Color(
+                        SRConfig.settings.carry.clientHighlight.colorRed.coerceIn(0, 255),
+                        SRConfig.settings.carry.clientHighlight.colorGreen.coerceIn(0, 255),
+                        SRConfig.settings.carry.clientHighlight.colorBlue.coerceIn(0, 255),
+                        SRConfig.settings.carry.clientHighlight.colorAlpha.coerceIn(0, 255)
                     )
+                },
+                { c ->
+                    SRConfig.settings.carry.clientHighlight.colorRed = c.red
+                    SRConfig.settings.carry.clientHighlight.colorGreen = c.green
+                    SRConfig.settings.carry.clientHighlight.colorBlue = c.blue
+                    SRConfig.settings.carry.clientHighlight.colorAlpha = c.alpha
+                }
+            ))
+            .group(createCarryHighlightGroup("Boss Highlight", "Highlight spawned bosses",
+                { SRConfig.settings.carry.bossHighlight.enabled },
+                { SRConfig.settings.carry.bossHighlight.enabled = it },
+                {
+                    Color(
+                        SRConfig.settings.carry.bossHighlight.colorRed.coerceIn(0, 255),
+                        SRConfig.settings.carry.bossHighlight.colorGreen.coerceIn(0, 255),
+                        SRConfig.settings.carry.bossHighlight.colorBlue.coerceIn(0, 255),
+                        SRConfig.settings.carry.bossHighlight.colorAlpha.coerceIn(0, 255)
+                    )
+                },
+                { c ->
+                    SRConfig.settings.carry.bossHighlight.colorRed = c.red
+                    SRConfig.settings.carry.bossHighlight.colorGreen = c.green
+                    SRConfig.settings.carry.bossHighlight.colorBlue = c.blue
+                    SRConfig.settings.carry.bossHighlight.colorAlpha = c.alpha
+                }
+            ))
+            .group(createCarryRenderGroup())
+            .build()
+    }
+
+    private fun createCarryGeneralGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.literal("General"))
+            .description(OptionDescription.of(Component.literal("Carry module settings")))
+            .collapsed(false)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.literal("Enabled"))
+                    .description(OptionDescription.of(Component.literal("Master toggle for /cm commands")))
+                    .binding(true, { SRConfig.settings.carry.enabled }, { SRConfig.settings.carry.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createCarryHighlightGroup(
+        name: String,
+        desc: String,
+        enabledGetter: () -> Boolean,
+        enabledSetter: (Boolean) -> Unit,
+        colorGetter: () -> Color,
+        colorSetter: (Color) -> Unit
+    ): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.literal(name))
+            .description(OptionDescription.of(Component.literal(desc)))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.literal("Enabled"))
+                    .description(OptionDescription.of(Component.literal("Enable $desc")))
+                    .binding(true, enabledGetter, enabledSetter)
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Color>()
+                    .name(Component.literal("Highlight Color"))
+                    .description(OptionDescription.of(Component.literal("Color used for the highlight")))
+                    .binding(Color(255, 255, 0, 200), colorGetter, colorSetter)
+                    .controller(ColorControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createCarryRenderGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.literal("Render Settings"))
+            .description(OptionDescription.of(Component.literal("Appearance of the highlight")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.literal("See Through Walls"))
+                    .description(OptionDescription.of(Component.literal("Render highlights through blocks")))
+                    .binding(false, { SRConfig.settings.carry.seeThroughWalls }, { SRConfig.settings.carry.seeThroughWalls = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<String>()
+                    .name(Component.literal("Render Mode"))
+                    .description(OptionDescription.of(Component.literal("OUTLINE = wireframe only, FILL = solid fill only, BOTH = outline + fill")))
+                    .binding(
+                        "BOTH",
+                        { SRConfig.settings.carry.renderMode },
+                        { SRConfig.settings.carry.renderMode = it }
+                    )
+                    .controller { option ->
+                        DropdownStringControllerBuilder.create(option)
+                            .allowAnyValue(false)
+                            .values(listOf("OUTLINE", "FILL", "BOTH"))
+                    }
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Int>()
+                    .name(Component.literal("Line Width"))
+                    .description(OptionDescription.of(Component.literal("Thickness of the outline lines")))
+                    .binding(
+                        3,
+                        { SRConfig.settings.carry.lineWidth },
+                        { SRConfig.settings.carry.lineWidth = it.coerceIn(1, 10) }
+                    )
+                    .controller { option ->
+                        IntegerSliderControllerBuilder.create(option)
+                            .range(1, 10)
+                            .step(1)
+                    }
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Int>()
+                    .name(Component.literal("Max Distance"))
+                    .description(OptionDescription.of(Component.literal("Maximum distance (in blocks) to highlight")))
+                    .binding(
+                        64,
+                        { SRConfig.settings.carry.maxDistance },
+                        { SRConfig.settings.carry.maxDistance = it.coerceIn(10, 128) }
+                    )
+                    .controller { option ->
+                        IntegerSliderControllerBuilder.create(option)
+                            .range(10, 128)
+                            .step(1)
+                    }
                     .build()
             )
             .build()
