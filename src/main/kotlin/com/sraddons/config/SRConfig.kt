@@ -64,6 +64,10 @@ object SRConfig {
         var countdownSound: Boolean = true
     )
 
+    data class CarryConfigData(
+        var enabled: Boolean = true
+    )
+
     data class StarredMobConfigData(
         var enabled: Boolean = true,
         var colorRed: Int = 255,
@@ -79,7 +83,8 @@ object SRConfig {
     data class SRConfigData(
         var entityFire: EntityFireConfigData = EntityFireConfigData(),
         var partyCommands: PartyCommandsConfigData = PartyCommandsConfigData(),
-        var starredMob: StarredMobConfigData = StarredMobConfigData()
+        var starredMob: StarredMobConfigData = StarredMobConfigData(),
+        var carry: CarryConfigData = CarryConfigData()
     )
 
     fun load() {

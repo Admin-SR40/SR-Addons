@@ -24,6 +24,7 @@ object SRConfigGui {
             .category(createEntityFireCategory())
             .category(createPartyCommandsCategory())
             .category(createStarredMobCategory())
+            .category(createCarryCategory())
             .build()
             .generateScreen(parent)
     }
@@ -315,6 +316,30 @@ object SRConfigGui {
                             .range(10, 128)
                             .step(1)
                     }
+                    .build()
+            )
+            .build()
+    }
+
+    // ========== Carry Category ==========
+
+    private fun createCarryCategory(): ConfigCategory {
+        return ConfigCategory.createBuilder()
+            .name(Component.literal("Carry"))
+            .tooltip(Component.literal("Carry module configuration"))
+            .group(
+                OptionGroup.createBuilder()
+                    .name(Component.literal("General"))
+                    .description(OptionDescription.of(Component.literal("Carry module settings")))
+                    .collapsed(false)
+                    .option(
+                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                            .name(Component.literal("Enabled"))
+                            .description(OptionDescription.of(Component.literal("Master toggle for /cm commands")))
+                            .binding(true, { SRConfig.settings.carry.enabled }, { SRConfig.settings.carry.enabled = it })
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                    )
                     .build()
             )
             .build()
