@@ -87,7 +87,7 @@ object CarryCommand {
         source.sendFeedback(buildHelpLine("§7/cm remove-type §b<type> §8- §f", "sraddons.carry.help.remove_type_desc"))
         source.sendFeedback(buildHelpLine("§7/cm list-client §8- §f", "sraddons.carry.help.list_client_desc"))
         source.sendFeedback(buildHelpLine("§7/cm list-type §8- §f", "sraddons.carry.help.list_type_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm done §f<amount> §d<player> §8- §f", "sraddons.carry.help.done_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm done §7[§famount§7] §7[§dplayer§7] §8- §f", "sraddons.carry.help.done_desc"))
         source.sendFeedback(buildHelpLine("§7/cm refund §d<player> §8- §f", "sraddons.carry.help.refund_desc"))
         source.sendFeedback(buildHelpLine("§7/cm status §8- §f", "sraddons.carry.help.status_desc"))
         source.sendFeedback(buildHelpLine("§7/cm clear-client §8- §f", "sraddons.carry.help.clear_client_desc"))
@@ -455,9 +455,9 @@ object CarryCommand {
                         )
                         return@executes 1
                     }
-                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount, client.useBulk)
+                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
                     val total = unitPrice * client.amount
-                    val usingBulk = client.useBulk && type.bulkPrice != null && client.amount >= type.bulkThreshold
+                    val usingBulk = type.bulkPrice != null && client.amount >= type.bulkThreshold
                     if (usingBulk) {
                         context.source.sendFeedback(
                             Constants.makePrefix().copy()
@@ -617,29 +617,17 @@ object CarryCommand {
     // ---- /cm done <amount> [playerName] ----
 
     private fun doneNode() = ClientCommandManager.literal("done")
+        .executes { context ->
+            if (!enabledCheck(context.source)) return@executes 1
+            doneWithDefaultAmount(context.source, 1)
+            1
+        }
         .then(
             ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
                 .executes { context ->
                     if (!enabledCheck(context.source)) return@executes 1
                     val amount = IntegerArgumentType.getInteger(context, "amount")
-                    val clientCount = CarryState.clients.size
-                    if (clientCount == 0) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
-                        )
-                        return@executes 1
-                    }
-                    if (clientCount > 1) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.specify_player",
-                                    Component.literal(clientCount.toString()).withColor(0xFFFFFF)).withColor(0xFF5555))
-                        )
-                        return@executes 1
-                    }
-                    val client = CarryState.clients.values.first()
-                    executeDone(context.source, amount, client)
+                    doneWithDefaultAmount(context.source, amount)
                     1
                 }
                 .then(
@@ -663,6 +651,27 @@ object CarryCommand {
                         }
                 )
         )
+
+    private fun doneWithDefaultAmount(source: FabricClientCommandSource, amount: Int) {
+        val clientCount = CarryState.clients.size
+        if (clientCount == 0) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
+            )
+            return
+        }
+        if (clientCount > 1) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.translatable("sraddons.carry.specify_player",
+                        Component.literal(clientCount.toString()).withColor(0xFFFFFF)).withColor(0xFF5555))
+            )
+            return
+        }
+        val client = CarryState.clients.values.first()
+        executeDone(source, amount, client)
+    }
 
     private fun executeDone(source: FabricClientCommandSource, amount: Int, client: CarryClient) {
         val type = CarryState.types[client.typeName.lowercase()]
@@ -689,7 +698,7 @@ object CarryCommand {
         sendPartyChat("${client.completed}/${client.amount}")
 
         if (client.completed >= client.amount) {
-            val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount, client.useBulk)
+            val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
             CarryState.status.totalOrders++
             CarryState.status.totalCarries += client.amount
             CarryState.status.totalEarned += unitPrice * client.amount
@@ -747,7 +756,7 @@ object CarryCommand {
                         return@executes 1
                     }
                     val remaining = client.amount - client.completed
-                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount, client.useBulk)
+                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
                     val refundAmount = remaining * unitPrice
 
                     context.source.sendFeedback(

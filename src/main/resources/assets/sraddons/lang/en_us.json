@@ -249,7 +249,7 @@
   "sraddons.carry.help.remove_type_desc": "Remove a carry type",
   "sraddons.carry.help.list_client_desc": "Show all clients",
   "sraddons.carry.help.list_type_desc": "Show all carry types",
-  "sraddons.carry.help.done_desc": "Record completed carries",
+  "sraddons.carry.help.done_desc": "Record completed carries (defaults to 1 if omitted)",
   "sraddons.carry.help.refund_desc": "Calculate refund",
   "sraddons.carry.help.status_desc": "Show total earnings",
   "sraddons.carry.help.clear_client_desc": "Remove all clients",

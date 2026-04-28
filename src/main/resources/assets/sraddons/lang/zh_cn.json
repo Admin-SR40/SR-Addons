@@ -249,7 +249,7 @@
   "sraddons.carry.help.remove_type_desc": "删除一个 Carry 类型",
   "sraddons.carry.help.list_client_desc": "显示所有客户",
   "sraddons.carry.help.list_type_desc": "显示所有 Carry 类型",
-  "sraddons.carry.help.done_desc": "记录已完成的 Carry",
+  "sraddons.carry.help.done_desc": "记录已完成的 Carry（省略时默认为 1）",
   "sraddons.carry.help.refund_desc": "计算退款",
   "sraddons.carry.help.status_desc": "显示总收入",
   "sraddons.carry.help.clear_client_desc": "清除所有客户",

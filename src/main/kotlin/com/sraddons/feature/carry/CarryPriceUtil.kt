@@ -44,11 +44,9 @@ object CarryPriceUtil {
         }
     }
 
-    fun effectivePrice(type: CarryType, amount: Int, useBulk: Boolean = false): Long {
-        if (useBulk) {
-            val bulk = type.bulkPrice
-            if (bulk != null && amount >= type.bulkThreshold) return bulk
-        }
+    fun effectivePrice(type: CarryType, amount: Int): Long {
+        val bulk = type.bulkPrice
+        if (bulk != null && amount >= type.bulkThreshold) return bulk
         return type.price
     }
 }
