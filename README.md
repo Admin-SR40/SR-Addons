@@ -2,7 +2,7 @@
 
 Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, and CarryModule into a single addon.
 
-![](https://img.shields.io/badge/Minecraft-1.21.11-green) ![](https://img.shields.io/badge/License-MIT-blue) ![](https://img.shields.io/badge/Version-1.3.0-orange)
+![](https://img.shields.io/badge/Minecraft-1.21.11-green) ![](https://img.shields.io/badge/License-MIT-blue) ![](https://img.shields.io/badge/Version-1.3.2-orange)
 
 ## Features
 
@@ -23,7 +23,8 @@ All modules support **i18n** (English / 简体中文).
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
-5. Download `SR-Addons-1.3.0.jar` and place it in `.minecraft/mods/`
+5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
+6. Download `SR-Addons-1.3.2.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -162,12 +163,12 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 
 ## Configuration
 
-All settings managed through the YACL config GUI (`/sra gui`) with 4 tabs:
+All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) with 4 tabs:
 
 | Tab | Settings |
 |-----|----------|
 | **EntityFire** | Toggle hidden fire |
-| **PartyCommands** | Prefix, 25+ command toggles, response routing (party chat / local), separator removal, auto `!mod` reply, note message, countdown sound |
+| **PartyCommands** | Prefix, 40+ individual command toggles (separate switches for each queue floor: f1–f7, m1–m7, t1–t5), response routing (party chat / local), separator removal, auto `!mod` reply, note message, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode (Outline/Fill/Both), line width, max distance, see-through-walls |
 | **Carry** | Master toggle, client & boss highlight (separate colors), render mode, line width, max distance, see-through-walls |
 
@@ -185,7 +186,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 
 **Requirements:** JDK 21
 
-**Output:** `build/libs/SR-Addons-1.3.0.jar`
+**Output:** `build/libs/SR-Addons-1.3.2.jar`
 
 ---
 
