@@ -11,7 +11,17 @@
   "entrypoints": {
     "client": [
       "com.sraddons.SRAddonsMod"
+    ],
+    "modmenu": [
+      "com.sraddons.compatibility.modmenu.ModMenuIntegration"
     ]
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.github": "https://github.com/Admin-SR40/SR-Addons"
+      }
+    }
   },
   "mixins": [
     {

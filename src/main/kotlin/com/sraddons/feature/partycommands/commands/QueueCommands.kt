@@ -21,13 +21,36 @@ object QueueCommands {
 
     private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
 
+    private fun isEnabled(cmd: String): Boolean = when (cmd) {
+        "f1" -> SRConfig.settings.partyCommands.queueF1
+        "f2" -> SRConfig.settings.partyCommands.queueF2
+        "f3" -> SRConfig.settings.partyCommands.queueF3
+        "f4" -> SRConfig.settings.partyCommands.queueF4
+        "f5" -> SRConfig.settings.partyCommands.queueF5
+        "f6" -> SRConfig.settings.partyCommands.queueF6
+        "f7" -> SRConfig.settings.partyCommands.queueF7
+        "m1" -> SRConfig.settings.partyCommands.queueM1
+        "m2" -> SRConfig.settings.partyCommands.queueM2
+        "m3" -> SRConfig.settings.partyCommands.queueM3
+        "m4" -> SRConfig.settings.partyCommands.queueM4
+        "m5" -> SRConfig.settings.partyCommands.queueM5
+        "m6" -> SRConfig.settings.partyCommands.queueM6
+        "m7" -> SRConfig.settings.partyCommands.queueM7
+        "t1" -> SRConfig.settings.partyCommands.queueT1
+        "t2" -> SRConfig.settings.partyCommands.queueT2
+        "t3" -> SRConfig.settings.partyCommands.queueT3
+        "t4" -> SRConfig.settings.partyCommands.queueT4
+        "t5" -> SRConfig.settings.partyCommands.queueT5
+        else -> true
+    }
+
     fun register() {
         floorInstances.keys.forEach { cmd ->
             Commands.add(object : Command(cmd, "Queue $cmd") {
                 override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                     builder.then(Command.argument("seconds", StringArgumentType.word())
                         .executes { ctx ->
-                            if (SRConfig.settings.partyCommands.queueInstance) {
+                            if (isEnabled(cmd)) {
                                 val seconds = StringArgumentType.getString(ctx, "seconds").toIntOrNull()
                                 if (seconds != null && seconds > 0) {
                                     CountdownManager.startCountdown(minOf(seconds, 300), cmd.uppercase())
@@ -36,7 +59,7 @@ object QueueCommands {
                             Command.SINGLE_SUCCESS
                         })
                     builder.executes {
-                        if (SRConfig.settings.partyCommands.queueInstance) {
+                        if (isEnabled(cmd)) {
                             val instance = floorInstances[cmd]!!
                             respond(formatResponse(Component.translatable("sraddons.pc.queue.label"), Component.literal("§e${cmd.uppercase()}")))
                             sendCommand("joininstance $instance")

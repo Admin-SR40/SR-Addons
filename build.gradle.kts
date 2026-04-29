@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.sraddons"
-version = "1.3.1"
+version = "1.3.2"
 
 repositories {
     mavenCentral()
@@ -33,6 +33,9 @@ dependencies {
 
     // YACL - Yet Another Config Lib
     modImplementation("dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric")
+
+    // ModMenu
+    modCompileOnly("com.terraformersmc:modmenu:11.0.4")
 }
 
 loom {
