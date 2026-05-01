@@ -101,4 +101,41 @@ object CarryState {
         clients.clear()
         status = CarryStatus()
     }
+
+    // -- Undo support --
+
+    private var undoSnapshot: String? = null
+
+    private data class UndoSnapshot(
+        val types: List<CarryType>,
+        val clients: List<CarryClient>,
+        val status: CarryStatus
+    )
+
+    fun saveUndo() {
+        undoSnapshot = GSON.toJson(UndoSnapshot(
+            types = types.values.toList(),
+            clients = clients.values.toList(),
+            status = status.copy()
+        ))
+    }
+
+    fun undo(): Boolean {
+        val json = undoSnapshot ?: return false
+        try {
+            val snapshot = GSON.fromJson(json, UndoSnapshot::class.java) ?: return false
+            types.clear()
+            clients.clear()
+            snapshot.types.forEach { types[it.name.lowercase()] = it }
+            snapshot.clients.forEach { clients[it.playerName.lowercase()] = it }
+            status = snapshot.status
+            undoSnapshot = null
+            saveData()
+            saveHistory()
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
+        }
+    }
 }
