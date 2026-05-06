@@ -2,7 +2,7 @@
 
 Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, and CarryModule into a single addon.
 
-![](https://img.shields.io/badge/Minecraft-1.21.11-green) ![](https://img.shields.io/badge/License-MIT-blue) ![](https://img.shields.io/badge/Version-1.3.3-orange)
+![](https://img.shields.io/badge/Minecraft-1.21.11-green) ![](https://img.shields.io/badge/License-MIT-blue) ![](https://img.shields.io/badge/Version-1.4.0-orange)
 
 ## Features
 
@@ -11,7 +11,7 @@ Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, Par
 | **EntityFire** | Hide fire animation on burning entities |
 | **PartyCommands** | Type commands in chat with `!` prefix — no `/pc` needed |
 | **StarredMobHighlighter** | Wireframe/fill highlight for mobs with `✯` star symbol in name |
-| **CarryModule** | Track carry orders, calculate prices, record earnings. Highlight clients & bosses |
+| **CarryModule** | Track carry orders, calculate prices, record earnings. Highlight clients, bosses & nearby minibosses. Boss spawn subtitle notification |
 
 All modules support **i18n** (English / 简体中文).
 
@@ -24,7 +24,7 @@ All modules support **i18n** (English / 简体中文).
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.3.3.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.4.0.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -66,7 +66,7 @@ All modules support **i18n** (English / 简体中文).
 
 | Command | Description |
 |---------|-------------|
-| `/cm calc-price <player>` | Calculate total price |
+| `/cm calc-price [player]` | Calculate total price (auto if 1 client) |
 | `/cm list-client` | Show all clients |
 | `/cm list-type` | Show all carry types |
 | `/cm status` | Show total earnings |
@@ -171,7 +171,7 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 | **EntityFire** | Toggle hidden fire |
 | **PartyCommands** | Prefix, 40+ individual command toggles (separate switches for each queue floor: f1–f7, m1–m7, t1–t5), response routing (party chat / local), separator removal, auto `!mod` reply, note message, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode (Outline/Fill/Both), line width, max distance, see-through-walls |
-| **Carry** | Master toggle, client & boss highlight (separate colors), render mode, line width, max distance, see-through-walls |
+| **Carry** | Master toggle, client / boss / miniboss highlight (separate colors), miniboss distance, boss spawn subtitle notification, render mode, line width, max distance, see-through-walls |
 
 Config file: `.minecraft/config/sraddons.json`
 
@@ -187,7 +187,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 
 **Requirements:** JDK 21
 
-**Output:** `build/libs/SR-Addons-1.3.3.jar`
+**Output:** `build/libs/SR-Addons-1.4.0.jar`
 
 ---
 

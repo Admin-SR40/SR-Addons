@@ -438,9 +438,14 @@ object CarryCommand {
                 )
         )
 
-    // ---- /cm calc-price <playerName> ----
+    // ---- /cm calc-price [playerName] ----
 
     private fun calcPriceNode() = ClientCommandManager.literal("calc-price")
+        .executes { context ->
+            if (!enabledCheck(context.source)) return@executes 1
+            calcPriceWithDefault(context.source)
+            1
+        }
         .then(
             ClientCommandManager.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
@@ -456,41 +461,65 @@ object CarryCommand {
                         )
                         return@executes 1
                     }
-                    val type = CarryState.types[client.typeName.lowercase()]
-                    if (type == null) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.type_not_found",
-                                    Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                        )
-                        return@executes 1
-                    }
-                    val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
-                    val total = unitPrice * client.amount
-                    val usingBulk = type.bulkPrice != null && client.amount >= type.bulkThreshold
-                    if (usingBulk) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.calc_price.bulk",
-                                    Component.literal(client.amount.toString()).withColor(0x55FFFF),
-                                    Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
-                                    Component.literal(type.bulkThreshold.toString()).withColor(0xFFFFFF),
-                                    Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
-                                ).withColor(0xFFFFFF))
-                        )
-                    } else {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.calc_price.standard",
-                                    Component.literal(client.amount.toString()).withColor(0x55FFFF),
-                                    Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
-                                    Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
-                                ).withColor(0xFFFFFF))
-                        )
-                    }
+                    calcPriceForClient(context.source, client)
                     1
                 }
         )
+
+    private fun calcPriceWithDefault(source: FabricClientCommandSource) {
+        val clientCount = CarryState.clients.size
+        if (clientCount == 0) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
+            )
+            return
+        }
+        if (clientCount > 1) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.translatable("sraddons.carry.specify_player",
+                        Component.literal(clientCount.toString()).withColor(0xFFFFFF)).withColor(0xFF5555))
+            )
+            return
+        }
+        calcPriceForClient(source, CarryState.clients.values.first())
+    }
+
+    private fun calcPriceForClient(source: FabricClientCommandSource, client: CarryClient) {
+        val type = CarryState.types[client.typeName.lowercase()]
+        if (type == null) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.translatable("sraddons.carry.type_not_found",
+                        Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
+            )
+            return
+        }
+        val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
+        val total = unitPrice * client.amount
+        val usingBulk = type.bulkPrice != null && client.amount >= type.bulkThreshold
+        if (usingBulk) {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.translatable("sraddons.carry.calc_price.bulk",
+                        Component.literal(client.amount.toString()).withColor(0x55FFFF),
+                        Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
+                        Component.literal(type.bulkThreshold.toString()).withColor(0xFFFFFF),
+                        Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
+                    ).withColor(0xFFFFFF))
+            )
+        } else {
+            source.sendFeedback(
+                Constants.makePrefix().copy()
+                    .append(Component.translatable("sraddons.carry.calc_price.standard",
+                        Component.literal(client.amount.toString()).withColor(0x55FFFF),
+                        Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
+                        Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
+                    ).withColor(0xFFFFFF))
+            )
+        }
+    }
 
     // ---- /cm remove <playerName> ----
 

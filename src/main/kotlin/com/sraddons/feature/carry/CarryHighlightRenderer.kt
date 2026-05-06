@@ -5,6 +5,7 @@ import com.sraddons.render.HighlightUtil
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.RenderType
+import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.decoration.ArmorStand
@@ -17,6 +18,17 @@ object CarryHighlightRenderer {
 
     private val LOGGER = LogManager.getLogger("SR-Addons-CarryHL")
     private const val BOSS_TAG = "Spawned by:"
+    private val knownBossArmorStandIds = mutableSetOf<Int>()
+
+    private val MINIBOSS_NAMES = setOf(
+        "Revenant Sycophant", "Revenant Champion", "Deformed Revenant",
+        "Atoned Champion", "Atoned Revenant",
+        "Tarantula Vermin", "Tarantula Beast", "Mutant Tarantula",
+        "Primordial Jockey", "Primordial Viscount",
+        "Pack Enforcer", "Sven Follower", "Sven Alpha",
+        "Voidling Devotee", "Voidling Radical", "Voidcrazed Maniac",
+        "Flare Demon", "Kindleheart Demon", "Burningsoul Demon"
+    )
 
     private val clientFilledXray: RenderType by lazy { HighlightUtil.createFilledType("carry_client", true) }
     private val clientLinesXray: RenderType by lazy { HighlightUtil.createLinesType("carry_client", true) }
@@ -28,6 +40,11 @@ object CarryHighlightRenderer {
     private val bossFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_boss", false) }
     private val bossLines: RenderType by lazy { HighlightUtil.createLinesType("carry_boss", false) }
 
+    private val minibossFilledXray: RenderType by lazy { HighlightUtil.createFilledType("carry_miniboss", true) }
+    private val minibossLinesXray: RenderType by lazy { HighlightUtil.createLinesType("carry_miniboss", true) }
+    private val minibossFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_miniboss", false) }
+    private val minibossLines: RenderType by lazy { HighlightUtil.createLinesType("carry_miniboss", false) }
+
     fun init() {
         WorldRenderEvents.END_MAIN.register { context ->
             if (!SRConfig.settings.carry.enabled) return@register
@@ -35,7 +52,8 @@ object CarryHighlightRenderer {
             val cfg = SRConfig.settings.carry
             val clientEnabled = cfg.clientHighlight.enabled
             val bossEnabled = cfg.bossHighlight.enabled
-            if (!clientEnabled && !bossEnabled) return@register
+            val minibossEnabled = cfg.minibossHighlight.enabled
+            if (!clientEnabled && !bossEnabled && !minibossEnabled) return@register
 
             val mc = Minecraft.getInstance()
             val world = mc.level ?: return@register
@@ -45,8 +63,23 @@ object CarryHighlightRenderer {
 
             val clientPlayers = if (clientEnabled) findClientPlayers(entities) else emptyList()
             val bossMobs = if (bossEnabled) findBossMobs(entities) else emptyList()
+            val minibosses = if (minibossEnabled) findMinibosses(entities, player, cfg.minibossMaxDistance.coerceIn(4, 32)) else emptyList()
 
-            if (clientPlayers.isEmpty() && bossMobs.isEmpty()) return@register
+            // Boss spawn notification
+            if (bossEnabled && cfg.bossSpawnNotification) {
+                val currentStands = findBossArmorStands(entities)
+                val currentIds = currentStands.map { it.id }.toSet()
+                for (stand in currentStands) {
+                    if (stand.id !in knownBossArmorStandIds) {
+                        triggerBossSpawnNotification()
+                        break
+                    }
+                }
+                knownBossArmorStandIds.clear()
+                knownBossArmorStandIds.addAll(currentIds)
+            }
+
+            if (clientPlayers.isEmpty() && bossMobs.isEmpty() && minibosses.isEmpty()) return@register
 
             val seeThroughWalls = cfg.seeThroughWalls
             val renderMode = cfg.renderMode.uppercase()
@@ -87,6 +120,20 @@ object CarryHighlightRenderer {
                 if (boxes.isNotEmpty()) {
                     HighlightUtil.drawBoxes(pose, boxes, bossColor, renderMode, lineWidth, seeThroughWalls,
                         bossFilled, bossLines, bossFilledXray, bossLinesXray, LOGGER)
+                }
+            }
+
+            if (minibosses.isNotEmpty()) {
+                val minibossColor = Color(
+                    cfg.minibossHighlight.colorRed.coerceIn(0, 255),
+                    cfg.minibossHighlight.colorGreen.coerceIn(0, 255),
+                    cfg.minibossHighlight.colorBlue.coerceIn(0, 255),
+                    cfg.minibossHighlight.colorAlpha.coerceIn(0, 255)
+                )
+                val boxes = collectBoxes(minibosses, player, maxDistance, partialTicks)
+                if (boxes.isNotEmpty()) {
+                    HighlightUtil.drawBoxes(pose, boxes, minibossColor, renderMode, lineWidth, seeThroughWalls,
+                        minibossFilled, minibossLines, minibossFilledXray, minibossLinesXray, LOGGER)
                 }
             }
 
@@ -146,6 +193,43 @@ object CarryHighlightRenderer {
 
         val result = mutableListOf<LivingEntity>()
         for (armorStand in bossArmorStands) {
+            val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
+            if (target != null && target !in result) {
+                result.add(target)
+            }
+        }
+        return result
+    }
+
+    private fun findBossArmorStands(entities: Iterable<Entity>): List<ArmorStand> {
+        if (CarryState.clients.isEmpty()) return emptyList()
+        return entities.filterIsInstance<ArmorStand>().filter { stand ->
+            val name = stand.name.string
+            val idx = name.indexOf(BOSS_TAG)
+            idx >= 0 && CarryState.clients.containsKey(
+                name.substring(idx + BOSS_TAG.length).trim().lowercase()
+            )
+        }
+    }
+
+    private fun triggerBossSpawnNotification() {
+        val mc = Minecraft.getInstance()
+        val text = SRConfig.settings.carry.bossSpawnNotificationText.trim()
+        mc.gui.setTimes(0, 20, 0)
+        mc.gui.setTitle(Component.empty())
+        mc.gui.setSubtitle(Component.literal(text).withColor(0xFF5555))
+    }
+
+    private fun findMinibosses(entities: Iterable<Entity>, player: Player, maxDistance: Int): List<LivingEntity> {
+        val minibossArmorStands = entities.filterIsInstance<ArmorStand>().filter { stand ->
+            val name = stand.name.string
+            MINIBOSS_NAMES.any { name.contains(it, ignoreCase = true) }
+        }
+        if (minibossArmorStands.isEmpty()) return emptyList()
+
+        val result = mutableListOf<LivingEntity>()
+        for (armorStand in minibossArmorStands) {
+            if (armorStand.distanceTo(player) > maxDistance) continue
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
             if (target != null && target !in result) {
                 result.add(target)

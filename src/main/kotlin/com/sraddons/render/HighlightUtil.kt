@@ -14,6 +14,7 @@ import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.AABB
 import org.apache.logging.log4j.Logger
 import java.awt.Color
@@ -66,7 +67,7 @@ object HighlightUtil {
         val asPos = armorStand.position()
 
         for (entity in entities) {
-            if (entity !is LivingEntity || entity is ArmorStand) continue
+            if (entity !is LivingEntity || entity is ArmorStand || entity is Player) continue
             val pos = entity.position()
             val dx = pos.x - asPos.x
             val dz = pos.z - asPos.z

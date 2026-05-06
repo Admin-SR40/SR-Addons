@@ -399,8 +399,78 @@ object SRConfigGui {
                     SRConfig.settings.carry.bossHighlight.colorAlpha = c.alpha
                 }
             ))
+            .group(createCarryHighlightGroup(
+                "sraddons.gui.carry.miniboss_highlight",
+                "sraddons.gui.carry.miniboss_highlight.desc",
+                { SRConfig.settings.carry.minibossHighlight.enabled },
+                { SRConfig.settings.carry.minibossHighlight.enabled = it },
+                {
+                    Color(
+                        SRConfig.settings.carry.minibossHighlight.colorRed.coerceIn(0, 255),
+                        SRConfig.settings.carry.minibossHighlight.colorGreen.coerceIn(0, 255),
+                        SRConfig.settings.carry.minibossHighlight.colorBlue.coerceIn(0, 255),
+                        SRConfig.settings.carry.minibossHighlight.colorAlpha.coerceIn(0, 255)
+                    )
+                },
+                { c ->
+                    SRConfig.settings.carry.minibossHighlight.colorRed = c.red
+                    SRConfig.settings.carry.minibossHighlight.colorGreen = c.green
+                    SRConfig.settings.carry.minibossHighlight.colorBlue = c.blue
+                    SRConfig.settings.carry.minibossHighlight.colorAlpha = c.alpha
+                }
+            ))
+            .group(createBossNotificationGroup())
             .group(createCarryRenderGroup())
             .group(createCarryDebugGroup())
+            .group(createMinibossDistanceGroup())
+            .build()
+    }
+
+    private fun createMinibossDistanceGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.carry.miniboss_distance"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_distance.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Int>()
+                    .name(Component.translatable("sraddons.gui.carry.miniboss_max_distance"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_max_distance.desc")))
+                    .binding(
+                        16,
+                        { SRConfig.settings.carry.minibossMaxDistance },
+                        { SRConfig.settings.carry.minibossMaxDistance = it.coerceIn(4, 32) }
+                    )
+                    .controller { option ->
+                        IntegerSliderControllerBuilder.create(option)
+                            .range(4, 32)
+                            .step(1)
+                    }
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createBossNotificationGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.carry.boss_notification"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.boss_notification.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.carry.boss_notification_enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.boss_notification_enabled.desc")))
+                    .binding(true, { SRConfig.settings.carry.bossSpawnNotification }, { SRConfig.settings.carry.bossSpawnNotification = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<String>()
+                    .name(Component.translatable("sraddons.gui.carry.boss_notification_text"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.boss_notification_text.desc")))
+                    .binding("BOSS SPAWNED", { SRConfig.settings.carry.bossSpawnNotificationText }, { SRConfig.settings.carry.bossSpawnNotificationText = it })
+                    .controller(StringControllerBuilder::create)
+                    .build()
+            )
             .build()
     }
 
