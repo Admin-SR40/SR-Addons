@@ -2,18 +2,7 @@
 
 Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, and CarryModule into a single addon.
 
-![](https://img.shields.io/badge/Minecraft-1.21.11-green) ![](https://img.shields.io/badge/License-MIT-blue) ![](https://img.shields.io/badge/Version-1.4.0-orange)
-
-## Features
-
-| Module | Description |
-|--------|-------------|
-| **EntityFire** | Hide fire animation on burning entities |
-| **PartyCommands** | Type commands in chat with `!` prefix — no `/pc` needed |
-| **StarredMobHighlighter** | Wireframe/fill highlight for mobs with `✯` star symbol in name |
-| **CarryModule** | Track carry orders, calculate prices, record earnings. Highlight clients, bosses & nearby minibosses. Boss spawn subtitle notification |
-
-All modules support **i18n** (English / 简体中文).
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.4.1-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
 
 ---
 
@@ -24,24 +13,67 @@ All modules support **i18n** (English / 简体中文).
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.4.0.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.4.1.jar` and place it in `.minecraft/mods/`
+
+---
+
+## Features
+
+<details open>
+<summary>modules</summary>
+
+### EntityFire
+- Hide fire animation on burning entities
+
+### StarredMobHighlighter
+- Wireframe / fill highlight for mobs with `✯` star symbol in name
+- Configurable color (RGBA), render mode, line width, max distance, see-through-walls
+
+### PartyCommands
+- Type commands in chat with `!` prefix — no `/pc` needed
+- 40+ individually toggleable commands
+- Ping, TPS, FPS, time, location, coords, holding, status info
+- Full party management (warp, allinvite, transfer, promote, demote, kick, kickoffline, kickall, disband, invite, leave)
+- Dungeon & Kuudra queue (`!f1`–`!f7`, `!m1`–`!m7`, `!t1`–`!t5`) with optional countdown
+- Fun commands (coinflip, 8ball, dice, boop, random)
+- Countdown timer with sound, note message, auto `!mod` reply
+- Configurable response routing (party chat / local), separator line removal
+- Auto party list updater with member online/offline tracking
+
+### CarryModule
+- Full carry order management via `/cm` commands
+- Carry types with configurable unit & bulk pricing
+- Client tracking with completed / remaining counts
+- **Client Highlight** — green bounding box around client players
+- **Boss Highlight** — red bounding box around bosses spawned by clients (detects "Spawned by:" name tags)
+- **Miniboss Highlight** — orange bounding box for 19 Slayer minibosses near clients
+- **Boss Spawn Notification** — subtitle alert when a client's boss spawns (toggleable, custom text)
+- Earnings history, refund calculator, undo support
+- Auto price calculation (no player name needed when only 1 client)
+
+All modules support **i18n** (English / 简体中文).
+
+</details>
 
 ---
 
 ## Commands
 
-### `/sra` — Mod Management
+<details open>
+<summary>/sra — mod management</summary>
 
 | Command | Description |
 |---------|-------------|
 | `/sra` | Show help |
 | `/sra reload` | Reload configuration |
-| `/sra config` | Open config GUI |
-| `/sra gui` | Open config GUI (alias) |
+| `/sra config` / `/sra gui` | Open config GUI |
 | `/sra version` | Show version info |
 | `/sra update` | Check for updates |
 
-### `/cm` — Carry Module
+</details>
+
+<details>
+<summary>/cm — carry module</summary>
 
 **Setup**
 
@@ -75,7 +107,7 @@ All modules support **i18n** (English / 简体中文).
 
 | Command | Description |
 |---------|-------------|
-| `/cm done [player] [n]` | Record completed carries (defaults to 1 if omitted) |
+| `/cm done [player] [n]` | Record completed carries (defaults to 1) |
 | `/cm refund <player>` | Calculate refund |
 | `/cm undo` | Undo last change |
 
@@ -86,7 +118,10 @@ All modules support **i18n** (English / 简体中文).
 | `/cm clear-client` | Remove all clients |
 | `/cm clear-history` | Reset earnings history |
 
-### PartyCommands — `!` Prefix
+</details>
+
+<details>
+<summary>! — party commands</summary>
 
 **Info**
 
@@ -150,9 +185,10 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 | `!note [message]` | Save/send note to party |
 | `!gui` | Open config GUI |
 
----
+</details>
 
-## Key Bindings
+<details>
+<summary>key bindings</summary>
 
 | Key | Action |
 |-----|--------|
@@ -160,9 +196,14 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 | Unbound | Open config GUI |
 | Unbound | Toggle PartyCommands on/off |
 
+</details>
+
 ---
 
 ## Configuration
+
+<details>
+<summary>config tabs</summary>
 
 All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) with 4 tabs:
 
@@ -171,11 +212,13 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 | **EntityFire** | Toggle hidden fire |
 | **PartyCommands** | Prefix, 40+ individual command toggles (separate switches for each queue floor: f1–f7, m1–m7, t1–t5), response routing (party chat / local), separator removal, auto `!mod` reply, note message, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode (Outline/Fill/Both), line width, max distance, see-through-walls |
-| **Carry** | Master toggle, client / boss / miniboss highlight (separate colors), miniboss distance, boss spawn subtitle notification, render mode, line width, max distance, see-through-walls |
+| **Carry** | Master toggle, client / boss / miniboss highlight (separate colors), miniboss distance, boss spawn subtitle notification (toggle + custom text), render mode, line width, max distance, see-through-walls |
 
 Config file: `.minecraft/config/sraddons.json`
 
 Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-migrated on first launch.
+
+</details>
 
 ---
 
@@ -185,9 +228,8 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ./gradlew clean build
 ```
 
-**Requirements:** JDK 21
-
-**Output:** `build/libs/SR-Addons-1.4.0.jar`
+**Requirements:** JDK 21  
+**Output:** `build/libs/SR-Addons-1.4.1.jar`
 
 ---
 

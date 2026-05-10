@@ -18,7 +18,7 @@ object CarryHighlightRenderer {
 
     private val LOGGER = LogManager.getLogger("SR-Addons-CarryHL")
     private const val BOSS_TAG = "Spawned by:"
-    private val knownBossArmorStandIds = mutableSetOf<Int>()
+    private val seenBossUUIDs = mutableSetOf<java.util.UUID>()
 
     private val MINIBOSS_NAMES = setOf(
         "Revenant Sycophant", "Revenant Champion", "Deformed Revenant",
@@ -61,22 +61,22 @@ object CarryHighlightRenderer {
 
             val entities = world.entitiesForRendering()
 
-            val clientPlayers = if (clientEnabled) findClientPlayers(entities) else emptyList()
+            val clientPlayers = if (clientEnabled || minibossEnabled) findClientPlayers(entities) else emptyList()
             val bossMobs = if (bossEnabled) findBossMobs(entities) else emptyList()
-            val minibosses = if (minibossEnabled) findMinibosses(entities, player, cfg.minibossMaxDistance.coerceIn(4, 32)) else emptyList()
+            val minibosses = if (minibossEnabled) findMinibosses(entities, clientPlayers, cfg.minibossMaxDistance.coerceIn(4, 32)) else emptyList()
 
             // Boss spawn notification
             if (bossEnabled && cfg.bossSpawnNotification) {
                 val currentStands = findBossArmorStands(entities)
-                val currentIds = currentStands.map { it.id }.toSet()
-                for (stand in currentStands) {
-                    if (stand.id !in knownBossArmorStandIds) {
+                val currentUUIDs = currentStands.map { it.uuid }.toSet()
+                for (uuid in currentUUIDs) {
+                    if (uuid !in seenBossUUIDs) {
                         triggerBossSpawnNotification()
                         break
                     }
                 }
-                knownBossArmorStandIds.clear()
-                knownBossArmorStandIds.addAll(currentIds)
+                seenBossUUIDs.clear()
+                seenBossUUIDs.addAll(currentUUIDs)
             }
 
             if (clientPlayers.isEmpty() && bossMobs.isEmpty() && minibosses.isEmpty()) return@register
@@ -95,7 +95,7 @@ object CarryHighlightRenderer {
             poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
             val pose = poseStack.last()
 
-            if (clientPlayers.isNotEmpty()) {
+            if (clientEnabled && clientPlayers.isNotEmpty()) {
                 val clientColor = Color(
                     cfg.clientHighlight.colorRed.coerceIn(0, 255),
                     cfg.clientHighlight.colorGreen.coerceIn(0, 255),
@@ -220,16 +220,19 @@ object CarryHighlightRenderer {
         mc.gui.setSubtitle(Component.literal(text).withColor(0xFF5555))
     }
 
-    private fun findMinibosses(entities: Iterable<Entity>, player: Player, maxDistance: Int): List<LivingEntity> {
+    private fun findMinibosses(entities: Iterable<Entity>, clientPlayers: List<LivingEntity>, maxDistance: Int): List<LivingEntity> {
+        if (clientPlayers.isEmpty()) return emptyList()
         val minibossArmorStands = entities.filterIsInstance<ArmorStand>().filter { stand ->
             val name = stand.name.string
             MINIBOSS_NAMES.any { name.contains(it, ignoreCase = true) }
         }
         if (minibossArmorStands.isEmpty()) return emptyList()
 
+        val maxDistSq = (maxDistance * maxDistance).toDouble()
         val result = mutableListOf<LivingEntity>()
         for (armorStand in minibossArmorStands) {
-            if (armorStand.distanceTo(player) > maxDistance) continue
+            val nearAnyClient = clientPlayers.any { armorStand.distanceToSqr(it) <= maxDistSq }
+            if (!nearAnyClient) continue
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
             if (target != null && target !in result) {
                 result.add(target)

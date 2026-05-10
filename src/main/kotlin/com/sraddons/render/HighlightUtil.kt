@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.Tesselator
 import com.mojang.blaze3d.vertex.VertexFormat
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.client.renderer.rendertype.RenderSetup
 import net.minecraft.client.renderer.rendertype.RenderType
@@ -14,7 +15,6 @@ import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.decoration.ArmorStand
-import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.AABB
 import org.apache.logging.log4j.Logger
 import java.awt.Color
@@ -67,7 +67,8 @@ object HighlightUtil {
         val asPos = armorStand.position()
 
         for (entity in entities) {
-            if (entity !is LivingEntity || entity is ArmorStand || entity is Player) continue
+            if (entity !is LivingEntity || entity is ArmorStand) continue
+            if (entity == Minecraft.getInstance().player) continue
             val pos = entity.position()
             val dx = pos.x - asPos.x
             val dz = pos.z - asPos.z
