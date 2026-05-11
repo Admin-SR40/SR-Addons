@@ -5,9 +5,11 @@ import net.minecraft.client.Minecraft
 object PartyUtils {
     private val mc = Minecraft.getInstance()
 
-    val members = mutableListOf<String>()
+    private val members = mutableListOf<String>()
     private val memberColors = mutableMapOf<String, String>()
     private val offlineMembers = mutableSetOf<String>()
+
+    fun getMembers(): List<String> = synchronized(this) { members.toList() }
 
     private val RANK_PREFIXES = listOf(
         "[MVP++]", "[MVP+]", "[MVP]",

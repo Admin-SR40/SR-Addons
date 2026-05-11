@@ -21,7 +21,8 @@ object CarryHighlightRenderer {
     private const val MAX_SEEN_BOSSES = 200
     private val seenBossUUIDs = ConcurrentHashMap.newKeySet<java.util.UUID>()
 
-    // 19 Hypixel SkyBlock Slayer miniboss names
+    // Hypixel SkyBlock 19 Slayer miniboss name tags used for entity matching.
+    // These are server-side name strings; kept as a set for O(1) contains() lookup in the render loop.
     private val MINIBOSS_NAMES = setOf(
         "Revenant Sycophant", "Revenant Champion", "Deformed Revenant",
         "Atoned Champion", "Atoned Revenant",

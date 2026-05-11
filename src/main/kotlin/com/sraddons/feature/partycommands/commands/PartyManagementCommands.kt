@@ -50,7 +50,7 @@ object PartyManagementCommands {
                 builder.then(Command.argument("player", StringArgumentType.word())
                     .suggests { _, suggestionsBuilder ->
                         val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.members
+                        PartyUtils.getMembers()
                             .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
                             .distinct()
                             .forEach { suggestionsBuilder.suggest(it) }
@@ -79,7 +79,7 @@ object PartyManagementCommands {
                 builder.then(Command.argument("player", StringArgumentType.word())
                     .suggests { _, suggestionsBuilder ->
                         val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.members
+                        PartyUtils.getMembers()
                             .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
                             .distinct()
                             .forEach { suggestionsBuilder.suggest(it) }
@@ -110,7 +110,7 @@ object PartyManagementCommands {
                 builder.then(Command.argument("player", StringArgumentType.word())
                     .suggests { _, suggestionsBuilder ->
                         val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.members
+                        PartyUtils.getMembers()
                             .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
                             .distinct()
                             .forEach { suggestionsBuilder.suggest(it) }
@@ -167,7 +167,7 @@ object PartyManagementCommands {
                 builder.then(Command.argument("player", StringArgumentType.word())
                     .suggests { _, suggestionsBuilder ->
                         val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.members
+                        PartyUtils.getMembers()
                             .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
                             .distinct()
                             .forEach { suggestionsBuilder.suggest(it) }
@@ -226,7 +226,7 @@ object PartyManagementCommands {
                 builder.then(Command.argument("exceptions", StringArgumentType.greedyString())
                     .suggests { _, suggestionsBuilder ->
                         val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.members
+                        PartyUtils.getMembers()
                             .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
                             .distinct()
                             .forEach { suggestionsBuilder.suggest(it) }
@@ -239,7 +239,7 @@ object PartyManagementCommands {
                                 val exceptions = exceptionsInput.split(" ").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
                                 val myName = mc.player?.name?.string ?: ""
                                 exceptions.add(myName)
-                                val toKick = PartyUtils.members.filter { member ->
+                                val toKick = PartyUtils.getMembers().filter { member ->
                                     exceptions.none { exception -> member.equals(exception, ignoreCase = true) }
                                 }
                                 if (toKick.isNotEmpty()) {
@@ -257,7 +257,7 @@ object PartyManagementCommands {
                     if (SRConfig.settings.partyCommands.kickall) {
                         if (PartyUtils.isLeader()) {
                             val myName = mc.player?.name?.string ?: ""
-                            val toKick = PartyUtils.members.filter { !it.equals(myName, ignoreCase = true) }
+                            val toKick = PartyUtils.getMembers().filter { !it.equals(myName, ignoreCase = true) }
                             if (toKick.isNotEmpty()) {
                                 sendPartyChat("Kicking all members...")
                                 Scheduler.scheduleStaggered(toKick, KICK_DELAY_MS) { target ->
