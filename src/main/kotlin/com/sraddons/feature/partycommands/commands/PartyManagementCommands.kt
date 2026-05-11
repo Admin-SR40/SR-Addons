@@ -4,12 +4,14 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.utils.*
+import com.sraddons.util.Scheduler
 import net.minecraft.client.Minecraft
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.network.chat.Component
 
 object PartyManagementCommands {
     private val mc = Minecraft.getInstance()
+    private const val KICK_DELAY_MS = 500L
 
     private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
     private fun error(key: String, vararg args: Any) = Component.translatable("sraddons.pc.error.$key", *args).withColor(0xFF5555)
@@ -179,10 +181,9 @@ object PartyManagementCommands {
                                     val target = PartyUtils.findMember(input)
                                     val reason = StringArgumentType.getString(ctx, "reason").noControlCodes
                                     sendPartyChat("Kicking $target : $reason")
-                                    Thread {
-                                        Thread.sleep(500)
+                                    Scheduler.schedule(KICK_DELAY_MS) {
                                         mc.execute { sendCommand("p kick $target") }
-                                    }.start()
+                                    }
                                     respond(formatResponse(label("kick"), Component.translatable("sraddons.pc.kick.success", Component.literal(target)).withColor(0x55FF55)))
                                 } else { respond(formatResponse(label("error"), error("not_leader"))) }
                             } else { respondDisabled("kick") }
@@ -243,11 +244,8 @@ object PartyManagementCommands {
                                 }
                                 if (toKick.isNotEmpty()) {
                                     sendPartyChat("Kicking all members...")
-                                    toKick.forEachIndexed { index, target ->
-                                        Thread {
-                                            Thread.sleep(500L * (index + 1))
-                                            mc.execute { sendCommand("p kick $target") }
-                                        }.start()
+                                    Scheduler.scheduleStaggered(toKick, KICK_DELAY_MS) { target ->
+                                        mc.execute { sendCommand("p kick $target") }
                                     }
                                     respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.kicking", toKick.size.toString()).withColor(0x55FF55)))
                                 } else { respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.none").withColor(0xFF5555))) }
@@ -262,11 +260,8 @@ object PartyManagementCommands {
                             val toKick = PartyUtils.members.filter { !it.equals(myName, ignoreCase = true) }
                             if (toKick.isNotEmpty()) {
                                 sendPartyChat("Kicking all members...")
-                                toKick.forEachIndexed { index, target ->
-                                    Thread {
-                                        Thread.sleep(500L * (index + 1))
-                                        mc.execute { sendCommand("p kick $target") }
-                                    }.start()
+                                Scheduler.scheduleStaggered(toKick, KICK_DELAY_MS) { target ->
+                                    mc.execute { sendCommand("p kick $target") }
                                 }
                                 respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.kicking", toKick.size.toString()).withColor(0x55FF55)))
                             } else { respond(formatResponse(label("kickall"), Component.translatable("sraddons.pc.kickall.none").withColor(0xFF5555))) }

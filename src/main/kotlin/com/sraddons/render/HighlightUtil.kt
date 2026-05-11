@@ -22,6 +22,11 @@ import kotlin.math.sqrt
 
 object HighlightUtil {
 
+    private const val MAX_HORIZONTAL_DIST_SQ = 9.0
+    private const val MIN_VERTICAL_OFFSET = 0.0
+    private const val MAX_VERTICAL_OFFSET = 6.0
+    private const val FILL_ALPHA_MULTIPLIER = 0.3f
+
     fun createFilledType(id: String, seeThrough: Boolean): RenderType {
         val suffix = if (seeThrough) "${id}_filled_xray" else "${id}_filled"
         val pipeline = RenderPipelines.register(
@@ -74,7 +79,7 @@ object HighlightUtil {
             val dz = pos.z - asPos.z
             val dy = asPos.y - pos.y
 
-            if (dx * dx + dz * dz <= 9.0 && dy in 0.0..6.0) {
+            if (dx * dx + dz * dz <= MAX_HORIZONTAL_DIST_SQ && dy in MIN_VERTICAL_OFFSET..MAX_VERTICAL_OFFSET) {
                 val dist = dx * dx + dz * dz + dy * dy
                 if (dist < closestDist) {
                     closestDist = dist
@@ -151,7 +156,7 @@ object HighlightUtil {
         val r = color.red
         val g = color.green
         val b = color.blue
-        val a = (color.alpha * 0.3f).toInt().coerceIn(0, 255)
+        val a = (color.alpha * FILL_ALPHA_MULTIPLIER).toInt().coerceIn(0, 255)
 
         // Bottom face
         buffer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a)

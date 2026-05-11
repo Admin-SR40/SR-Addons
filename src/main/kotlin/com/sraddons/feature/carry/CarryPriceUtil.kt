@@ -2,6 +2,9 @@ package com.sraddons.feature.carry
 
 object CarryPriceUtil {
 
+    private const val MILLION = 1_000_000L
+    private const val THOUSAND = 1_000L
+
     fun parsePrice(input: String): Long? {
         val trimmed = input.trim().uppercase()
         if (trimmed.isEmpty()) return null
@@ -9,11 +12,11 @@ object CarryPriceUtil {
         return when {
             trimmed.endsWith("M") -> {
                 val num = trimmed.dropLast(1).toDoubleOrNull() ?: return null
-                if (num < 0) null else (num * 1_000_000).toLong()
+                if (num < 0) null else (num * MILLION).toLong()
             }
             trimmed.endsWith("K") -> {
                 val num = trimmed.dropLast(1).toDoubleOrNull() ?: return null
-                if (num < 0) null else (num * 1_000).toLong()
+                if (num < 0) null else (num * THOUSAND).toLong()
             }
             else -> {
                 val num = trimmed.toLongOrNull() ?: return null
@@ -24,16 +27,16 @@ object CarryPriceUtil {
 
     fun formatPrice(coins: Long): String {
         return when {
-            coins >= 1_000_000 -> {
-                val millions = coins.toDouble() / 1_000_000.0
+            coins >= MILLION -> {
+                val millions = coins.toDouble() / MILLION.toDouble()
                 if (millions == millions.toLong().toDouble()) {
                     "${millions.toLong()}M"
                 } else {
                     "${String.format("%.1f", millions)}M"
                 }
             }
-            coins >= 1_000 -> {
-                val thousands = coins.toDouble() / 1_000.0
+            coins >= THOUSAND -> {
+                val thousands = coins.toDouble() / THOUSAND.toDouble()
                 if (thousands == thousands.toLong().toDouble()) {
                     "${thousands.toLong()}K"
                 } else {

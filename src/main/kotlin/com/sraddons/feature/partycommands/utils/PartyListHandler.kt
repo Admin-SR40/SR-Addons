@@ -24,42 +24,49 @@ object PartyListHandler {
     )
 
     fun startWaiting() {
-        isWaitingForList = true
-        silentMode = false
-        waitTicks = 0
-        collectedLines.clear()
-        lastMessageWasNotInParty = false
-        lastMessageWasSeparator = false
+        synchronized(this) {
+            isWaitingForList = true
+            silentMode = false
+            waitTicks = 0
+            collectedLines.clear()
+            lastMessageWasNotInParty = false
+            lastMessageWasSeparator = false
+        }
     }
 
     fun startAutoWaiting() {
-        isWaitingForList = true
-        silentMode = true
-        waitTicks = 0
-        collectedLines.clear()
-        lastMessageWasNotInParty = false
-        lastMessageWasSeparator = false
+        synchronized(this) {
+            isWaitingForList = true
+            silentMode = true
+            waitTicks = 0
+            collectedLines.clear()
+            lastMessageWasNotInParty = false
+            lastMessageWasSeparator = false
+        }
     }
 
     fun onTick() {
-        if (!isWaitingForList) return
-        waitTicks++
-        if (waitTicks > 40) {
-            val wasSilent = silentMode
-            isWaitingForList = false
-            lastMessageWasNotInParty = false
-            silentMode = false
-            lastMessageWasSeparator = false
-            if (!wasSilent) {
-                modMessage(formatResponse(
-                    Component.translatable("sraddons.pc.party_list.title"),
-                    Component.translatable("sraddons.pc.party_list.timeout").withColor(0xFF5555)
-                ))
+        synchronized(this) {
+            if (!isWaitingForList) return
+            waitTicks++
+            if (waitTicks > 40) {
+                val wasSilent = silentMode
+                isWaitingForList = false
+                lastMessageWasNotInParty = false
+                silentMode = false
+                lastMessageWasSeparator = false
+                if (!wasSilent) {
+                    modMessage(formatResponse(
+                        Component.translatable("sraddons.pc.party_list.title"),
+                        Component.translatable("sraddons.pc.party_list.timeout").withColor(0xFF5555)
+                    ))
+                }
             }
         }
     }
 
     fun handleMessage(text: String): Boolean {
+        synchronized(this) {
         val trimmed = text.trim()
 
         for (pattern in interceptSeparatorPatterns) {
@@ -132,6 +139,7 @@ object PartyListHandler {
         }
 
         return false
+        }
     }
 
     private fun parseAndDisplay() {
@@ -144,11 +152,7 @@ object PartyListHandler {
             leaderPattern.find(line)?.let {
                 val leaderName = it.groupValues[1]
                 leader = formatMember(leaderName)
-                val cleanName = leaderName.noControlCodes
-                    .replace("[MVP++]", "").replace("[MVP+]", "").replace("[MVP]", "")
-                    .replace("[VIP+]", "").replace("[VIP]", "").replace("[YOUTUBE]", "")
-                    .replace("[ADMIN]", "").replace("[GM]", "").replace("[MOD]", "")
-                    .replace("[HELPER]", "").replace("\u25cf", "").trim()
+                val cleanName = PartyUtils.cleanPlayerName(leaderName)
                 PartyUtils.partyLeader = cleanName
                 PartyUtils.addMember(cleanName, leaderName)
                 return@let
@@ -160,11 +164,7 @@ object PartyListHandler {
                     if (memberFull.isNotEmpty()) {
                         val formatted = formatMember(memberFull)
                         members.add(formatted)
-                        val cleanName = memberFull.noControlCodes
-                            .replace("[MVP++]", "").replace("[MVP+]", "").replace("[MVP]", "")
-                            .replace("[VIP+]", "").replace("[VIP]", "").replace("[YOUTUBE]", "")
-                            .replace("[ADMIN]", "").replace("[GM]", "").replace("[MOD]", "")
-                            .replace("[HELPER]", "").trim()
+                        val cleanName = PartyUtils.cleanPlayerName(memberFull)
                         PartyUtils.addMember(cleanName, memberFull)
                     }
                 }
@@ -177,11 +177,7 @@ object PartyListHandler {
         for (line in collectedLines) {
             leaderPattern.find(line)?.let {
                 val leaderName = it.groupValues[1]
-                val cleanName = leaderName.noControlCodes
-                    .replace("[MVP++]", "").replace("[MVP+]", "").replace("[MVP]", "")
-                    .replace("[VIP+]", "").replace("[VIP]", "").replace("[YOUTUBE]", "")
-                    .replace("[ADMIN]", "").replace("[GM]", "").replace("[MOD]", "")
-                    .replace("[HELPER]", "").replace("\u25cf", "").trim()
+                val cleanName = PartyUtils.cleanPlayerName(leaderName)
                 PartyUtils.partyLeader = cleanName
                 PartyUtils.addMember(cleanName, leaderName)
                 return@let
@@ -193,11 +189,7 @@ object PartyListHandler {
                     val memberName = memberMatch.groupValues[1].trim()
                     val bulletColor = memberMatch.groupValues[2]
                     if (memberName.isEmpty()) return@forEach
-                    val cleanName = memberName.noControlCodes
-                        .replace("[MVP++]", "").replace("[MVP+]", "").replace("[MVP]", "")
-                        .replace("[VIP+]", "").replace("[VIP]", "").replace("[YOUTUBE]", "")
-                        .replace("[ADMIN]", "").replace("[GM]", "").replace("[MOD]", "")
-                        .replace("[HELPER]", "").trim()
+                    val cleanName = PartyUtils.cleanPlayerName(memberName)
                     if (cleanName.isEmpty()) return@forEach
                     PartyUtils.addMember(cleanName, memberName)
                     if (bulletColor == "\u00a7c") {

@@ -1,6 +1,7 @@
 package com.sraddons.gui
 
 import com.sraddons.config.SRConfig
+import com.sraddons.util.Scheduler
 import dev.isxander.yacl3.api.ConfigCategory
 import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.api.OptionGroup
@@ -16,6 +17,8 @@ import net.minecraft.network.chat.Component
 import java.awt.Color
 
 object SRConfigGui {
+
+    private const val GUI_OPEN_DELAY_MS = 50L
 
     fun createScreen(parent: Screen?): Screen {
         return YetAnotherConfigLib.createBuilder()
@@ -600,11 +603,10 @@ object SRConfigGui {
 
     fun open() {
         val mc = Minecraft.getInstance()
-        Thread {
-            Thread.sleep(50)
+        Scheduler.schedule(GUI_OPEN_DELAY_MS) {
             mc.execute {
                 mc.setScreen(createScreen(mc.screen))
             }
-        }.start()
+        }
     }
 }

@@ -14,8 +14,10 @@ object Commands {
     fun init() {}
 
     fun add(command: Command) {
-        COMMANDS.removeAll { it.name == command.name }
-        COMMANDS.add(command)
+        synchronized(this) {
+            COMMANDS.removeAll { it.name == command.name }
+            COMMANDS.add(command)
+        }
     }
 
     @JvmStatic
@@ -26,7 +28,9 @@ object Commands {
     }
 
     fun rebuildDispatcher() {
-        DISPATCHER = CommandDispatcher()
-        COMMANDS.forEach { it.registerTo(DISPATCHER) }
+        synchronized(this) {
+            DISPATCHER = CommandDispatcher()
+            COMMANDS.forEach { it.registerTo(DISPATCHER) }
+        }
     }
 }

@@ -9,6 +9,20 @@ object PartyUtils {
     private val memberColors = mutableMapOf<String, String>()
     private val offlineMembers = mutableSetOf<String>()
 
+    private val RANK_PREFIXES = listOf(
+        "[MVP++]", "[MVP+]", "[MVP]",
+        "[VIP+]", "[VIP]",
+        "[YOUTUBE]", "[ADMIN]", "[GM]", "[MOD]", "[HELPER]"
+    )
+
+    fun cleanPlayerName(name: String): String {
+        var clean = name.noControlCodes
+        for (prefix in RANK_PREFIXES) {
+            clean = clean.replace(prefix, "")
+        }
+        return clean.replace("●", "").trim()
+    }
+
     var partyLeader: String? = null
         internal set
 
@@ -20,20 +34,9 @@ object PartyUtils {
     }
 
     fun addMember(playerName: String, coloredName: String? = null) {
-        if (!isInParty) isInParty = true
-        val cleanName = playerName.noControlCodes
-            .replace("[MVP++]", "")
-            .replace("[MVP+]", "")
-            .replace("[MVP]", "")
-            .replace("[VIP+]", "")
-            .replace("[VIP]", "")
-            .replace("[YOUTUBE]", "")
-            .replace("[ADMIN]", "")
-            .replace("[GM]", "")
-            .replace("[MOD]", "")
-            .replace("[HELPER]", "")
-            .replace("\u25cf", "")
-            .trim()
+        synchronized(this) {
+            if (!isInParty) isInParty = true
+            val cleanName = cleanPlayerName(playerName)
         if (cleanName.isEmpty()) return
         if (cleanName !in members) {
             members.add(cleanName)
@@ -41,32 +44,41 @@ object PartyUtils {
         if (coloredName != null) {
             memberColors[cleanName] = coloredName
         }
+        }
     }
 
     fun removeMember(playerName: String) {
-        val cleanName = playerName.noControlCodes
-        if (cleanName !in members) return
-        members.remove(cleanName)
-        memberColors.remove(cleanName)
-        if (members.isEmpty()) {
-            disband()
+        synchronized(this) {
+            val cleanName = playerName.noControlCodes
+            if (cleanName !in members) return
+            members.remove(cleanName)
+            memberColors.remove(cleanName)
+            if (members.isEmpty()) {
+                disband()
+            }
         }
     }
 
     fun disband() {
-        members.clear()
+        synchronized(this) {
+            members.clear()
         memberColors.clear()
         offlineMembers.clear()
         partyLeader = null
         isInParty = false
+        }
     }
 
     fun markOffline(playerName: String) {
-        offlineMembers.add(playerName.noControlCodes.lowercase())
+        synchronized(this) {
+            offlineMembers.add(playerName.noControlCodes.lowercase())
+        }
     }
 
     fun markOnline(playerName: String) {
-        offlineMembers.remove(playerName.noControlCodes.lowercase())
+        synchronized(this) {
+            offlineMembers.remove(playerName.noControlCodes.lowercase())
+        }
     }
 
     fun isOffline(playerName: String): Boolean {
@@ -74,12 +86,14 @@ object PartyUtils {
     }
 
     fun removeMemberWithOffline(playerName: String) {
-        val cleanName = playerName.noControlCodes
-        members.remove(cleanName)
-        memberColors.remove(cleanName)
-        offlineMembers.remove(cleanName)
-        if (members.isEmpty()) {
-            disband()
+        synchronized(this) {
+            val cleanName = playerName.noControlCodes
+            members.remove(cleanName)
+            memberColors.remove(cleanName)
+            offlineMembers.remove(cleanName)
+            if (members.isEmpty()) {
+                disband()
+            }
         }
     }
 

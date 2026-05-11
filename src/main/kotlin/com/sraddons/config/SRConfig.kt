@@ -3,17 +3,23 @@ package com.sraddons.config
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.fabricmc.loader.api.FabricLoader
+import org.apache.logging.log4j.LogManager
 import java.io.File
-import java.io.FileReader
-import java.io.FileWriter
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 
 object SRConfig {
+    private val LOGGER = LogManager.getLogger("SR-Addons-Config")
     private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
     private val CONFIG_FILE = File(
         FabricLoader.getInstance().configDir.toFile(),
         "sraddons.json"
     )
 
+    @Volatile
     var settings = SRConfigData()
 
     data class EntityFireConfigData(
@@ -124,32 +130,41 @@ object SRConfig {
     )
 
     fun load() {
-        if (!CONFIG_FILE.exists()) {
-            migrateFromOldConfigs()
-            save()
-            return
-        }
-
-        try {
-            FileReader(CONFIG_FILE).use { reader ->
-                val data = GSON.fromJson(reader, SRConfigData::class.java)
-                if (data != null) {
-                    settings = data
-                }
+        synchronized(this) {
+            if (!CONFIG_FILE.exists()) {
+                migrateFromOldConfigs()
+                save()
+                return
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            save()
+
+            try {
+                InputStreamReader(FileInputStream(CONFIG_FILE), StandardCharsets.UTF_8).use { reader ->
+                    val data = GSON.fromJson(reader, SRConfigData::class.java)
+                    if (data != null) {
+                        settings = data
+                    }
+                }
+            } catch (e: Exception) {
+                LOGGER.error("Failed to load config, resetting to defaults", e)
+                save()
+            }
         }
     }
 
     fun save() {
-        try {
-            FileWriter(CONFIG_FILE).use { writer ->
-                GSON.toJson(settings, writer)
+        synchronized(this) {
+            val tmpFile = File(CONFIG_FILE.parentFile, "${CONFIG_FILE.name}.tmp")
+            try {
+                OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
+                    GSON.toJson(settings, writer)
+                }
+                if (!tmpFile.renameTo(CONFIG_FILE)) {
+                    LOGGER.warn("Failed to rename config tmp file")
+                }
+            } catch (e: Exception) {
+                LOGGER.error("Failed to save config", e)
+                tmpFile.delete()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
@@ -161,16 +176,17 @@ object SRConfig {
         val oldEntityFireFile = File(configDir, "entityfiremod.json")
         if (oldEntityFireFile.exists()) {
             try {
-                FileReader(oldEntityFireFile).use { reader ->
+                InputStreamReader(FileInputStream(oldEntityFireFile), StandardCharsets.UTF_8).use { reader ->
                     val data = GSON.fromJson(reader, EntityFireConfigData::class.java)
                     if (data != null) {
                         settings.entityFire = data
                         migrated = true
                     }
                 }
-                oldEntityFireFile.renameTo(File(configDir, "entityfiremod.json.bak"))
+                val ok = oldEntityFireFile.renameTo(File(configDir, "entityfiremod.json.bak"))
+                if (!ok) LOGGER.warn("Failed to rename entityfiremod.json")
             } catch (e: Exception) {
-                e.printStackTrace()
+                LOGGER.error("Failed to migrate EntityFire config", e)
             }
         }
 
@@ -178,16 +194,17 @@ object SRConfig {
         val oldPCFile = File(configDir, "partycommands.json")
         if (oldPCFile.exists()) {
             try {
-                FileReader(oldPCFile).use { reader ->
+                InputStreamReader(FileInputStream(oldPCFile), StandardCharsets.UTF_8).use { reader ->
                     val data = GSON.fromJson(reader, PartyCommandsConfigData::class.java)
                     if (data != null) {
                         settings.partyCommands = data
                         migrated = true
                     }
                 }
-                oldPCFile.renameTo(File(configDir, "partycommands.json.bak"))
+                val ok = oldPCFile.renameTo(File(configDir, "partycommands.json.bak"))
+                if (!ok) LOGGER.warn("Failed to rename partycommands.json")
             } catch (e: Exception) {
-                e.printStackTrace()
+                LOGGER.error("Failed to migrate PartyCommands config", e)
             }
         }
 
@@ -195,16 +212,17 @@ object SRConfig {
         val oldSMFile = File(configDir, "starredmobhighlighter.json")
         if (oldSMFile.exists()) {
             try {
-                FileReader(oldSMFile).use { reader ->
+                InputStreamReader(FileInputStream(oldSMFile), StandardCharsets.UTF_8).use { reader ->
                     val data = GSON.fromJson(reader, StarredMobConfigData::class.java)
                     if (data != null) {
                         settings.starredMob = data
                         migrated = true
                     }
                 }
-                oldSMFile.renameTo(File(configDir, "starredmobhighlighter.json.bak"))
+                val ok = oldSMFile.renameTo(File(configDir, "starredmobhighlighter.json.bak"))
+                if (!ok) LOGGER.warn("Failed to rename starredmobhighlighter.json")
             } catch (e: Exception) {
-                e.printStackTrace()
+                LOGGER.error("Failed to migrate StarredMob config", e)
             }
         }
 

@@ -1,14 +1,15 @@
 package com.sraddons.feature.partycommands.utils
 
 import com.sraddons.config.SRConfig
+import com.sraddons.util.Scheduler
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
-import kotlin.concurrent.thread
 
 object CountdownManager {
     private val mc = Minecraft.getInstance()
+    private const val CANCEL_HINT_DELAY_MS = 500L
 
     private var currentCountdown: Countdown? = null
 
@@ -47,8 +48,7 @@ object CountdownManager {
         } else {
             if (PartyUtils.isInParty) {
                 sendPartyChat("Queued for $displayLabel - entering in $timeStr")
-                thread {
-                    Thread.sleep(500)
+                Scheduler.schedule(CANCEL_HINT_DELAY_MS) {
                     sendPartyChat("Type !cancel to abort the queue")
                 }
             } else {

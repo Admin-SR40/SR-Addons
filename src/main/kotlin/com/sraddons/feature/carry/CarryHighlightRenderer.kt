@@ -68,15 +68,19 @@ object CarryHighlightRenderer {
             // Boss spawn notification
             if (bossEnabled && cfg.bossSpawnNotification) {
                 val currentStands = findBossArmorStands(entities)
-                val currentUUIDs = currentStands.map { it.uuid }.toSet()
-                for (uuid in currentUUIDs) {
-                    if (uuid !in seenBossUUIDs) {
-                        triggerBossSpawnNotification()
-                        break
+                if (currentStands.isEmpty()) {
+                    seenBossUUIDs.clear()
+                } else {
+                    val currentUUIDs = currentStands.map { it.uuid }.toSet()
+                    for (uuid in currentUUIDs) {
+                        if (uuid !in seenBossUUIDs) {
+                            triggerBossSpawnNotification()
+                            break
+                        }
                     }
+                    seenBossUUIDs.clear()
+                    seenBossUUIDs.addAll(currentUUIDs)
                 }
-                seenBossUUIDs.clear()
-                seenBossUUIDs.addAll(currentUUIDs)
             }
 
             if (clientPlayers.isEmpty() && bossMobs.isEmpty() && minibosses.isEmpty()) return@register

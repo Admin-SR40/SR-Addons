@@ -1,10 +1,14 @@
 package com.sraddons.feature.partycommands.utils
 
 import com.sraddons.config.SRConfig
+import com.sraddons.util.Scheduler
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.network.chat.Component
 
 object ChatListener {
+
+    private const val MOD_REPLY_DELAY_MS = 500L
+    private const val GITHUB_REPLY_DELAY_MS = 800L
 
     private val joinedSelf = Regex("^You have joined ((?:\\[[^]]*?])? ?)?(\\w{1,16})'s? party!$")
     private val joinedOther = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) joined the party\\.$")
@@ -126,12 +130,12 @@ object ChatListener {
         val myName = mc.player?.name?.string ?: return
         if (senderClean.equals(myName, ignoreCase = true)) return
 
-        Thread {
-            Thread.sleep(500)
+        Scheduler.schedule(MOD_REPLY_DELAY_MS) {
             mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.mod").string) }
-            Thread.sleep(300)
+        }
+        Scheduler.schedule(GITHUB_REPLY_DELAY_MS) {
             mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.github").string) }
-        }.start()
+        }
     }
 
     private fun handleCancelCommand(message: String) {

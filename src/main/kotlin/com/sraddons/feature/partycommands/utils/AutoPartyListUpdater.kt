@@ -1,5 +1,6 @@
 package com.sraddons.feature.partycommands.utils
 
+import com.sraddons.util.Scheduler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.Minecraft
 
@@ -9,6 +10,8 @@ object AutoPartyListUpdater {
     private var hasDoneFirstUpdate = false
     private var lastUpdateTime = 0L
     private const val UPDATE_COOLDOWN = 60000L
+    private const val INITIAL_DELAY_MS = 500L
+    private const val UPDATE_DELAY_MS = 1500L
 
     fun init() {
         ClientTickEvents.START_CLIENT_TICK.register { _ ->
@@ -20,12 +23,11 @@ object AutoPartyListUpdater {
         val isInGame = mc.player != null && mc.connection != null
 
         if (!wasInGame && isInGame && !hasDoneFirstUpdate) {
-            Thread {
-                Thread.sleep(500)
+            Scheduler.schedule(INITIAL_DELAY_MS) {
                 mc.execute {
                     if (shouldUpdate()) scheduleUpdate()
                 }
-            }.start()
+            }
             hasDoneFirstUpdate = true
         }
 
@@ -45,15 +47,14 @@ object AutoPartyListUpdater {
         if (currentTime - lastUpdateTime < UPDATE_COOLDOWN) return
         lastUpdateTime = currentTime
 
-        Thread {
-            Thread.sleep(1500)
+        Scheduler.schedule(UPDATE_DELAY_MS) {
             mc.execute {
                 if (mc.player != null && !mc.isSingleplayer) {
                     PartyListHandler.startAutoWaiting()
                     sendCommand("p list")
                 }
             }
-        }.start()
+        }
     }
 
     fun refresh() {

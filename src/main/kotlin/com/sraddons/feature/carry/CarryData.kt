@@ -3,9 +3,13 @@ package com.sraddons.feature.carry
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.fabricmc.loader.api.FabricLoader
+import org.apache.logging.log4j.LogManager
 import java.io.File
-import java.io.FileReader
-import java.io.FileWriter
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 
 data class CarryType(
     val name: String,
@@ -34,6 +38,7 @@ private data class CarryDataFile(
 )
 
 object CarryState {
+    private val LOGGER = LogManager.getLogger("SR-Addons-Carry")
     private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
     private val CONFIG_DIR = FabricLoader.getInstance().configDir.toFile()
     private val HISTORY_FILE = File(CONFIG_DIR, "srac-history.json")
@@ -41,69 +46,91 @@ object CarryState {
 
     val types = mutableMapOf<String, CarryType>()
     val clients = mutableMapOf<String, CarryClient>()
+    @Volatile
     var status = CarryStatus()
 
     fun loadHistory() {
         if (!HISTORY_FILE.exists()) return
-        try {
-            FileReader(HISTORY_FILE).use { reader ->
-                val data = GSON.fromJson(reader, CarryStatus::class.java)
-                if (data != null) {
-                    status = data
+        synchronized(this) {
+            try {
+                InputStreamReader(FileInputStream(HISTORY_FILE), StandardCharsets.UTF_8).use { reader ->
+                    val data = GSON.fromJson(reader, CarryStatus::class.java)
+                    if (data != null) {
+                        status = data
+                    }
                 }
+            } catch (e: Exception) {
+                LOGGER.error("Failed to load carry history", e)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
     fun saveHistory() {
-        try {
-            FileWriter(HISTORY_FILE).use { writer ->
-                GSON.toJson(status, writer)
+        synchronized(this) {
+            val tmpFile = File(HISTORY_FILE.parentFile, "${HISTORY_FILE.name}.tmp")
+            try {
+                OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
+                    GSON.toJson(status, writer)
+                }
+                if (!tmpFile.renameTo(HISTORY_FILE)) {
+                    LOGGER.warn("Failed to rename history tmp file")
+                }
+            } catch (e: Exception) {
+                LOGGER.error("Failed to save carry history", e)
+                tmpFile.delete()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
     fun saveData() {
-        try {
-            FileWriter(DATA_FILE).use { writer ->
-                val file = CarryDataFile(
-                    types = types.values.toList(),
-                    clients = clients.values.toList()
-                )
-                GSON.toJson(file, writer)
+        synchronized(this) {
+            val tmpFile = File(DATA_FILE.parentFile, "${DATA_FILE.name}.tmp")
+            try {
+                OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
+                    val file = CarryDataFile(
+                        types = types.values.toList(),
+                        clients = clients.values.toList()
+                    )
+                    GSON.toJson(file, writer)
+                }
+                if (!tmpFile.renameTo(DATA_FILE)) {
+                    LOGGER.warn("Failed to rename carry data tmp file")
+                }
+            } catch (e: Exception) {
+                LOGGER.error("Failed to save carry data", e)
+                tmpFile.delete()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
     fun loadData() {
         if (!DATA_FILE.exists()) return
-        try {
-            FileReader(DATA_FILE).use { reader ->
-                val file = GSON.fromJson(reader, CarryDataFile::class.java)
-                if (file != null) {
-                    file.types.forEach { types[it.name.lowercase()] = it }
-                    file.clients.forEach { clients[it.playerName.lowercase()] = it }
+        synchronized(this) {
+            try {
+                InputStreamReader(FileInputStream(DATA_FILE), StandardCharsets.UTF_8).use { reader ->
+                    val file = GSON.fromJson(reader, CarryDataFile::class.java)
+                    if (file != null) {
+                        file.types.forEach { types[it.name.lowercase()] = it }
+                        file.clients.forEach { clients[it.playerName.lowercase()] = it }
+                    }
                 }
+            } catch (e: Exception) {
+                LOGGER.error("Failed to load carry data", e)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
     fun reset() {
-        types.clear()
-        clients.clear()
-        status = CarryStatus()
+        synchronized(this) {
+            types.clear()
+            clients.clear()
+            status = CarryStatus()
+        }
     }
 
     // -- Undo support --
 
+    @Volatile
     private var undoSnapshot: String? = null
 
     private data class UndoSnapshot(
@@ -113,29 +140,33 @@ object CarryState {
     )
 
     fun saveUndo() {
-        undoSnapshot = GSON.toJson(UndoSnapshot(
-            types = types.values.toList(),
-            clients = clients.values.toList(),
-            status = status.copy()
-        ))
+        synchronized(this) {
+            undoSnapshot = GSON.toJson(UndoSnapshot(
+                types = types.values.toList(),
+                clients = clients.values.toList(),
+                status = status.copy()
+            ))
+        }
     }
 
     fun undo(): Boolean {
         val json = undoSnapshot ?: return false
-        try {
-            val snapshot = GSON.fromJson(json, UndoSnapshot::class.java) ?: return false
-            types.clear()
-            clients.clear()
-            snapshot.types.forEach { types[it.name.lowercase()] = it }
-            snapshot.clients.forEach { clients[it.playerName.lowercase()] = it }
-            status = snapshot.status
-            undoSnapshot = null
-            saveData()
-            saveHistory()
-            return true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
+        synchronized(this) {
+            try {
+                val snapshot = GSON.fromJson(json, UndoSnapshot::class.java) ?: return false
+                types.clear()
+                clients.clear()
+                snapshot.types.forEach { types[it.name.lowercase()] = it }
+                snapshot.clients.forEach { clients[it.playerName.lowercase()] = it }
+                status = snapshot.status
+                undoSnapshot = null
+                saveData()
+                saveHistory()
+                return true
+            } catch (e: Exception) {
+                LOGGER.error("Failed to undo carry state", e)
+                return false
+            }
         }
     }
 }
