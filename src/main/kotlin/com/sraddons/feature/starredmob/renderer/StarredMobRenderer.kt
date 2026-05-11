@@ -10,7 +10,6 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
 import org.apache.logging.log4j.LogManager
-import java.awt.Color
 
 object StarredMobRenderer {
 
@@ -40,11 +39,11 @@ object StarredMobRenderer {
 
             if (starredMobs.isEmpty()) return@register
 
-            val color = Color(
-                SRConfig.settings.starredMob.colorRed.coerceIn(0, 255),
-                SRConfig.settings.starredMob.colorGreen.coerceIn(0, 255),
-                SRConfig.settings.starredMob.colorBlue.coerceIn(0, 255),
-                SRConfig.settings.starredMob.colorAlpha.coerceIn(0, 255)
+            val color = HighlightUtil.clampedColor(
+                SRConfig.settings.starredMob.colorRed,
+                SRConfig.settings.starredMob.colorGreen,
+                SRConfig.settings.starredMob.colorBlue,
+                SRConfig.settings.starredMob.colorAlpha
             )
             val seeThroughWalls = SRConfig.settings.starredMob.seeThroughWalls
             val renderMode = SRConfig.settings.starredMob.renderMode.uppercase()

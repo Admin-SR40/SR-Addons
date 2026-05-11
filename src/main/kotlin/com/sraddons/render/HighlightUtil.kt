@@ -27,6 +27,13 @@ object HighlightUtil {
     private const val MAX_VERTICAL_OFFSET = 6.0
     private const val FILL_ALPHA_MULTIPLIER = 0.3f
 
+    fun clampedColor(r: Int, g: Int, b: Int, a: Int): Color = Color(
+        r.coerceIn(0, 255),
+        g.coerceIn(0, 255),
+        b.coerceIn(0, 255),
+        a.coerceIn(0, 255)
+    )
+
     fun createFilledType(id: String, seeThrough: Boolean): RenderType {
         val suffix = if (seeThrough) "${id}_filled_xray" else "${id}_filled"
         val pipeline = RenderPipelines.register(

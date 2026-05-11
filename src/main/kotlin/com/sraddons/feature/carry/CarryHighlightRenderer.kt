@@ -12,14 +12,16 @@ import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.AABB
 import org.apache.logging.log4j.LogManager
-import java.awt.Color
+import java.util.concurrent.ConcurrentHashMap
 
 object CarryHighlightRenderer {
 
     private val LOGGER = LogManager.getLogger("SR-Addons-CarryHL")
     private const val BOSS_TAG = "Spawned by:"
-    private val seenBossUUIDs = mutableSetOf<java.util.UUID>()
+    private const val MAX_SEEN_BOSSES = 200
+    private val seenBossUUIDs = ConcurrentHashMap.newKeySet<java.util.UUID>()
 
+    // 19 Hypixel SkyBlock Slayer miniboss names
     private val MINIBOSS_NAMES = setOf(
         "Revenant Sycophant", "Revenant Champion", "Deformed Revenant",
         "Atoned Champion", "Atoned Revenant",
@@ -79,7 +81,9 @@ object CarryHighlightRenderer {
                         }
                     }
                     seenBossUUIDs.clear()
-                    seenBossUUIDs.addAll(currentUUIDs)
+                    if (currentUUIDs.size <= MAX_SEEN_BOSSES) {
+                        seenBossUUIDs.addAll(currentUUIDs)
+                    }
                 }
             }
 
@@ -100,11 +104,11 @@ object CarryHighlightRenderer {
             val pose = poseStack.last()
 
             if (clientEnabled && clientPlayers.isNotEmpty()) {
-                val clientColor = Color(
-                    cfg.clientHighlight.colorRed.coerceIn(0, 255),
-                    cfg.clientHighlight.colorGreen.coerceIn(0, 255),
-                    cfg.clientHighlight.colorBlue.coerceIn(0, 255),
-                    cfg.clientHighlight.colorAlpha.coerceIn(0, 255)
+                val clientColor = HighlightUtil.clampedColor(
+                    cfg.clientHighlight.colorRed,
+                    cfg.clientHighlight.colorGreen,
+                    cfg.clientHighlight.colorBlue,
+                    cfg.clientHighlight.colorAlpha
                 )
                 val boxes = collectBoxes(clientPlayers, player, maxDistance, partialTicks)
                 if (boxes.isNotEmpty()) {
@@ -114,11 +118,11 @@ object CarryHighlightRenderer {
             }
 
             if (bossMobs.isNotEmpty()) {
-                val bossColor = Color(
-                    cfg.bossHighlight.colorRed.coerceIn(0, 255),
-                    cfg.bossHighlight.colorGreen.coerceIn(0, 255),
-                    cfg.bossHighlight.colorBlue.coerceIn(0, 255),
-                    cfg.bossHighlight.colorAlpha.coerceIn(0, 255)
+                val bossColor = HighlightUtil.clampedColor(
+                    cfg.bossHighlight.colorRed,
+                    cfg.bossHighlight.colorGreen,
+                    cfg.bossHighlight.colorBlue,
+                    cfg.bossHighlight.colorAlpha
                 )
                 val boxes = collectBoxes(bossMobs, player, maxDistance, partialTicks)
                 if (boxes.isNotEmpty()) {
@@ -128,11 +132,11 @@ object CarryHighlightRenderer {
             }
 
             if (minibosses.isNotEmpty()) {
-                val minibossColor = Color(
-                    cfg.minibossHighlight.colorRed.coerceIn(0, 255),
-                    cfg.minibossHighlight.colorGreen.coerceIn(0, 255),
-                    cfg.minibossHighlight.colorBlue.coerceIn(0, 255),
-                    cfg.minibossHighlight.colorAlpha.coerceIn(0, 255)
+                val minibossColor = HighlightUtil.clampedColor(
+                    cfg.minibossHighlight.colorRed,
+                    cfg.minibossHighlight.colorGreen,
+                    cfg.minibossHighlight.colorBlue,
+                    cfg.minibossHighlight.colorAlpha
                 )
                 val boxes = collectBoxes(minibosses, player, maxDistance, partialTicks)
                 if (boxes.isNotEmpty()) {
@@ -169,8 +173,8 @@ object CarryHighlightRenderer {
         val result = mutableListOf<LivingEntity>()
         for (entity in entities) {
             if (entity is Player) {
-                val name = entity.name.string
-                if (CarryState.clients.containsKey(name.lowercase())) {
+                val nameLower = entity.name.string.lowercase()
+                if (CarryState.clients.containsKey(nameLower)) {
                     result.add(entity)
                 }
             }
@@ -187,8 +191,8 @@ object CarryHighlightRenderer {
                 val name = entity.name.string
                 val idx = name.indexOf(BOSS_TAG)
                 if (idx >= 0) {
-                    val playerName = name.substring(idx + BOSS_TAG.length).trim()
-                    if (CarryState.clients.containsKey(playerName.lowercase())) {
+                    val playerNameLower = name.substring(idx + BOSS_TAG.length).trim().lowercase()
+                    if (CarryState.clients.containsKey(playerNameLower)) {
                         bossArmorStands.add(entity)
                     }
                 }
@@ -210,9 +214,9 @@ object CarryHighlightRenderer {
         return entities.filterIsInstance<ArmorStand>().filter { stand ->
             val name = stand.name.string
             val idx = name.indexOf(BOSS_TAG)
-            idx >= 0 && CarryState.clients.containsKey(
-                name.substring(idx + BOSS_TAG.length).trim().lowercase()
-            )
+            if (idx < 0) return@filter false
+            val playerNameLower = name.substring(idx + BOSS_TAG.length).trim().lowercase()
+            CarryState.clients.containsKey(playerNameLower)
         }
     }
 

@@ -10,6 +10,7 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.ConcurrentHashMap
 
 data class CarryType(
     val name: String,
@@ -44,8 +45,8 @@ object CarryState {
     private val HISTORY_FILE = File(CONFIG_DIR, "srac-history.json")
     private val DATA_FILE = File(CONFIG_DIR, "srac-data.json")
 
-    val types = mutableMapOf<String, CarryType>()
-    val clients = mutableMapOf<String, CarryClient>()
+    val types = ConcurrentHashMap<String, CarryType>()
+    val clients = ConcurrentHashMap<String, CarryClient>()
     @Volatile
     var status = CarryStatus()
 
