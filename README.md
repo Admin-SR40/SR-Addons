@@ -2,7 +2,7 @@
 
 Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, and CarryModule into a single addon.
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.4.1-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.4.2-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
 
 ---
 
@@ -13,7 +13,7 @@ Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, Par
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.4.1.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.4.2.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -229,7 +229,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 21  
-**Output:** `build/libs/SR-Addons-1.4.1.jar`
+**Output:** `build/libs/SR-Addons-1.4.2.jar`
 
 ---
 
