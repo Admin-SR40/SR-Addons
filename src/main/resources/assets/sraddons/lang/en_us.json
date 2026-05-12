@@ -322,6 +322,13 @@
   "sraddons.carry.specify_player": "You have %s clients. Specify the player name.",
   "sraddons.carry.bool.true": "true",
   "sraddons.carry.bool.false": "false",
+  "sraddons.carry.quotes_required": "Please use double quotes around the name. Example: /cm add-miniboss \"Revenant Sycophant\"",
+  "sraddons.carry.miniboss_added": "Miniboss name \"%s\" added.",
+  "sraddons.carry.miniboss_removed": "Miniboss name \"%s\" removed.",
+  "sraddons.carry.miniboss_not_found": "Miniboss name \"%s\" not found in the list.",
+  "sraddons.carry.miniboss_already_exists": "Miniboss name \"%s\" already exists in the list.",
+  "sraddons.carry.help.add_miniboss_desc": "Add a miniboss name for highlighting",
+  "sraddons.carry.help.remove_miniboss_desc": "Remove a miniboss name from the list",
 
   "sraddons.gui.pc.toggle.warp": "Warp",
   "sraddons.gui.pc.toggle.warp.desc": "Send a party warp request",
@@ -412,6 +419,13 @@
   "sraddons.gui.pc.toggle.t4.desc": "Join Kuudra Fiery",
   "sraddons.gui.pc.toggle.t5": "T5",
   "sraddons.gui.pc.toggle.t5.desc": "Join Kuudra Infernal",
+
+  "sraddons.gui.general": "General",
+  "sraddons.gui.general.desc": "General-purpose settings that don't fit into other categories",
+  "sraddons.gui.general.group.display": "Display",
+  "sraddons.gui.general.group.display.desc": "Settings related to what you see on screen",
+  "sraddons.gui.general.show_own_name": "Show Own Nametag in Third Person",
+  "sraddons.gui.general.show_own_name.desc": "Shows your own nametag when in third-person perspective",
 
   "sraddons.pc.label.cd": "Countdown"
 }

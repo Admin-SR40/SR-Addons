@@ -41,6 +41,8 @@ object CarryCommand {
                 .then(clearClientNode())
                 .then(clearHistoryNode())
                 .then(undoNode())
+                .then(addMinibossNode())
+                .then(removeMinibossNode())
                 .also { dispatcher.register(it) }
         }
     }
@@ -63,6 +65,11 @@ object CarryCommand {
 
     private val suggestClients = SuggestionProvider<FabricClientCommandSource> { _, builder ->
         CarryState.clients.values.forEach { builder.suggest(it.playerName) }
+        builder.buildFuture()
+    }
+
+    private val suggestMinibossNames = SuggestionProvider<FabricClientCommandSource> { _, builder ->
+        SRConfig.settings.carry.minibossNames.forEach { builder.suggest("\"$it\"") }
         builder.buildFuture()
     }
 
@@ -94,6 +101,8 @@ object CarryCommand {
         source.sendFeedback(buildHelpLine("§7/cm status §8- §f", "sraddons.carry.help.status_desc"))
         source.sendFeedback(buildHelpLine("§7/cm clear-client §8- §f", "sraddons.carry.help.clear_client_desc"))
         source.sendFeedback(buildHelpLine("§7/cm clear-history §8- §f", "sraddons.carry.help.clear_history_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm add-miniboss §b\"<NAME>\" §8- §f", "sraddons.carry.help.add_miniboss_desc"))
+        source.sendFeedback(buildHelpLine("§7/cm remove-miniboss §b\"<NAME>\" §8- §f", "sraddons.carry.help.remove_miniboss_desc"))
     }
 
     // ---- /cm add-type <typeName> ----
@@ -935,4 +944,83 @@ object CarryCommand {
             }
             1
         }
+
+    // ---- /cm add-miniboss "<NAME>" ----
+
+    private fun addMinibossNode() = ClientCommandManager.literal("add-miniboss")
+        .then(
+            ClientCommandManager.argument("name", StringArgumentType.string())
+                .executes { context ->
+                    if (!enabledCheck(context.source)) return@executes 1
+
+                    val argNode = context.nodes.find { it.node.name == "name" } ?: return@executes 1
+                    val rawArg = context.input.substring(argNode.range.start, argNode.range.end)
+                    if (!rawArg.startsWith("\"") || !rawArg.endsWith("\"")) {
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.translatable("sraddons.carry.quotes_required").withColor(0xFF5555))
+                        )
+                        return@executes 1
+                    }
+
+                    val name = StringArgumentType.getString(context, "name")
+                    val list = SRConfig.settings.carry.minibossNames
+                    if (list.any { it.equals(name, ignoreCase = true) }) {
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.translatable("sraddons.carry.miniboss_already_exists",
+                                    Component.literal(name).withColor(0x55FFFF)).withColor(0xFF5555))
+                        )
+                        return@executes 1
+                    }
+                    SRConfig.settings.carry.minibossNames = list + name
+                    SRConfig.save()
+                    context.source.sendFeedback(
+                        Constants.makePrefix().copy()
+                            .append(Component.translatable("sraddons.carry.miniboss_added",
+                                Component.literal(name).withColor(0x55FFFF)).withColor(0x55FF55))
+                    )
+                    1
+                }
+        )
+
+    // ---- /cm remove-miniboss "<NAME>" ----
+
+    private fun removeMinibossNode() = ClientCommandManager.literal("remove-miniboss")
+        .then(
+            ClientCommandManager.argument("name", StringArgumentType.string())
+                .suggests(suggestMinibossNames)
+                .executes { context ->
+                    if (!enabledCheck(context.source)) return@executes 1
+
+                    val argNode = context.nodes.find { it.node.name == "name" } ?: return@executes 1
+                    val rawArg = context.input.substring(argNode.range.start, argNode.range.end)
+                    if (!rawArg.startsWith("\"") || !rawArg.endsWith("\"")) {
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.translatable("sraddons.carry.quotes_required").withColor(0xFF5555))
+                        )
+                        return@executes 1
+                    }
+
+                    val name = StringArgumentType.getString(context, "name")
+                    val list = SRConfig.settings.carry.minibossNames
+                    if (list.none { it.equals(name, ignoreCase = true) }) {
+                        context.source.sendFeedback(
+                            Constants.makePrefix().copy()
+                                .append(Component.translatable("sraddons.carry.miniboss_not_found",
+                                    Component.literal(name).withColor(0x55FFFF)).withColor(0xFF5555))
+                        )
+                        return@executes 1
+                    }
+                    SRConfig.settings.carry.minibossNames = list.filter { !it.equals(name, ignoreCase = true) }
+                    SRConfig.save()
+                    context.source.sendFeedback(
+                        Constants.makePrefix().copy()
+                            .append(Component.translatable("sraddons.carry.miniboss_removed",
+                                Component.literal(name).withColor(0x55FFFF)).withColor(0x55FF55))
+                    )
+                    1
+                }
+        )
 }

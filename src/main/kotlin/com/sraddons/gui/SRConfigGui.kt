@@ -1,6 +1,7 @@
 package com.sraddons.gui
 
 import com.sraddons.config.SRConfig
+import com.sraddons.render.HighlightUtil
 import com.sraddons.util.Scheduler
 import dev.isxander.yacl3.api.ConfigCategory
 import dev.isxander.yacl3.api.OptionDescription
@@ -24,12 +25,36 @@ object SRConfigGui {
         return YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("sraddons.gui.title"))
             .save { SRConfig.save() }
+            .category(createGeneralCategory())
             .category(createEntityFireCategory())
             .category(createPartyCommandsCategory())
             .category(createStarredMobCategory())
             .category(createCarryCategory())
             .build()
             .generateScreen(parent)
+    }
+
+    // ========== General Category ==========
+
+    private fun createGeneralCategory(): ConfigCategory {
+        return ConfigCategory.createBuilder()
+            .name(Component.translatable("sraddons.gui.general"))
+            .tooltip(Component.translatable("sraddons.gui.general.desc"))
+            .group(
+                OptionGroup.createBuilder()
+                    .name(Component.translatable("sraddons.gui.general.group.display"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.group.display.desc")))
+                    .option(
+                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                            .name(Component.translatable("sraddons.gui.general.show_own_name"))
+                            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.show_own_name.desc")))
+                            .binding(true, { SRConfig.settings.general.showOwnNameInThirdPerson }, { SRConfig.settings.general.showOwnNameInThirdPerson = it })
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                    )
+                    .build()
+            )
+            .build()
     }
 
     // ========== EntityFire Category ==========
@@ -287,11 +312,11 @@ object SRConfigGui {
                     .binding(
                         Color(255, 255, 0, 200),
                         {
-                            Color(
-                                SRConfig.settings.starredMob.colorRed.coerceIn(0, 255),
-                                SRConfig.settings.starredMob.colorGreen.coerceIn(0, 255),
-                                SRConfig.settings.starredMob.colorBlue.coerceIn(0, 255),
-                                SRConfig.settings.starredMob.colorAlpha.coerceIn(0, 255)
+                            HighlightUtil.clampedColor(
+                                SRConfig.settings.starredMob.colorRed,
+                                SRConfig.settings.starredMob.colorGreen,
+                                SRConfig.settings.starredMob.colorBlue,
+                                SRConfig.settings.starredMob.colorAlpha
                             )
                         },
                         {
@@ -368,11 +393,11 @@ object SRConfigGui {
                 { SRConfig.settings.carry.clientHighlight.enabled },
                 { SRConfig.settings.carry.clientHighlight.enabled = it },
                 {
-                    Color(
-                        SRConfig.settings.carry.clientHighlight.colorRed.coerceIn(0, 255),
-                        SRConfig.settings.carry.clientHighlight.colorGreen.coerceIn(0, 255),
-                        SRConfig.settings.carry.clientHighlight.colorBlue.coerceIn(0, 255),
-                        SRConfig.settings.carry.clientHighlight.colorAlpha.coerceIn(0, 255)
+                    HighlightUtil.clampedColor(
+                        SRConfig.settings.carry.clientHighlight.colorRed,
+                        SRConfig.settings.carry.clientHighlight.colorGreen,
+                        SRConfig.settings.carry.clientHighlight.colorBlue,
+                        SRConfig.settings.carry.clientHighlight.colorAlpha
                     )
                 },
                 { c ->
@@ -388,11 +413,11 @@ object SRConfigGui {
                 { SRConfig.settings.carry.bossHighlight.enabled },
                 { SRConfig.settings.carry.bossHighlight.enabled = it },
                 {
-                    Color(
-                        SRConfig.settings.carry.bossHighlight.colorRed.coerceIn(0, 255),
-                        SRConfig.settings.carry.bossHighlight.colorGreen.coerceIn(0, 255),
-                        SRConfig.settings.carry.bossHighlight.colorBlue.coerceIn(0, 255),
-                        SRConfig.settings.carry.bossHighlight.colorAlpha.coerceIn(0, 255)
+                    HighlightUtil.clampedColor(
+                        SRConfig.settings.carry.bossHighlight.colorRed,
+                        SRConfig.settings.carry.bossHighlight.colorGreen,
+                        SRConfig.settings.carry.bossHighlight.colorBlue,
+                        SRConfig.settings.carry.bossHighlight.colorAlpha
                     )
                 },
                 { c ->
@@ -408,11 +433,11 @@ object SRConfigGui {
                 { SRConfig.settings.carry.minibossHighlight.enabled },
                 { SRConfig.settings.carry.minibossHighlight.enabled = it },
                 {
-                    Color(
-                        SRConfig.settings.carry.minibossHighlight.colorRed.coerceIn(0, 255),
-                        SRConfig.settings.carry.minibossHighlight.colorGreen.coerceIn(0, 255),
-                        SRConfig.settings.carry.minibossHighlight.colorBlue.coerceIn(0, 255),
-                        SRConfig.settings.carry.minibossHighlight.colorAlpha.coerceIn(0, 255)
+                    HighlightUtil.clampedColor(
+                        SRConfig.settings.carry.minibossHighlight.colorRed,
+                        SRConfig.settings.carry.minibossHighlight.colorGreen,
+                        SRConfig.settings.carry.minibossHighlight.colorBlue,
+                        SRConfig.settings.carry.minibossHighlight.colorAlpha
                     )
                 },
                 { c ->

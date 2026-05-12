@@ -21,17 +21,8 @@ object CarryHighlightRenderer {
     private const val MAX_SEEN_BOSSES = 200
     private val seenBossUUIDs = ConcurrentHashMap.newKeySet<java.util.UUID>()
 
-    // Hypixel SkyBlock 19 Slayer miniboss name tags used for entity matching.
-    // These are server-side name strings; kept as a set for O(1) contains() lookup in the render loop.
-    private val MINIBOSS_NAMES = setOf(
-        "Revenant Sycophant", "Revenant Champion", "Deformed Revenant",
-        "Atoned Champion", "Atoned Revenant",
-        "Tarantula Vermin", "Tarantula Beast", "Mutant Tarantula",
-        "Primordial Jockey", "Primordial Viscount",
-        "Pack Enforcer", "Sven Follower", "Sven Alpha",
-        "Voidling Devotee", "Voidling Radical", "Voidcrazed Maniac",
-        "Flare Demon", "Kindleheart Demon", "Burningsoul Demon"
-    )
+    // Hypixel SkyBlock Slayer miniboss name tags, driven by config.
+    // Set-based lookup provides O(1) contains() for entity matching in the render loop.
 
     private val clientFilledXray: RenderType by lazy { HighlightUtil.createFilledType("carry_client", true) }
     private val clientLinesXray: RenderType by lazy { HighlightUtil.createLinesType("carry_client", true) }
@@ -65,16 +56,16 @@ object CarryHighlightRenderer {
             val entities = world.entitiesForRendering()
 
             val clientPlayers = if (clientEnabled || minibossEnabled) findClientPlayers(entities) else emptyList()
-            val bossMobs = if (bossEnabled) findBossMobs(entities) else emptyList()
+            val bossArmorStands = if (bossEnabled) findBossArmorStands(entities) else emptyList()
+            val bossMobs = if (bossArmorStands.isNotEmpty()) findBossMobs(bossArmorStands, entities) else emptyList()
             val minibosses = if (minibossEnabled) findMinibosses(entities, clientPlayers, cfg.minibossMaxDistance.coerceIn(4, 32)) else emptyList()
 
             // Boss spawn notification
             if (bossEnabled && cfg.bossSpawnNotification) {
-                val currentStands = findBossArmorStands(entities)
-                if (currentStands.isEmpty()) {
+                if (bossArmorStands.isEmpty()) {
                     seenBossUUIDs.clear()
                 } else {
-                    val currentUUIDs = currentStands.map { it.uuid }.toSet()
+                    val currentUUIDs = bossArmorStands.map { it.uuid }.toSet()
                     for (uuid in currentUUIDs) {
                         if (uuid !in seenBossUUIDs) {
                             triggerBossSpawnNotification()
@@ -183,23 +174,7 @@ object CarryHighlightRenderer {
         return result
     }
 
-    private fun findBossMobs(entities: Iterable<Entity>): List<LivingEntity> {
-        if (CarryState.clients.isEmpty()) return emptyList()
-        val bossArmorStands = mutableListOf<ArmorStand>()
-
-        for (entity in entities) {
-            if (entity is ArmorStand) {
-                val name = entity.name.string
-                val idx = name.indexOf(BOSS_TAG)
-                if (idx >= 0) {
-                    val playerNameLower = name.substring(idx + BOSS_TAG.length).trim().lowercase()
-                    if (CarryState.clients.containsKey(playerNameLower)) {
-                        bossArmorStands.add(entity)
-                    }
-                }
-            }
-        }
-
+    private fun findBossMobs(bossArmorStands: List<ArmorStand>, entities: Iterable<Entity>): List<LivingEntity> {
         val result = mutableListOf<LivingEntity>()
         for (armorStand in bossArmorStands) {
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
@@ -233,7 +208,7 @@ object CarryHighlightRenderer {
         if (clientPlayers.isEmpty()) return emptyList()
         val minibossArmorStands = entities.filterIsInstance<ArmorStand>().filter { stand ->
             val name = stand.name.string
-            MINIBOSS_NAMES.any { name.contains(it, ignoreCase = true) }
+            SRConfig.settings.carry.minibossNames.any { name.contains(it, ignoreCase = true) }
         }
         if (minibossArmorStands.isEmpty()) return emptyList()
 

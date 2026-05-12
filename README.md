@@ -2,7 +2,7 @@
 
 Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, and CarryModule into a single addon.
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.4.2-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.4.3-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
 
 ---
 
@@ -13,7 +13,7 @@ Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, Par
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.4.2.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.4.3.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -46,7 +46,7 @@ Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, Par
 - Client tracking with completed / remaining counts
 - **Client Highlight** — green bounding box around client players
 - **Boss Highlight** — red bounding box around bosses spawned by clients (detects "Spawned by:" name tags)
-- **Miniboss Highlight** — orange bounding box for 19 Slayer minibosses near clients
+- **Miniboss Highlight** — orange bounding box for configurable Slayer miniboss names near clients (19 defaults, add/remove via commands)
 - **Boss Spawn Notification** — subtitle alert when a client's boss spawns (toggleable, custom text)
 - Earnings history, refund calculator, undo support
 - Auto price calculation (no player name needed when only 1 client)
@@ -117,6 +117,8 @@ All modules support **i18n** (English / 简体中文).
 |---------|-------------|
 | `/cm clear-client` | Remove all clients |
 | `/cm clear-history` | Reset earnings history |
+| `/cm add-miniboss "<name>"` | Add a miniboss name for highlighting |
+| `/cm remove-miniboss "<name>"` | Remove a miniboss name (TAB autocomplete) |
 
 </details>
 
@@ -229,7 +231,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 21  
-**Output:** `build/libs/SR-Addons-1.4.2.jar`
+**Output:** `build/libs/SR-Addons-1.4.3.jar`
 
 ---
 

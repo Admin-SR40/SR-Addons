@@ -22,6 +22,10 @@ object SRConfig {
     @Volatile
     var settings = SRConfigData()
 
+    data class GeneralConfigData(
+        var showOwnNameInThirdPerson: Boolean = true
+    )
+
     data class EntityFireConfigData(
         var hiddenFire: Boolean = false
     )
@@ -102,6 +106,15 @@ object SRConfig {
         var bossHighlight: CarryHighlightConfig = CarryHighlightConfig(colorRed = 255, colorGreen = 50, colorBlue = 50, colorAlpha = 200),
         var minibossHighlight: CarryHighlightConfig = CarryHighlightConfig(colorRed = 255, colorGreen = 165, colorBlue = 0, colorAlpha = 200),
         var minibossMaxDistance: Int = 16,
+        var minibossNames: List<String> = listOf(
+            "Revenant Sycophant", "Revenant Champion", "Deformed Revenant",
+            "Atoned Champion", "Atoned Revenant",
+            "Tarantula Vermin", "Tarantula Beast", "Mutant Tarantula",
+            "Primordial Jockey", "Primordial Viscount",
+            "Pack Enforcer", "Sven Follower", "Sven Alpha",
+            "Voidling Devotee", "Voidling Radical", "Voidcrazed Maniac",
+            "Flare Demon", "Kindleheart Demon", "Burningsoul Demon"
+        ),
         var bossSpawnNotification: Boolean = true,
         var bossSpawnNotificationText: String = "BOSS SPAWNED",
         var seeThroughWalls: Boolean = false,
@@ -123,6 +136,7 @@ object SRConfig {
     )
 
     data class SRConfigData(
+        var general: GeneralConfigData = GeneralConfigData(),
         var entityFire: EntityFireConfigData = EntityFireConfigData(),
         var partyCommands: PartyCommandsConfigData = PartyCommandsConfigData(),
         var starredMob: StarredMobConfigData = StarredMobConfigData(),

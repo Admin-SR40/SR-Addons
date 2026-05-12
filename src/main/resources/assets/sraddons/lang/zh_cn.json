@@ -322,6 +322,13 @@
   "sraddons.carry.specify_player": "你有 %s 个客户。请指定玩家名称。",
   "sraddons.carry.bool.true": "true",
   "sraddons.carry.bool.false": "false",
+  "sraddons.carry.quotes_required": "请使用双引号将名称括起来。例如：/cm add-miniboss \"Revenant Sycophant\"",
+  "sraddons.carry.miniboss_added": "已添加 Miniboss 名称 \"%s\"。",
+  "sraddons.carry.miniboss_removed": "已移除 Miniboss 名称 \"%s\"。",
+  "sraddons.carry.miniboss_not_found": "列表中未找到 Miniboss 名称 \"%s\"。",
+  "sraddons.carry.miniboss_already_exists": "Miniboss 名称 \"%s\" 已存在于列表中。",
+  "sraddons.carry.help.add_miniboss_desc": "添加一个用于高亮的 Miniboss 名称",
+  "sraddons.carry.help.remove_miniboss_desc": "从列表中移除一个 Miniboss 名称",
 
   "sraddons.gui.pc.toggle.warp": "传送",
   "sraddons.gui.pc.toggle.warp.desc": "发送队伍传送请求",
@@ -412,6 +419,13 @@
   "sraddons.gui.pc.toggle.t4.desc": "加入 Kuudra 炽热",
   "sraddons.gui.pc.toggle.t5": "T5",
   "sraddons.gui.pc.toggle.t5.desc": "加入 Kuudra 地狱",
+
+  "sraddons.gui.general": "通用",
+  "sraddons.gui.general.desc": "不适合其他分类的通用设置",
+  "sraddons.gui.general.group.display": "显示",
+  "sraddons.gui.general.group.display.desc": "与屏幕上显示内容相关的设置",
+  "sraddons.gui.general.show_own_name": "在第三人称显示自己的 Nametag",
+  "sraddons.gui.general.show_own_name.desc": "在第三人称视角下渲染自己的 Nametag",
 
   "sraddons.pc.label.cd": "倒计时"
 }
