@@ -23,7 +23,7 @@ object FunCommands {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.literal("cf")
                     .executes {
-                        if (SRConfig.settings.partyCommands.coinflip) {
+                        if (SRConfig.isCommandEnabled("coinflip")) {
                             val result = if (Random.nextBoolean()) "heads" else "tails"
                             val color = if (Random.nextBoolean()) 0xFFAA00 else 0xFFFFFF
                             respond(formatResponse(
@@ -35,7 +35,7 @@ object FunCommands {
                     })
                 builder.then(Command.literal("8ball")
                     .executes {
-                        if (SRConfig.settings.partyCommands.eightball) {
+                        if (SRConfig.isCommandEnabled("eightball")) {
                             respond(formatResponse(
                                 Component.translatable("sraddons.pc.fun.eightball.label"),
                                 Component.literal(eightBallResponses.random()).withColor(0xFF55FF)
@@ -45,7 +45,7 @@ object FunCommands {
                     })
                 builder.then(Command.literal("dice")
                     .executes {
-                        if (SRConfig.settings.partyCommands.dice) {
+                        if (SRConfig.isCommandEnabled("dice")) {
                             val roll = (1..6).random()
                             val color = when (roll) { 6 -> 0x00AA00; 5 -> 0x55FF55; 4 -> 0xFFFF55; 3 -> 0xFFAA00; else -> 0xFF5555 }
                             respond(formatResponse(
@@ -58,7 +58,7 @@ object FunCommands {
                 builder.then(Command.literal("boop")
                     .then(Command.argument("player", StringArgumentType.word())
                         .executes { ctx ->
-                            if (SRConfig.settings.partyCommands.boop) {
+                            if (SRConfig.isCommandEnabled("boop")) {
                                 val target = StringArgumentType.getString(ctx, "player")
                                 sendCommand("boop $target")
                                 respond(formatResponse(

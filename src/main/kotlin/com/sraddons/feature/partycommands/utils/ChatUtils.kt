@@ -63,4 +63,10 @@ fun respondDisabled(command: String) {
         Component.translatable("sraddons.pc.label.error"),
         Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
     ))
+    if (!SRConfig.settings.partyCommands.showResponseLocally && !SRConfig.settings.partyCommands.respondInPartyChat) {
+        modMessage(formatResponse(
+            Component.translatable("sraddons.pc.label.error"),
+            Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
+        ))
+    }
 }

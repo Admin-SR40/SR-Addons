@@ -13,16 +13,9 @@ object CountdownManager {
 
     private var currentCountdown: Countdown? = null
 
-    private val floorInstances = mapOf(
-        "F1" to "catacombs_floor_one", "F2" to "catacombs_floor_two", "F3" to "catacombs_floor_three",
-        "F4" to "catacombs_floor_four", "F5" to "catacombs_floor_five", "F6" to "catacombs_floor_six",
-        "F7" to "catacombs_floor_seven", "M1" to "master_catacombs_floor_one",
-        "M2" to "master_catacombs_floor_two", "M3" to "master_catacombs_floor_three",
-        "M4" to "master_catacombs_floor_four", "M5" to "master_catacombs_floor_five",
-        "M6" to "master_catacombs_floor_six", "M7" to "master_catacombs_floor_seven",
-        "T1" to "kuudra_normal", "T2" to "kuudra_hot", "T3" to "kuudra_burning",
-        "T4" to "kuudra_fiery", "T5" to "kuudra_infernal"
-    )
+    private const val CUSTOM_LABEL = "Custom"
+
+    private fun getInstanceId(label: String): String? = FloorData.INSTANCES[label.lowercase()]
 
     data class Countdown(
         val totalSeconds: Int,
@@ -30,15 +23,16 @@ object CountdownManager {
         var remainingSeconds: Int
     )
 
-    fun startCountdown(seconds: Int, label: String = "Custom"): Boolean {
+    fun startCountdown(seconds: Int, label: String = CUSTOM_LABEL): Boolean {
         if (seconds <= 0) return false
         currentCountdown = Countdown(seconds, label, seconds)
         val timeStr = formatTime(seconds)
-        val displayLabel = if (label == "Custom") "Custom" else label
+        val displayLabel = if (label == CUSTOM_LABEL) CUSTOM_LABEL else label
 
-        if (label == "Custom") {
+        if (label == CUSTOM_LABEL) {
             if (PartyUtils.isInParty) {
-                sendPartyChat("Countdown - $displayLabel - Started: $timeStr")
+                sendPartyChat(Component.translatable("sraddons.pc.countdown.started.party",
+                    Component.literal(timeStr), Component.literal(displayLabel)).string)
             } else {
                 modMessage(formatResponse(
                     cdLabel(),
@@ -47,9 +41,10 @@ object CountdownManager {
             }
         } else {
             if (PartyUtils.isInParty) {
-                sendPartyChat("Queued for $displayLabel - entering in $timeStr")
+                sendPartyChat(Component.translatable("sraddons.pc.countdown.party.queued",
+                    Component.literal(displayLabel), Component.literal(timeStr)).string)
                 Scheduler.schedule(CANCEL_HINT_DELAY_MS) {
-                    sendPartyChat("Type !cancel to abort the queue")
+                    sendPartyChat(Component.translatable("sraddons.pc.countdown.party.cancel_hint").string)
                 }
             } else {
                 modMessage(formatResponse(
@@ -80,15 +75,16 @@ object CountdownManager {
         if (countdown.remainingSeconds <= 0) {
             playLevelUpSound()
             if (PartyUtils.isInParty) {
-                sendPartyChat("Countdown - ${countdown.label} - Time's up!")
+                sendPartyChat(Component.translatable("sraddons.pc.countdown.times_up",
+                    Component.literal(countdown.label)).string)
             } else {
                 modMessage(formatResponse(
                     cdLabel(),
                     Component.translatable("sraddons.pc.countdown.times_up", Component.literal(countdown.label)).withColor(0x55FF55)
                 ))
             }
-            if (countdown.label != "Custom") {
-                val instanceId = floorInstances[countdown.label]
+            if (countdown.label != CUSTOM_LABEL) {
+                val instanceId = getInstanceId(countdown.label)
                 if (instanceId != null) {
                     sendCommand("joininstance $instanceId")
                     modMessage(formatResponse(
@@ -106,17 +102,18 @@ object CountdownManager {
         when {
             remaining <= 5 -> sendReminder(countdown)
             remaining == 10 -> sendReminder(countdown)
-            countdown.label != "Custom" && remaining % 30 == 0 -> sendReminder(countdown)
-            countdown.label == "Custom" -> checkCustomReminder(countdown)
+            countdown.label != CUSTOM_LABEL && remaining % 30 == 0 -> sendReminder(countdown)
+            countdown.label == CUSTOM_LABEL -> checkCustomReminder(countdown)
         }
     }
 
     private fun sendReminder(countdown: Countdown) {
         val timeStr = formatTime(countdown.remainingSeconds)
         playCountdownSound()
-        if (countdown.label == "Custom") {
+        if (countdown.label == CUSTOM_LABEL) {
             if (PartyUtils.isInParty) {
-                sendPartyChat("Countdown - Custom - $timeStr remaining")
+                sendPartyChat(Component.translatable("sraddons.pc.countdown.party.remaining",
+                    Component.literal("Custom"), Component.literal(timeStr)).string)
             } else {
                 modMessage(formatResponse(
                     cdLabel(),
@@ -130,7 +127,8 @@ object CountdownManager {
                 else -> 0xFFFF55
             }
             if (PartyUtils.isInParty) {
-                sendPartyChat("Countdown - ${countdown.label} - $timeStr remaining")
+                sendPartyChat(Component.translatable("sraddons.pc.countdown.party.remaining",
+                    Component.literal(countdown.label), Component.literal(timeStr)).string)
             } else {
                 modMessage(formatResponse(
                     cdLabel(),
@@ -171,7 +169,8 @@ object CountdownManager {
             val timeStr = formatTime(remaining)
             playCountdownSound()
             if (PartyUtils.isInParty) {
-                sendPartyChat("Countdown - Custom - $timeStr remaining")
+                sendPartyChat(Component.translatable("sraddons.pc.countdown.party.remaining",
+                    Component.literal("Custom"), Component.literal(timeStr)).string)
             } else {
                 modMessage(formatResponse(
                     cdLabel(),
@@ -243,9 +242,10 @@ object CountdownManager {
 
     fun tryCancelFromPartyChat(playerName: String): Boolean {
         val countdown = currentCountdown ?: return false
-        if (countdown.label == "Custom") return false
+        if (countdown.label == CUSTOM_LABEL) return false
         currentCountdown = null
-        sendPartyChat("Countdown cancelled by $playerName")
+        sendPartyChat(Component.translatable("sraddons.pc.countdown.cancelled_by",
+            Component.literal(playerName)).string)
         return true
     }
 

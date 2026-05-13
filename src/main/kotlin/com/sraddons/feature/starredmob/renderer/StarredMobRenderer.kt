@@ -1,6 +1,7 @@
 package com.sraddons.feature.starredmob.renderer
 
 import com.sraddons.config.SRConfig
+import com.sraddons.config.toColor
 import com.sraddons.render.HighlightUtil
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 import net.minecraft.client.Minecraft
@@ -39,12 +40,7 @@ object StarredMobRenderer {
 
             if (starredMobs.isEmpty()) return@register
 
-            val color = HighlightUtil.clampedColor(
-                SRConfig.settings.starredMob.colorRed,
-                SRConfig.settings.starredMob.colorGreen,
-                SRConfig.settings.starredMob.colorBlue,
-                SRConfig.settings.starredMob.colorAlpha
-            )
+            val color = SRConfig.settings.starredMob.toColor()
             val seeThroughWalls = SRConfig.settings.starredMob.seeThroughWalls
             val renderMode = SRConfig.settings.starredMob.renderMode.uppercase()
             val lineWidth = SRConfig.settings.starredMob.lineWidth.coerceIn(1, 10).toFloat()
@@ -59,16 +55,7 @@ object StarredMobRenderer {
             poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
             val pose = poseStack.last()
 
-            val boxes = mutableListOf<AABB>()
-            for (entity in starredMobs) {
-                if (!entity.isAlive) continue
-                try {
-                    if (entity.distanceTo(player) > maxDistance) continue
-                    boxes.add(HighlightUtil.getEntityBoundingBox(entity, partialTicks))
-                } catch (e: Exception) {
-                    LOGGER.warn("Error calculating bounding box for entity ${entity.id}", e)
-                }
-            }
+            val boxes = HighlightUtil.collectBoxes(starredMobs, player, maxDistance, partialTicks, LOGGER)
 
             if (boxes.isNotEmpty()) {
                 HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth, seeThroughWalls,
@@ -79,18 +66,17 @@ object StarredMobRenderer {
         }
     }
 
+    private val nonDigitRegex = Regex("[^0-9]")
+
     private fun isDamageNumber(name: String): Boolean {
-        val cleaned = name
-            .replace(STAR_SYMBOL, "")
-            .replace(",", "")
-            .replace(" ", "")
-            .replace(".", "")
-        return cleaned.isNotEmpty() && cleaned.all { it.isDigit() }
+        val cleaned = name.replace(STAR_SYMBOL, "").replace(nonDigitRegex, "")
+        return cleaned.isNotEmpty()
     }
 
     private fun findStarredMobs(entities: Iterable<Entity>): List<LivingEntity> {
-        val result = mutableListOf<LivingEntity>()
+        val result = LinkedHashSet<LivingEntity>()
         val starredArmorStands = mutableListOf<ArmorStand>()
+        val mobs = HighlightUtil.filterLivingMobs(entities)
 
         for (entity in entities) {
             if (entity is ArmorStand) {
@@ -100,19 +86,19 @@ object StarredMobRenderer {
                 }
             } else if (entity is LivingEntity) {
                 val name = entity.customName?.string ?: entity.name.string
-                if (name.contains(STAR_SYMBOL) && entity !in result) {
+                if (name.contains(STAR_SYMBOL)) {
                     result.add(entity)
                 }
             }
         }
 
         for (armorStand in starredArmorStands) {
-            val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
-            if (target != null && target !in result) {
+            val target = HighlightUtil.findNearestMobBelow(armorStand, mobs)
+            if (target != null) {
                 result.add(target)
             }
         }
 
-        return result
+        return result.toList()
     }
 }

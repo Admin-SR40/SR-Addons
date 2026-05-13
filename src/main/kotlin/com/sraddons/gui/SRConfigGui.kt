@@ -1,6 +1,7 @@
 package com.sraddons.gui
 
 import com.sraddons.config.SRConfig
+import com.sraddons.config.toColor
 import com.sraddons.render.HighlightUtil
 import com.sraddons.util.Scheduler
 import dev.isxander.yacl3.api.ConfigCategory
@@ -52,6 +53,14 @@ object SRConfigGui {
                             .controller(TickBoxControllerBuilder::create)
                             .build()
                     )
+                    .option(
+                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                            .name(Component.translatable("sraddons.gui.general.remove_separator"))
+                            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.remove_separator.desc")))
+                            .binding(true, { SRConfig.settings.general.removeSeparator }, { SRConfig.settings.general.removeSeparator = it })
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                    )
                     .build()
             )
             .build()
@@ -83,67 +92,36 @@ object SRConfigGui {
 
     // ========== PartyCommands Category ==========
 
+    private data class CommandToggleGroup(
+        val nameKey: String, val descKey: String, val commands: List<String>
+    )
+
+    private val PC_TOGGLE_GROUPS = listOf(
+        CommandToggleGroup("sraddons.gui.pc.group.party_mgmt", "sraddons.gui.pc.group.party_mgmt.desc",
+            listOf("warp", "allinvite", "kick", "kickoffline", "kickall", "promote", "demote", "transfer", "disband", "invite", "leave")),
+        CommandToggleGroup("sraddons.gui.pc.group.queue.f", "sraddons.gui.pc.group.queue.f.desc",
+            listOf("f1", "f2", "f3", "f4", "f5", "f6", "f7")),
+        CommandToggleGroup("sraddons.gui.pc.group.queue.m", "sraddons.gui.pc.group.queue.m.desc",
+            listOf("m1", "m2", "m3", "m4", "m5", "m6", "m7")),
+        CommandToggleGroup("sraddons.gui.pc.group.queue.t", "sraddons.gui.pc.group.queue.t.desc",
+            listOf("t1", "t2", "t3", "t4", "t5")),
+        CommandToggleGroup("sraddons.gui.pc.group.info", "sraddons.gui.pc.group.info.desc",
+            listOf("ping", "tps", "fps", "time", "location", "coords", "holding", "status", "countdown")),
+        CommandToggleGroup("sraddons.gui.pc.group.fun", "sraddons.gui.pc.group.fun.desc",
+            listOf("coinflip", "8ball", "dice", "boop"))
+    )
+
     private fun createPartyCommandsCategory(): ConfigCategory {
         return ConfigCategory.createBuilder()
             .name(Component.translatable("sraddons.gui.partycommands"))
             .tooltip(Component.translatable("sraddons.gui.partycommands.desc"))
             .group(createPCBasicSettingsGroup())
             .group(createPCResponseGroup())
-            .group(createPCToggleGroup("sraddons.gui.pc.group.party_mgmt", "sraddons.gui.pc.group.party_mgmt.desc", listOf(
-                "warp" to OptBinding({ SRConfig.settings.partyCommands.warp }, { SRConfig.settings.partyCommands.warp = it }),
-                "allinvite" to OptBinding({ SRConfig.settings.partyCommands.allinvite }, { SRConfig.settings.partyCommands.allinvite = it }),
-                "kick" to OptBinding({ SRConfig.settings.partyCommands.kick }, { SRConfig.settings.partyCommands.kick = it }),
-                "kickoffline" to OptBinding({ SRConfig.settings.partyCommands.kickoffline }, { SRConfig.settings.partyCommands.kickoffline = it }),
-                "kickall" to OptBinding({ SRConfig.settings.partyCommands.kickall }, { SRConfig.settings.partyCommands.kickall = it }),
-                "promote" to OptBinding({ SRConfig.settings.partyCommands.promote }, { SRConfig.settings.partyCommands.promote = it }),
-                "demote" to OptBinding({ SRConfig.settings.partyCommands.demote }, { SRConfig.settings.partyCommands.demote = it }),
-                "transfer" to OptBinding({ SRConfig.settings.partyCommands.transfer }, { SRConfig.settings.partyCommands.transfer = it }),
-                "disband" to OptBinding({ SRConfig.settings.partyCommands.disband }, { SRConfig.settings.partyCommands.disband = it }),
-                "invite" to OptBinding({ SRConfig.settings.partyCommands.invite }, { SRConfig.settings.partyCommands.invite = it }),
-                "leave" to OptBinding({ SRConfig.settings.partyCommands.leave }, { SRConfig.settings.partyCommands.leave = it })
-            )))
-            .group(createPCToggleGroup("sraddons.gui.pc.group.queue.f", "sraddons.gui.pc.group.queue.f.desc", listOf(
-                "f1" to OptBinding({ SRConfig.settings.partyCommands.queueF1 }, { SRConfig.settings.partyCommands.queueF1 = it }),
-                "f2" to OptBinding({ SRConfig.settings.partyCommands.queueF2 }, { SRConfig.settings.partyCommands.queueF2 = it }),
-                "f3" to OptBinding({ SRConfig.settings.partyCommands.queueF3 }, { SRConfig.settings.partyCommands.queueF3 = it }),
-                "f4" to OptBinding({ SRConfig.settings.partyCommands.queueF4 }, { SRConfig.settings.partyCommands.queueF4 = it }),
-                "f5" to OptBinding({ SRConfig.settings.partyCommands.queueF5 }, { SRConfig.settings.partyCommands.queueF5 = it }),
-                "f6" to OptBinding({ SRConfig.settings.partyCommands.queueF6 }, { SRConfig.settings.partyCommands.queueF6 = it }),
-                "f7" to OptBinding({ SRConfig.settings.partyCommands.queueF7 }, { SRConfig.settings.partyCommands.queueF7 = it })
-            )))
-            .group(createPCToggleGroup("sraddons.gui.pc.group.queue.m", "sraddons.gui.pc.group.queue.m.desc", listOf(
-                "m1" to OptBinding({ SRConfig.settings.partyCommands.queueM1 }, { SRConfig.settings.partyCommands.queueM1 = it }),
-                "m2" to OptBinding({ SRConfig.settings.partyCommands.queueM2 }, { SRConfig.settings.partyCommands.queueM2 = it }),
-                "m3" to OptBinding({ SRConfig.settings.partyCommands.queueM3 }, { SRConfig.settings.partyCommands.queueM3 = it }),
-                "m4" to OptBinding({ SRConfig.settings.partyCommands.queueM4 }, { SRConfig.settings.partyCommands.queueM4 = it }),
-                "m5" to OptBinding({ SRConfig.settings.partyCommands.queueM5 }, { SRConfig.settings.partyCommands.queueM5 = it }),
-                "m6" to OptBinding({ SRConfig.settings.partyCommands.queueM6 }, { SRConfig.settings.partyCommands.queueM6 = it }),
-                "m7" to OptBinding({ SRConfig.settings.partyCommands.queueM7 }, { SRConfig.settings.partyCommands.queueM7 = it })
-            )))
-            .group(createPCToggleGroup("sraddons.gui.pc.group.queue.t", "sraddons.gui.pc.group.queue.t.desc", listOf(
-                "t1" to OptBinding({ SRConfig.settings.partyCommands.queueT1 }, { SRConfig.settings.partyCommands.queueT1 = it }),
-                "t2" to OptBinding({ SRConfig.settings.partyCommands.queueT2 }, { SRConfig.settings.partyCommands.queueT2 = it }),
-                "t3" to OptBinding({ SRConfig.settings.partyCommands.queueT3 }, { SRConfig.settings.partyCommands.queueT3 = it }),
-                "t4" to OptBinding({ SRConfig.settings.partyCommands.queueT4 }, { SRConfig.settings.partyCommands.queueT4 = it }),
-                "t5" to OptBinding({ SRConfig.settings.partyCommands.queueT5 }, { SRConfig.settings.partyCommands.queueT5 = it })
-            )))
-            .group(createPCToggleGroup("sraddons.gui.pc.group.info", "sraddons.gui.pc.group.info.desc", listOf(
-                "ping" to OptBinding({ SRConfig.settings.partyCommands.ping }, { SRConfig.settings.partyCommands.ping = it }),
-                "tps" to OptBinding({ SRConfig.settings.partyCommands.tps }, { SRConfig.settings.partyCommands.tps = it }),
-                "fps" to OptBinding({ SRConfig.settings.partyCommands.fps }, { SRConfig.settings.partyCommands.fps = it }),
-                "time" to OptBinding({ SRConfig.settings.partyCommands.time }, { SRConfig.settings.partyCommands.time = it }),
-                "location" to OptBinding({ SRConfig.settings.partyCommands.location }, { SRConfig.settings.partyCommands.location = it }),
-                "coords" to OptBinding({ SRConfig.settings.partyCommands.coords }, { SRConfig.settings.partyCommands.coords = it }),
-                "holding" to OptBinding({ SRConfig.settings.partyCommands.holding }, { SRConfig.settings.partyCommands.holding = it }),
-                "status" to OptBinding({ SRConfig.settings.partyCommands.status }, { SRConfig.settings.partyCommands.status = it }),
-                "countdown" to OptBinding({ SRConfig.settings.partyCommands.countdown }, { SRConfig.settings.partyCommands.countdown = it })
-            )))
-            .group(createPCToggleGroup("sraddons.gui.pc.group.fun", "sraddons.gui.pc.group.fun.desc", listOf(
-                "coinflip" to OptBinding({ SRConfig.settings.partyCommands.coinflip }, { SRConfig.settings.partyCommands.coinflip = it }),
-                "8ball" to OptBinding({ SRConfig.settings.partyCommands.eightball }, { SRConfig.settings.partyCommands.eightball = it }),
-                "dice" to OptBinding({ SRConfig.settings.partyCommands.dice }, { SRConfig.settings.partyCommands.dice = it }),
-                "boop" to OptBinding({ SRConfig.settings.partyCommands.boop }, { SRConfig.settings.partyCommands.boop = it })
-            )))
+            .also { category ->
+                PC_TOGGLE_GROUPS.forEach { group ->
+                    category.group(createPCToggleGroup(group))
+                }
+            }
             .group(createPCNoteGroup())
             .build()
     }
@@ -195,14 +173,6 @@ object SRConfigGui {
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.pc.remove_separator"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.pc.remove_separator.desc")))
-                    .binding(true, { SRConfig.settings.partyCommands.removeSeparator }, { SRConfig.settings.partyCommands.removeSeparator = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
                     .name(Component.translatable("sraddons.gui.pc.auto_reply_mod"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.pc.auto_reply_mod.desc")))
                     .binding(true, { SRConfig.settings.partyCommands.mod }, { SRConfig.settings.partyCommands.mod = it })
@@ -212,18 +182,21 @@ object SRConfigGui {
             .build()
     }
 
-    private fun createPCToggleGroup(nameKey: String, descKey: String, toggles: List<Pair<String, OptBinding<Boolean>>>): OptionGroup {
+    private fun createPCToggleGroup(group: CommandToggleGroup): OptionGroup {
         val groupBuilder = OptionGroup.createBuilder()
-            .name(Component.translatable(nameKey))
-            .description(OptionDescription.of(Component.translatable(descKey)))
+            .name(Component.translatable(group.nameKey))
+            .description(OptionDescription.of(Component.translatable(group.descKey)))
             .collapsed(true)
 
-        toggles.forEach { (cmdKey, binding) ->
+        group.commands.forEach { cmd ->
             groupBuilder.option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.pc.toggle.$cmdKey"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.pc.toggle.$cmdKey.desc")))
-                    .binding(true, binding.getter, binding.setter)
+                    .name(Component.translatable("sraddons.gui.pc.toggle.$cmd"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.pc.toggle.$cmd.desc")))
+                    .binding(true,
+                        { SRConfig.isCommandEnabled(cmd) },
+                        { enabled -> if (enabled) SRConfig.settings.partyCommands.disabledCommands.remove(cmd) else SRConfig.settings.partyCommands.disabledCommands.add(cmd) }
+                    )
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
@@ -312,12 +285,7 @@ object SRConfigGui {
                     .binding(
                         Color(255, 255, 0, 200),
                         {
-                            HighlightUtil.clampedColor(
-                                SRConfig.settings.starredMob.colorRed,
-                                SRConfig.settings.starredMob.colorGreen,
-                                SRConfig.settings.starredMob.colorBlue,
-                                SRConfig.settings.starredMob.colorAlpha
-                            )
+                            SRConfig.settings.starredMob.toColor()
                         },
                         {
                             SRConfig.settings.starredMob.colorRed = it.red
@@ -393,12 +361,7 @@ object SRConfigGui {
                 { SRConfig.settings.carry.clientHighlight.enabled },
                 { SRConfig.settings.carry.clientHighlight.enabled = it },
                 {
-                    HighlightUtil.clampedColor(
-                        SRConfig.settings.carry.clientHighlight.colorRed,
-                        SRConfig.settings.carry.clientHighlight.colorGreen,
-                        SRConfig.settings.carry.clientHighlight.colorBlue,
-                        SRConfig.settings.carry.clientHighlight.colorAlpha
-                    )
+                    SRConfig.settings.carry.clientHighlight.toColor()
                 },
                 { c ->
                     SRConfig.settings.carry.clientHighlight.colorRed = c.red
@@ -413,12 +376,7 @@ object SRConfigGui {
                 { SRConfig.settings.carry.bossHighlight.enabled },
                 { SRConfig.settings.carry.bossHighlight.enabled = it },
                 {
-                    HighlightUtil.clampedColor(
-                        SRConfig.settings.carry.bossHighlight.colorRed,
-                        SRConfig.settings.carry.bossHighlight.colorGreen,
-                        SRConfig.settings.carry.bossHighlight.colorBlue,
-                        SRConfig.settings.carry.bossHighlight.colorAlpha
-                    )
+                    SRConfig.settings.carry.bossHighlight.toColor()
                 },
                 { c ->
                     SRConfig.settings.carry.bossHighlight.colorRed = c.red
@@ -433,12 +391,7 @@ object SRConfigGui {
                 { SRConfig.settings.carry.minibossHighlight.enabled },
                 { SRConfig.settings.carry.minibossHighlight.enabled = it },
                 {
-                    HighlightUtil.clampedColor(
-                        SRConfig.settings.carry.minibossHighlight.colorRed,
-                        SRConfig.settings.carry.minibossHighlight.colorGreen,
-                        SRConfig.settings.carry.minibossHighlight.colorBlue,
-                        SRConfig.settings.carry.minibossHighlight.colorAlpha
-                    )
+                    SRConfig.settings.carry.minibossHighlight.toColor()
                 },
                 { c ->
                     SRConfig.settings.carry.minibossHighlight.colorRed = c.red
@@ -623,8 +576,6 @@ object SRConfigGui {
     }
 
     // ========== Utility ==========
-
-    data class OptBinding<T>(val getter: () -> T, val setter: (T) -> Unit)
 
     fun open() {
         val mc = Minecraft.getInstance()

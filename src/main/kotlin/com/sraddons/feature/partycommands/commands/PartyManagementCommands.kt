@@ -1,6 +1,7 @@
 package com.sraddons.feature.partycommands.commands
 
 import com.mojang.brigadier.arguments.StringArgumentType
+import com.mojang.brigadier.suggestion.SuggestionProvider
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.utils.*
@@ -16,11 +17,19 @@ object PartyManagementCommands {
     private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
     private fun error(key: String, vararg args: Any) = Component.translatable("sraddons.pc.error.$key", *args).withColor(0xFF5555)
 
+    private val suggestMembers = SuggestionProvider<SharedSuggestionProvider> { _, builder ->
+        val myName = mc.player?.name?.string ?: ""
+        PartyUtils.getMembers()
+            .filter { !it.equals(myName, ignoreCase = true) }
+            .forEach { builder.suggest(it) }
+        builder.buildFuture()
+    }
+
     fun register() {
         Commands.add(object : Command("warp", "Warp party members", "w") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.warp) {
+                    if (SRConfig.isCommandEnabled("warp")) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("party warp")
                             respond(formatResponse(label("warp"), Component.translatable("sraddons.pc.warp.sent").withColor(0x55FF55)))
@@ -34,7 +43,7 @@ object PartyManagementCommands {
         Commands.add(object : Command("allinvite", "Enable all invite", "allinv") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.allinvite) {
+                    if (SRConfig.isCommandEnabled("allinvite")) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("party settings allinvite")
                             respond(formatResponse(label("all_invite"), Component.translatable("sraddons.pc.allinvite.enabled").withColor(0x55FF55)))
@@ -48,14 +57,7 @@ object PartyManagementCommands {
         Commands.add(object : Command("transfer", "Transfer party leader", "pt") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.argument("player", StringArgumentType.word())
-                    .suggests { _, suggestionsBuilder ->
-                        val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.getMembers()
-                            .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
-                            .distinct()
-                            .forEach { suggestionsBuilder.suggest(it) }
-                        suggestionsBuilder.buildFuture()
-                    }
+                    .suggests(suggestMembers)
                     .executes { ctx ->
                         if (!PartyUtils.isInParty) {
                             respond(formatResponse(label("error"), error("not_in_party")))
@@ -77,16 +79,9 @@ object PartyManagementCommands {
         Commands.add(object : Command("promote", "Promote member") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.argument("player", StringArgumentType.word())
-                    .suggests { _, suggestionsBuilder ->
-                        val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.getMembers()
-                            .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
-                            .distinct()
-                            .forEach { suggestionsBuilder.suggest(it) }
-                        suggestionsBuilder.buildFuture()
-                    }
+                    .suggests(suggestMembers)
                     .executes { ctx ->
-                        if (SRConfig.settings.partyCommands.promote) {
+                        if (SRConfig.isCommandEnabled("promote")) {
                             if (PartyUtils.isLeader()) {
                                 val input = StringArgumentType.getString(ctx, "player")
                                 val target = PartyUtils.findMember(input)
@@ -97,7 +92,7 @@ object PartyManagementCommands {
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.promote) {
+                    if (SRConfig.isCommandEnabled("promote")) {
                         respond(formatResponse(label("usage"), Component.literal("§c!promote <player>")))
                     } else { respondDisabled("promote") }
                     Command.SINGLE_SUCCESS
@@ -108,16 +103,9 @@ object PartyManagementCommands {
         Commands.add(object : Command("demote", "Demote member") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.argument("player", StringArgumentType.word())
-                    .suggests { _, suggestionsBuilder ->
-                        val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.getMembers()
-                            .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
-                            .distinct()
-                            .forEach { suggestionsBuilder.suggest(it) }
-                        suggestionsBuilder.buildFuture()
-                    }
+                    .suggests(suggestMembers)
                     .executes { ctx ->
-                        if (SRConfig.settings.partyCommands.demote) {
+                        if (SRConfig.isCommandEnabled("demote")) {
                             if (PartyUtils.isLeader()) {
                                 val input = StringArgumentType.getString(ctx, "player")
                                 val target = PartyUtils.findMember(input)
@@ -128,7 +116,7 @@ object PartyManagementCommands {
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.demote) {
+                    if (SRConfig.isCommandEnabled("demote")) {
                         respond(formatResponse(label("usage"), Component.literal("§c!demote <player>")))
                     } else { respondDisabled("demote") }
                     Command.SINGLE_SUCCESS
@@ -139,7 +127,7 @@ object PartyManagementCommands {
         Commands.add(object : Command("disband", "Disband party") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.disband) {
+                    if (SRConfig.isCommandEnabled("disband")) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("p disband")
                             modMessage(formatResponse(label("disband"), Component.translatable("sraddons.pc.disband.done").withColor(0x55FF55)))
@@ -153,7 +141,7 @@ object PartyManagementCommands {
         Commands.add(object : Command("leave", "Leave party") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.leave) {
+                    if (SRConfig.isCommandEnabled("leave")) {
                         sendCommand("p leave")
                         modMessage(formatResponse(label("leave"), Component.translatable("sraddons.pc.leave.done").withColor(0x55FF55)))
                     } else { respondDisabled("leave") }
@@ -165,17 +153,10 @@ object PartyManagementCommands {
         Commands.add(object : Command("kick", "Kick member", "k") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.argument("player", StringArgumentType.word())
-                    .suggests { _, suggestionsBuilder ->
-                        val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.getMembers()
-                            .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
-                            .distinct()
-                            .forEach { suggestionsBuilder.suggest(it) }
-                        suggestionsBuilder.buildFuture()
-                    }
+                    .suggests(suggestMembers)
                     .then(Command.argument("reason", StringArgumentType.greedyString())
                         .executes { ctx ->
-                            if (SRConfig.settings.partyCommands.kick) {
+                            if (SRConfig.isCommandEnabled("kick")) {
                                 if (PartyUtils.isLeader()) {
                                     val input = StringArgumentType.getString(ctx, "player")
                                     val target = PartyUtils.findMember(input)
@@ -190,7 +171,7 @@ object PartyManagementCommands {
                             Command.SINGLE_SUCCESS
                         })
                     .executes { ctx ->
-                        if (SRConfig.settings.partyCommands.kick) {
+                        if (SRConfig.isCommandEnabled("kick")) {
                             if (PartyUtils.isLeader()) {
                                 val input = StringArgumentType.getString(ctx, "player")
                                 val target = PartyUtils.findMember(input)
@@ -210,7 +191,7 @@ object PartyManagementCommands {
         Commands.add(object : Command("kickoffline", "Kick offline members") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.kickoffline) {
+                    if (SRConfig.isCommandEnabled("kickoffline")) {
                         if (PartyUtils.isLeader()) {
                             sendCommand("p kickoffline")
                             respond(formatResponse(label("kickoffline"), Component.translatable("sraddons.pc.kickoffline.done").withColor(0x55FF55)))
@@ -224,16 +205,9 @@ object PartyManagementCommands {
         Commands.add(object : Command("kickall", "Kick all members except specified") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.argument("exceptions", StringArgumentType.greedyString())
-                    .suggests { _, suggestionsBuilder ->
-                        val myName = mc.player?.name?.string ?: ""
-                        PartyUtils.getMembers()
-                            .filter { val cleanMember = it.replace("\u25cf", "").trim(); !cleanMember.equals(myName, ignoreCase = true) }
-                            .distinct()
-                            .forEach { suggestionsBuilder.suggest(it) }
-                        suggestionsBuilder.buildFuture()
-                    }
+                    .suggests(suggestMembers)
                     .executes { ctx ->
-                        if (SRConfig.settings.partyCommands.kickall) {
+                        if (SRConfig.isCommandEnabled("kickall")) {
                             if (PartyUtils.isLeader()) {
                                 val exceptionsInput = StringArgumentType.getString(ctx, "exceptions")
                                 val exceptions = exceptionsInput.split(" ").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
@@ -254,7 +228,7 @@ object PartyManagementCommands {
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.kickall) {
+                    if (SRConfig.isCommandEnabled("kickall")) {
                         if (PartyUtils.isLeader()) {
                             val myName = mc.player?.name?.string ?: ""
                             val toKick = PartyUtils.getMembers().filter { !it.equals(myName, ignoreCase = true) }
@@ -276,7 +250,7 @@ object PartyManagementCommands {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.argument("player", StringArgumentType.word())
                     .executes { ctx ->
-                        if (SRConfig.settings.partyCommands.invite) {
+                        if (SRConfig.isCommandEnabled("invite")) {
                             val target = StringArgumentType.getString(ctx, "player")
                             sendCommand("p invite $target")
                             respond(formatResponse(label("invite"), Component.translatable("sraddons.pc.invite.success", Component.literal(target)).withColor(0x55FF55)))

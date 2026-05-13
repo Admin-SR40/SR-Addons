@@ -16,7 +16,7 @@ object GradientText {
             val b = (start.blue * (1 - percent) + end.blue * percent).toInt().coerceIn(0, 255)
 
             val color = (r shl 16) or (g shl 8) or b
-            result = result.copy().append(Component.literal(text[i].toString()).withColor(color))
+            result = result.append(Component.literal(text[i].toString()).withColor(color))
         }
 
         return result

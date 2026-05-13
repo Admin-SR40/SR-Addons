@@ -73,14 +73,13 @@ object HighlightUtil {
         return entity.boundingBox.move(x - entity.x, y - entity.y, z - entity.z)
     }
 
-    fun findNearestMobBelow(armorStand: ArmorStand, entities: Iterable<Entity>): LivingEntity? {
+    fun findNearestMobBelow(armorStand: ArmorStand, mobs: List<LivingEntity>): LivingEntity? {
         var closest: LivingEntity? = null
         var closestDist = Double.MAX_VALUE
         val asPos = armorStand.position()
 
-        for (entity in entities) {
-            if (entity !is LivingEntity || entity is ArmorStand) continue
-            if (entity == Minecraft.getInstance().player) continue
+        for (entity in mobs) {
+            if (entity is ArmorStand || entity == Minecraft.getInstance().player) continue
             val pos = entity.position()
             val dx = pos.x - asPos.x
             val dz = pos.z - asPos.z
@@ -95,6 +94,30 @@ object HighlightUtil {
             }
         }
         return closest
+    }
+
+    fun filterLivingMobs(entities: Iterable<Entity>): List<LivingEntity> {
+        return entities.filterIsInstance<LivingEntity>().filter { it !is ArmorStand && it != Minecraft.getInstance().player }
+    }
+
+    fun collectBoxes(
+        entities: List<LivingEntity>,
+        player: net.minecraft.world.entity.player.Player,
+        maxDistance: Int,
+        partialTicks: Float,
+        logger: Logger
+    ): List<AABB> {
+        val boxes = mutableListOf<AABB>()
+        for (entity in entities) {
+            if (!entity.isAlive) continue
+            try {
+                if (entity.distanceTo(player) > maxDistance) continue
+                boxes.add(getEntityBoundingBox(entity, partialTicks))
+            } catch (e: Exception) {
+                logger.warn("Error calculating bounding box for entity {}", entity.id, e)
+            }
+        }
+        return boxes
     }
 
     fun drawBoxes(
@@ -252,15 +275,8 @@ object HighlightUtil {
         r: Int, g: Int, b: Int, a: Int,
         lineWidth: Float
     ) {
-        val dx = x2 - x1
-        val dy = y2 - y1
-        val dz = z2 - z1
-        val len = sqrt(dx * dx + dy * dy + dz * dz)
-        val nx = if (len > 0) dx / len else 0f
-        val ny = if (len > 0) dy / len else 0f
-        val nz = if (len > 0) dz / len else 0f
-
-        buffer.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(nx, ny, nz).setLineWidth(lineWidth)
-        buffer.addVertex(pose, x2, y2, z2).setColor(r, g, b, a).setNormal(nx, ny, nz).setLineWidth(lineWidth)
+        // Normal unused by line shader; use constant to avoid per-line sqrt
+        buffer.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(0f, 1f, 0f).setLineWidth(lineWidth)
+        buffer.addVertex(pose, x2, y2, z2).setColor(r, g, b, a).setNormal(0f, 1f, 0f).setLineWidth(lineWidth)
     }
 }

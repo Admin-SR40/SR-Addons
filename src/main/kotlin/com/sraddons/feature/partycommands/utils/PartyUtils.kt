@@ -31,8 +31,8 @@ object PartyUtils {
     var isInParty: Boolean = false
         internal set
 
-    fun isLeader(): Boolean {
-        return partyLeader == mc.player?.name?.string
+    fun isLeader(): Boolean = synchronized(this) {
+        partyLeader == mc.player?.name?.string
     }
 
     fun addMember(playerName: String, coloredName: String? = null) {
@@ -83,8 +83,8 @@ object PartyUtils {
         }
     }
 
-    fun isOffline(playerName: String): Boolean {
-        return offlineMembers.contains(playerName.noControlCodes.lowercase())
+    fun isOffline(playerName: String): Boolean = synchronized(this) {
+        offlineMembers.contains(playerName.noControlCodes.lowercase())
     }
 
     fun removeMemberWithOffline(playerName: String) {
@@ -99,12 +99,12 @@ object PartyUtils {
         }
     }
 
-    fun findMember(partialName: String): String {
-        return members.find { it.contains(partialName, ignoreCase = true) } ?: partialName
+    fun findMember(partialName: String): String = synchronized(this) {
+        members.find { it.contains(partialName, ignoreCase = true) } ?: partialName
     }
 
-    fun getMemberWithColor(cleanName: String): String {
-        return memberColors[cleanName] ?: "\u00a77$cleanName"
+    fun getMemberWithColor(cleanName: String): String = synchronized(this) {
+        memberColors[cleanName] ?: "\u00a77$cleanName"
     }
 
     fun reset() {

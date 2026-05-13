@@ -64,8 +64,6 @@
   "sraddons.gui.pc.respond_party.desc": "Send command responses to party chat",
   "sraddons.gui.pc.respond_local": "Show Response Locally",
   "sraddons.gui.pc.respond_local.desc": "Show command responses in your own chat HUD",
-  "sraddons.gui.pc.remove_separator": "Remove Separator Lines",
-  "sraddons.gui.pc.remove_separator.desc": "Hide decorative separator lines (---) from Hypixel chat",
   "sraddons.gui.pc.auto_reply_mod": "Auto Reply to !mod",
   "sraddons.gui.pc.auto_reply_mod.desc": "Automatically reply when party members send !mod",
   "sraddons.gui.pc.note_message": "Note Message",
@@ -242,6 +240,10 @@
   "sraddons.pc.countdown.remaining": "%s remaining (%s)",
   "sraddons.pc.countdown.auto_join": "Auto-joining %s...",
   "sraddons.pc.countdown.cancelled_by": "Countdown cancelled by %s",
+  "sraddons.pc.countdown.party.started": "Countdown - %s - Started: %s",
+  "sraddons.pc.countdown.party.queued": "Queued for %s - entering in %s",
+  "sraddons.pc.countdown.party.cancel_hint": "Type !cancel to abort the queue",
+  "sraddons.pc.countdown.party.remaining": "Countdown - %s - %s remaining",
 
   "sraddons.pc.party_list.title": "Party Status",
   "sraddons.pc.party_list.leader": "Leader",
@@ -426,6 +428,8 @@
   "sraddons.gui.general.group.display.desc": "Settings related to what you see on screen",
   "sraddons.gui.general.show_own_name": "Show Own Nametag in Third Person",
   "sraddons.gui.general.show_own_name.desc": "Shows your own nametag when in third-person perspective",
+  "sraddons.gui.general.remove_separator": "Remove Separator Lines",
+  "sraddons.gui.general.remove_separator.desc": "Hide decorative separator lines (---) from Hypixel chat",
 
   "sraddons.pc.label.cd": "Countdown"
 }

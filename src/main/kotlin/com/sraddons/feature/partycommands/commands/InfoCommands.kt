@@ -22,7 +22,7 @@ object InfoCommands {
         Commands.add(object : Command("ping", "Show latency") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.ping) {
+                    if (SRConfig.isCommandEnabled("ping")) {
                         val ping = ServerUtils.currentPing
                         respond(formatResponse(
                             Component.translatable("sraddons.pc.ping.response"),
@@ -37,7 +37,7 @@ object InfoCommands {
         Commands.add(object : Command("tps", "Show server TPS") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.tps) {
+                    if (SRConfig.isCommandEnabled("tps")) {
                         val tps = ServerUtils.averageTps
                         if (tps < 0) {
                             respond(formatResponse(
@@ -59,7 +59,7 @@ object InfoCommands {
         Commands.add(object : Command("fps", "Show current FPS") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.fps) {
+                    if (SRConfig.isCommandEnabled("fps")) {
                         val fps = ServerUtils.currentFps
                         respond(formatResponse(
                             Component.translatable("sraddons.pc.fps.response"),
@@ -74,7 +74,7 @@ object InfoCommands {
         Commands.add(object : Command("time", "Show current time") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.time) {
+                    if (SRConfig.isCommandEnabled("time")) {
                         val time = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))
                         respond(formatResponse(
                             Component.translatable("sraddons.pc.time.response"),
@@ -89,7 +89,7 @@ object InfoCommands {
         Commands.add(object : Command("location", "Show current coordinates", "loc") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.location) {
+                    if (SRConfig.isCommandEnabled("location")) {
                         val pos = getPositionString()
                         respond(formatResponse(
                             Component.translatable("sraddons.pc.coords.response"),
@@ -104,7 +104,7 @@ object InfoCommands {
         Commands.add(object : Command("coords", "Show current coordinates", "co") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.coords) {
+                    if (SRConfig.isCommandEnabled("coords")) {
                         val pos = getPositionString()
                         respond(formatResponse(
                             Component.translatable("sraddons.pc.loc.response"),
@@ -119,7 +119,7 @@ object InfoCommands {
         Commands.add(object : Command("holding", "Show held item", "hold") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.holding) {
+                    if (SRConfig.isCommandEnabled("holding")) {
                         val item = mc.player?.mainHandItem?.displayName?.string ?: "Air"
                         respond(formatResponse(
                             Component.translatable("sraddons.pc.holding.response"),
@@ -134,7 +134,7 @@ object InfoCommands {
         Commands.add(object : Command("status", "Show party status") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.status) {
+                    if (SRConfig.isCommandEnabled("status")) {
                         PartyListHandler.startWaiting()
                         sendCommand("p list")
                     } else { respondDisabled("status") }
@@ -182,8 +182,6 @@ object InfoCommands {
         rawMessage(buildHelpLine("!invite <player>", "sraddons.pc.help.invite_desc"))
         rawMessage(buildHelpLine("!forward", "sraddons.pc.help.forward_desc"))
         rawMessage(buildHelpLine("!reload", "sraddons.pc.help.reload_desc"))
-        rawMessage(buildHelpLine("!gui", "sraddons.pc.help.gui_desc"))
-        rawMessage(buildHelpLine("!ver", "sraddons.pc.help.ver_desc"))
         rawMessage(Component.literal("§b§l============================"))
     }
 }

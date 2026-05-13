@@ -26,25 +26,17 @@ object CarryPriceUtil {
     }
 
     fun formatPrice(coins: Long): String {
-        return when {
-            coins >= MILLION -> {
-                val millions = coins.toDouble() / MILLION.toDouble()
-                if (millions == millions.toLong().toDouble()) {
-                    "${millions.toLong()}M"
-                } else {
-                    "${String.format("%.1f", millions)}M"
-                }
-            }
-            coins >= THOUSAND -> {
-                val thousands = coins.toDouble() / THOUSAND.toDouble()
-                if (thousands == thousands.toLong().toDouble()) {
-                    "${thousands.toLong()}K"
-                } else {
-                    "${String.format("%.1f", thousands)}K"
-                }
-            }
-            else -> coins.toString()
-        }
+        tryFormat(coins, MILLION, "M")?.let { return it }
+        tryFormat(coins, THOUSAND, "K")?.let { return it }
+        return coins.toString()
+    }
+
+    private fun tryFormat(coins: Long, divisor: Long, suffix: String): String? {
+        if (coins < divisor) return null
+        val whole = coins / divisor
+        val remainder = coins % divisor
+        if (remainder == 0L) return "${whole}$suffix"
+        return "${String.format("%.1f", coins.toDouble() / divisor)}$suffix"
     }
 
     fun effectivePrice(type: CarryType, amount: Int): Long {

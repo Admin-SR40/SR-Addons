@@ -23,7 +23,6 @@ class SRAddonsMod : ClientModInitializer {
         CarryCommand.register()
         CarryHighlightRenderer.init()
         StarredMobRenderer.init()
-        Commands.init()
         PartyCommandHandler.init()
         ChatListener.init()
         AutoPartyListUpdater.init()

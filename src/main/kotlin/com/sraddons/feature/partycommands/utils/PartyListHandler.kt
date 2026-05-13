@@ -11,7 +11,6 @@ object PartyListHandler {
     private val collectedLines = mutableListOf<String>()
     private var lastMessageWasNotInParty = false
     private var shouldInterceptNextSeparator = false
-    private var lastMessageWasSeparator = false
 
     private val notInPartyPattern = Regex("^You are not currently in a party\\.$")
     private val partySizePattern = Regex("^Party Members \\((\\d+)\\)$")
@@ -30,7 +29,6 @@ object PartyListHandler {
             waitTicks = 0
             collectedLines.clear()
             lastMessageWasNotInParty = false
-            lastMessageWasSeparator = false
         }
     }
 
@@ -41,7 +39,6 @@ object PartyListHandler {
             waitTicks = 0
             collectedLines.clear()
             lastMessageWasNotInParty = false
-            lastMessageWasSeparator = false
         }
     }
 
@@ -54,8 +51,7 @@ object PartyListHandler {
                 isWaitingForList = false
                 lastMessageWasNotInParty = false
                 silentMode = false
-                lastMessageWasSeparator = false
-                if (!wasSilent) {
+                    if (!wasSilent) {
                     modMessage(formatResponse(
                         Component.translatable("sraddons.pc.party_list.title"),
                         Component.translatable("sraddons.pc.party_list.timeout").withColor(0xFF5555)
@@ -78,22 +74,19 @@ object PartyListHandler {
 
         if (shouldInterceptNextSeparator && isSeparatorLine(trimmed)) {
             shouldInterceptNextSeparator = false
-            if (SRConfig.settings.partyCommands.removeSeparator) {
-                lastMessageWasSeparator = true
-                return true
+            if (SRConfig.settings.general.removeSeparator) {
+                    return true
             }
         }
 
         if (!isWaitingForList && isSeparatorLine(trimmed)) {
-            if (SRConfig.settings.partyCommands.removeSeparator) {
-                lastMessageWasSeparator = true
-                return true
+            if (SRConfig.settings.general.removeSeparator) {
+                    return true
             }
             return false
         }
 
         if (!isWaitingForList) {
-            lastMessageWasSeparator = false
             return false
         }
 
@@ -101,8 +94,7 @@ object PartyListHandler {
             if (lastMessageWasNotInParty) {
                 isWaitingForList = false
                 lastMessageWasNotInParty = false
-                lastMessageWasSeparator = false
-                return true
+                    return true
             }
             if (collectedLines.isEmpty()) {
                 return true
@@ -114,8 +106,7 @@ object PartyListHandler {
                     parseAndDisplay()
                 }
                 isWaitingForList = false
-                lastMessageWasSeparator = false
-                return true
+                    return true
             }
         }
 

@@ -3,9 +3,7 @@ package com.sraddons.feature.partycommands.commands
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.sraddons.config.SRConfig
-import com.sraddons.gui.SRConfigGui
 import com.sraddons.feature.partycommands.utils.*
-import com.sraddons.util.Constants
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.network.chat.Component
 
@@ -48,7 +46,7 @@ object UtilityCommands {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.then(Command.argument("time", StringArgumentType.word())
                     .executes { ctx ->
-                        if (SRConfig.settings.partyCommands.countdown) {
+                        if (SRConfig.isCommandEnabled("countdown")) {
                             val timeInput = StringArgumentType.getString(ctx, "time")
                             val seconds = CountdownManager.parseTime(timeInput)
                             if (seconds != null) {
@@ -62,7 +60,7 @@ object UtilityCommands {
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.countdown) {
+                    if (SRConfig.isCommandEnabled("countdown")) {
                         val currentCountdown = CountdownManager.getCurrentCountdown()
                         if (currentCountdown != null) {
                             val remaining = currentCountdown.remainingSeconds
@@ -89,7 +87,7 @@ object UtilityCommands {
         Commands.add(object : Command("clear", "Clear countdown") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
-                    if (SRConfig.settings.partyCommands.countdown) {
+                    if (SRConfig.isCommandEnabled("countdown")) {
                         CountdownManager.clearCountdown()
                     } else {
                         respondDisabled("clear")
@@ -138,41 +136,5 @@ object UtilityCommands {
             }
         })
 
-        Commands.add(object : Command("gui", "Open config GUI") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    SRConfigGui.open()
-                    modMessage(formatResponse(
-                        Component.literal("GUI"),
-                        Component.translatable("sraddons.pc.gui.opening").withColor(0x55FF55)
-                    ))
-                    Command.SINGLE_SUCCESS
-                }
-            }
-        })
-
-        Commands.add(object : Command("ver", "Show version info", "version") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    rawMessage(Component.literal("§b§l===== ")
-                        .append(Component.translatable("sraddons.pc.ver.title"))
-                        .append(Component.literal(" =====")))
-                    rawMessage(Component.literal("§e")
-                        .append(Component.translatable("sraddons.pc.ver.version"))
-                        .append(Component.literal(": §a${Constants.MOD_VERSION}")))
-                    rawMessage(Component.literal("§e")
-                        .append(Component.translatable("sraddons.pc.ver.features"))
-                        .append(Component.literal(": §aEntityFire, PartyCommands, StarredMob, CarryModule")))
-                    rawMessage(Component.literal("§e")
-                        .append(Component.translatable("sraddons.pc.ver.author"))
-                        .append(Component.literal(": §aAdmin_SR40")))
-                    rawMessage(Component.literal("§e")
-                        .append(Component.translatable("sraddons.pc.ver.github"))
-                        .append(Component.literal(": §aAdmin-SR40/SR-Addons")))
-                    rawMessage(Component.literal("§b§l======================="))
-                    Command.SINGLE_SUCCESS
-                }
-            }
-        })
     }
 }

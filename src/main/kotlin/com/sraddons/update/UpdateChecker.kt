@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import com.sraddons.util.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.URL
+import java.net.URI
 
 object UpdateChecker {
 
@@ -25,7 +25,7 @@ object UpdateChecker {
 
     suspend fun check(): UpdateResult = withContext(Dispatchers.IO) {
         try {
-            val url = URL("https://api.github.com/repos/${Constants.GITHUB_REPO}/releases/latest")
+            val url = URI("https://api.github.com/repos/${Constants.GITHUB_REPO}/releases/latest").toURL()
             val connection = url.openConnection()
             connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
             connection.connectTimeout = 5000

@@ -23,7 +23,8 @@ object SRConfig {
     var settings = SRConfigData()
 
     data class GeneralConfigData(
-        var showOwnNameInThirdPerson: Boolean = true
+        var showOwnNameInThirdPerson: Boolean = true,
+        var removeSeparator: Boolean = true
     )
 
     data class EntityFireConfigData(
@@ -33,64 +34,17 @@ object SRConfig {
     data class PartyCommandsConfigData(
         var enabled: Boolean = true,
         var prefix: String = "!",
-        // Info commands
-        var ping: Boolean = true,
-        var tps: Boolean = true,
-        var fps: Boolean = true,
-        var time: Boolean = true,
-        var location: Boolean = true,
-        var coords: Boolean = true,
-        var holding: Boolean = true,
-        var status: Boolean = true,
-        // Party management (require leader)
-        var warp: Boolean = true,
-        var allinvite: Boolean = true,
-        var kick: Boolean = true,
-        var kickoffline: Boolean = true,
-        var kickall: Boolean = true,
-        var promote: Boolean = true,
-        var demote: Boolean = true,
-        var transfer: Boolean = true,
-        var disband: Boolean = true,
-        // Party commands (no leader needed)
-        var leave: Boolean = true,
-        // Fun commands
-        var coinflip: Boolean = true,
-        var eightball: Boolean = true,
-        var dice: Boolean = true,
-        // Dungeon
-        var queueF1: Boolean = true,
-        var queueF2: Boolean = true,
-        var queueF3: Boolean = true,
-        var queueF4: Boolean = true,
-        var queueF5: Boolean = true,
-        var queueF6: Boolean = true,
-        var queueF7: Boolean = true,
-        var queueM1: Boolean = true,
-        var queueM2: Boolean = true,
-        var queueM3: Boolean = true,
-        var queueM4: Boolean = true,
-        var queueM5: Boolean = true,
-        var queueM6: Boolean = true,
-        var queueM7: Boolean = true,
-        var queueT1: Boolean = true,
-        var queueT2: Boolean = true,
-        var queueT3: Boolean = true,
-        var queueT4: Boolean = true,
-        var queueT5: Boolean = true,
-        // Other
-        var boop: Boolean = true,
-        var invite: Boolean = true,
-        var countdown: Boolean = true,
-        var mod: Boolean = true,
+        var disabledCommands: MutableSet<String> = mutableSetOf(),
         // Response settings
         var respondInPartyChat: Boolean = true,
         var showResponseLocally: Boolean = true,
-        var removeSeparator: Boolean = true,
         // Note & sound
         var note: String = "",
-        var countdownSound: Boolean = true
+        var countdownSound: Boolean = true,
+        var mod: Boolean = true // auto-reply to !mod
     )
+
+    fun isCommandEnabled(cmd: String): Boolean = cmd !in settings.partyCommands.disabledCommands
 
     data class CarryHighlightConfig(
         var enabled: Boolean = true,
@@ -152,10 +106,13 @@ object SRConfig {
             }
 
             try {
-                InputStreamReader(FileInputStream(CONFIG_FILE), StandardCharsets.UTF_8).use { reader ->
-                    val data = GSON.fromJson(reader, SRConfigData::class.java)
-                    if (data != null) {
-                        settings = data
+                val rawJson = CONFIG_FILE.readText(StandardCharsets.UTF_8)
+                val data = GSON.fromJson(rawJson, SRConfigData::class.java)
+                if (data != null) {
+                    settings = data
+                    if (needsPartyCommandsMigration(rawJson)) {
+                        migratePartyCommandsFromBooleans(rawJson)
+                        save()
                     }
                 }
             } catch (e: Exception) {
@@ -164,6 +121,97 @@ object SRConfig {
             }
         }
     }
+
+    private fun needsPartyCommandsMigration(rawJson: String): Boolean {
+        if (settings.partyCommands.disabledCommands.isNotEmpty()) return false
+        return LEGACY_PC_BOOLEAN_FIELDS.any { rawJson.contains("\"$it\"") }
+    }
+
+    private fun migratePartyCommandsFromBooleans(rawJson: String) {
+        try {
+            val old = GSON.fromJson(rawJson, PartyCommandsConfigDataV0::class.java)
+            val disabled = settings.partyCommands.disabledCommands
+            if (old?.ping == false) disabled.add("ping")
+            if (old?.tps == false) disabled.add("tps")
+            if (old?.fps == false) disabled.add("fps")
+            if (old?.time == false) disabled.add("time")
+            if (old?.location == false) disabled.add("location")
+            if (old?.coords == false) disabled.add("coords")
+            if (old?.holding == false) disabled.add("holding")
+            if (old?.status == false) disabled.add("status")
+            if (old?.warp == false) disabled.add("warp")
+            if (old?.allinvite == false) disabled.add("allinvite")
+            if (old?.kick == false) disabled.add("kick")
+            if (old?.kickoffline == false) disabled.add("kickoffline")
+            if (old?.kickall == false) disabled.add("kickall")
+            if (old?.promote == false) disabled.add("promote")
+            if (old?.demote == false) disabled.add("demote")
+            if (old?.transfer == false) disabled.add("transfer")
+            if (old?.disband == false) disabled.add("disband")
+            if (old?.leave == false) disabled.add("leave")
+            if (old?.coinflip == false) disabled.add("coinflip")
+            if (old?.eightball == false) disabled.add("eightball")
+            if (old?.dice == false) disabled.add("dice")
+            if (old?.queueF1 == false) disabled.add("f1")
+            if (old?.queueF2 == false) disabled.add("f2")
+            if (old?.queueF3 == false) disabled.add("f3")
+            if (old?.queueF4 == false) disabled.add("f4")
+            if (old?.queueF5 == false) disabled.add("f5")
+            if (old?.queueF6 == false) disabled.add("f6")
+            if (old?.queueF7 == false) disabled.add("f7")
+            if (old?.queueM1 == false) disabled.add("m1")
+            if (old?.queueM2 == false) disabled.add("m2")
+            if (old?.queueM3 == false) disabled.add("m3")
+            if (old?.queueM4 == false) disabled.add("m4")
+            if (old?.queueM5 == false) disabled.add("m5")
+            if (old?.queueM6 == false) disabled.add("m6")
+            if (old?.queueM7 == false) disabled.add("m7")
+            if (old?.queueT1 == false) disabled.add("t1")
+            if (old?.queueT2 == false) disabled.add("t2")
+            if (old?.queueT3 == false) disabled.add("t3")
+            if (old?.queueT4 == false) disabled.add("t4")
+            if (old?.queueT5 == false) disabled.add("t5")
+            if (old?.boop == false) disabled.add("boop")
+            if (old?.invite == false) disabled.add("invite")
+            if (old?.countdown == false) disabled.add("countdown")
+            if (old?.removeSeparator != null) settings.general.removeSeparator = old.removeSeparator!!
+        } catch (e: Exception) {
+            LOGGER.warn("Failed to migrate old PartyCommands boolean format", e)
+        }
+    }
+
+    // Legacy format used only for migration from boolean-based config
+    @Suppress("unused")
+    private data class PartyCommandsConfigDataV0(
+        val ping: Boolean? = null, val tps: Boolean? = null, val fps: Boolean? = null,
+        val time: Boolean? = null, val location: Boolean? = null, val coords: Boolean? = null,
+        val holding: Boolean? = null, val status: Boolean? = null,
+        val warp: Boolean? = null, val allinvite: Boolean? = null,
+        val kick: Boolean? = null, val kickoffline: Boolean? = null, val kickall: Boolean? = null,
+        val promote: Boolean? = null, val demote: Boolean? = null, val transfer: Boolean? = null,
+        val disband: Boolean? = null, val leave: Boolean? = null,
+        val coinflip: Boolean? = null, val eightball: Boolean? = null, val dice: Boolean? = null,
+        val queueF1: Boolean? = null, val queueF2: Boolean? = null, val queueF3: Boolean? = null,
+        val queueF4: Boolean? = null, val queueF5: Boolean? = null, val queueF6: Boolean? = null,
+        val queueF7: Boolean? = null, val queueM1: Boolean? = null, val queueM2: Boolean? = null,
+        val queueM3: Boolean? = null, val queueM4: Boolean? = null, val queueM5: Boolean? = null,
+        val queueM6: Boolean? = null, val queueM7: Boolean? = null,
+        val queueT1: Boolean? = null, val queueT2: Boolean? = null, val queueT3: Boolean? = null,
+        val queueT4: Boolean? = null, val queueT5: Boolean? = null,
+        val boop: Boolean? = null, val invite: Boolean? = null,
+        val countdown: Boolean? = null, val mod: Boolean? = null,
+        val removeSeparator: Boolean? = null
+    )
+
+    private val LEGACY_PC_BOOLEAN_FIELDS = listOf(
+            "ping", "tps", "fps", "time", "location", "coords", "holding", "status",
+            "warp", "allinvite", "kick", "kickoffline", "kickall", "promote", "demote",
+            "transfer", "disband", "leave", "coinflip", "eightball", "dice",
+            "queueF1", "queueF2", "queueF3", "queueF4", "queueF5", "queueF6", "queueF7",
+            "queueM1", "queueM2", "queueM3", "queueM4", "queueM5", "queueM6", "queueM7",
+            "queueT1", "queueT2", "queueT3", "queueT4", "queueT5",
+            "boop", "invite", "countdown"
+    )
 
     fun save() {
         synchronized(this) {
@@ -186,62 +234,38 @@ object SRConfig {
         val configDir = FabricLoader.getInstance().configDir.toFile()
         var migrated = false
 
-        // Migrate EntityFire config
-        val oldEntityFireFile = File(configDir, "entityfiremod.json")
-        if (oldEntityFireFile.exists()) {
-            try {
-                InputStreamReader(FileInputStream(oldEntityFireFile), StandardCharsets.UTF_8).use { reader ->
-                    val data = GSON.fromJson(reader, EntityFireConfigData::class.java)
-                    if (data != null) {
-                        settings.entityFire = data
-                        migrated = true
-                    }
-                }
-                val ok = oldEntityFireFile.renameTo(File(configDir, "entityfiremod.json.bak"))
-                if (!ok) LOGGER.warn("Failed to rename entityfiremod.json")
-            } catch (e: Exception) {
-                LOGGER.error("Failed to migrate EntityFire config", e)
-            }
-        }
-
-        // Migrate PartyCommands config
-        val oldPCFile = File(configDir, "partycommands.json")
-        if (oldPCFile.exists()) {
-            try {
-                InputStreamReader(FileInputStream(oldPCFile), StandardCharsets.UTF_8).use { reader ->
-                    val data = GSON.fromJson(reader, PartyCommandsConfigData::class.java)
-                    if (data != null) {
-                        settings.partyCommands = data
-                        migrated = true
-                    }
-                }
-                val ok = oldPCFile.renameTo(File(configDir, "partycommands.json.bak"))
-                if (!ok) LOGGER.warn("Failed to rename partycommands.json")
-            } catch (e: Exception) {
-                LOGGER.error("Failed to migrate PartyCommands config", e)
-            }
-        }
-
-        // Migrate StarredMob config
-        val oldSMFile = File(configDir, "starredmobhighlighter.json")
-        if (oldSMFile.exists()) {
-            try {
-                InputStreamReader(FileInputStream(oldSMFile), StandardCharsets.UTF_8).use { reader ->
-                    val data = GSON.fromJson(reader, StarredMobConfigData::class.java)
-                    if (data != null) {
-                        settings.starredMob = data
-                        migrated = true
-                    }
-                }
-                val ok = oldSMFile.renameTo(File(configDir, "starredmobhighlighter.json.bak"))
-                if (!ok) LOGGER.warn("Failed to rename starredmobhighlighter.json")
-            } catch (e: Exception) {
-                LOGGER.error("Failed to migrate StarredMob config", e)
-            }
-        }
+        migrateOldConfig<EntityFireConfigData>(File(configDir, "entityfiremod.json")) { settings.entityFire = it; migrated = true }
+        migrateOldConfig<PartyCommandsConfigData>(File(configDir, "partycommands.json")) { settings.partyCommands = it; migrated = true }
+        migrateOldConfig<StarredMobConfigData>(File(configDir, "starredmobhighlighter.json")) { settings.starredMob = it; migrated = true }
 
         if (migrated) {
             save()
         }
     }
+
+    private inline fun <reified T> migrateOldConfig(file: File, assign: (T) -> Unit) {
+        if (!file.exists()) return
+        try {
+            InputStreamReader(FileInputStream(file), StandardCharsets.UTF_8).use { reader ->
+                val data = GSON.fromJson(reader, T::class.java)
+                if (data != null) {
+                    assign(data)
+                    val bak = File(file.parentFile, "${file.name}.bak")
+                    file.renameTo(bak)
+                }
+            }
+        } catch (e: Exception) {
+            LOGGER.error("Failed to migrate ${file.name}", e)
+        }
+    }
 }
+
+fun SRConfig.CarryHighlightConfig.toColor() = java.awt.Color(
+    colorRed.coerceIn(0, 255), colorGreen.coerceIn(0, 255),
+    colorBlue.coerceIn(0, 255), colorAlpha.coerceIn(0, 255)
+)
+
+fun SRConfig.StarredMobConfigData.toColor() = java.awt.Color(
+    colorRed.coerceIn(0, 255), colorGreen.coerceIn(0, 255),
+    colorBlue.coerceIn(0, 255), colorAlpha.coerceIn(0, 255)
+)

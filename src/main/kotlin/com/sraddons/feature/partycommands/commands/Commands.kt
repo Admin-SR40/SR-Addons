@@ -6,17 +6,18 @@ import net.minecraft.client.Minecraft
 import net.minecraft.commands.SharedSuggestionProvider
 
 object Commands {
-    val COMMANDS = mutableListOf<Command>()
-    @JvmField
-    var DISPATCHER = CommandDispatcher<SharedSuggestionProvider>()
+    private val commandList = mutableListOf<Command>()
+    val commands: List<Command> get() = commandList
     private val mc = Minecraft.getInstance()
 
-    fun init() {}
+    @Volatile
+    @JvmField
+    var DISPATCHER = CommandDispatcher<SharedSuggestionProvider>()
 
     fun add(command: Command) {
         synchronized(this) {
-            COMMANDS.removeAll { it.name == command.name }
-            COMMANDS.add(command)
+            commandList.removeAll { it.name == command.name }
+            commandList.add(command)
         }
     }
 
@@ -30,7 +31,7 @@ object Commands {
     fun rebuildDispatcher() {
         synchronized(this) {
             DISPATCHER = CommandDispatcher()
-            COMMANDS.forEach { it.registerTo(DISPATCHER) }
+            commandList.forEach { it.registerTo(DISPATCHER) }
         }
     }
 }

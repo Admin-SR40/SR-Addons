@@ -29,6 +29,16 @@ object ChatListener {
     private val kuudraJoin = Regex("^Party Finder > ((?:\\[[^]]*?])? ?)?(\\w{1,16}) joined the group!")
     private val partyFinderQueued = Regex("^Party Finder > Your party has been queued in the party finder!$")
 
+    private val colorCodeRegex = Regex("§[0-9a-fk-or]")
+    private val rankStripRegex = Regex("\\[.+?]\\s*")
+    private val partySenderRegex = Regex("^Party > (?:\\[.+?] )?(.+?):")
+    private val cancelPatterns = listOf(
+        Regex("^Party > (?:\\[.+?] )?(.+?):"),
+        Regex("^Guild > (?:\\[.+?] )?(.+?):"),
+        Regex("^\\[\\d+\\] (?:\\[.+?] )?(.+?):"),
+        Regex("^(?:\\[.+?] )?(.+?):")
+    )
+
     private val disbandPatterns = listOf(
         Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) has disbanded the party!$"),
         Regex("^You have been kicked from the party by ((?:\\[[^]]*?])? ?)?(\\w{1,16})$"),
@@ -119,14 +129,13 @@ object ChatListener {
 
     private fun handleModCommand(message: String) {
         if (!SRConfig.settings.partyCommands.mod) return
-        val cleanMessage = message.replace(Regex("\u00a7[0-9a-fk-or]"), "")
+        val cleanMessage = message.replace(colorCodeRegex, "")
         if (!cleanMessage.startsWith("Party >")) return
         if (!cleanMessage.contains("!mod")) return
 
-        val pattern = Regex("^Party > (?:\\[.+?] )?(.+?):")
-        val match = pattern.find(cleanMessage) ?: return
+        val match = partySenderRegex.find(cleanMessage) ?: return
         val senderRaw = match.groupValues[1].trim()
-        val senderClean = senderRaw.replace(Regex("\\[.+?]\\s*"), "").trim()
+        val senderClean = senderRaw.replace(rankStripRegex, "").trim()
         val myName = mc.player?.name?.string ?: return
         if (senderClean.equals(myName, ignoreCase = true)) return
 
@@ -141,22 +150,14 @@ object ChatListener {
     private fun handleCancelCommand(message: String) {
         if (!message.contains("!cancel")) return
         val myName = mc.player?.name?.string ?: return
-        val cleanMessage = message.replace(Regex("\u00a7[0-9a-fk-or]"), "")
-        val patterns = listOf(
-            Regex("^Party > (?:\\[.+?] )?(.+?):"),
-            Regex("^Guild > (?:\\[.+?] )?(.+?):"),
-            Regex("^\\[\\d+\\] (?:\\[.+?] )?(.+?):"),
-            Regex("^(?:\\[.+?] )?(.+?):")
-        )
-        for (pattern in patterns) {
-            val match = pattern.find(cleanMessage)
-            if (match != null) {
-                val senderRaw = match.groupValues[1].trim()
-                val senderClean = senderRaw.replace(Regex("\\[.+?]\\s*"), "").trim()
-                if (senderClean.equals(myName, ignoreCase = true)) return
-                CountdownManager.tryCancelFromPartyChat(senderClean)
-                return
-            }
+        val cleanMessage = message.replace(colorCodeRegex, "")
+        for (pattern in cancelPatterns) {
+            val match = pattern.find(cleanMessage) ?: continue
+            val senderRaw = match.groupValues[1].trim()
+            val senderClean = senderRaw.replace(rankStripRegex, "").trim()
+            if (senderClean.equals(myName, ignoreCase = true)) return
+            CountdownManager.tryCancelFromPartyChat(senderClean)
+            return
         }
     }
 }

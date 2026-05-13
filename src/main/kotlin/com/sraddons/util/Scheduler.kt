@@ -12,7 +12,11 @@ object Scheduler {
     }
 
     fun schedule(delayMs: Long, action: () -> Unit) {
-        executor.schedule(action, delayMs, TimeUnit.MILLISECONDS)
+        executor.schedule({
+            try { action() } catch (e: Exception) {
+                org.apache.logging.log4j.LogManager.getLogger("SR-Addons-Scheduler").error("Scheduled task failed", e)
+            }
+        }, delayMs, TimeUnit.MILLISECONDS)
     }
 
     fun <T> scheduleStaggered(items: List<T>, delayMs: Long, action: (T) -> Unit) {

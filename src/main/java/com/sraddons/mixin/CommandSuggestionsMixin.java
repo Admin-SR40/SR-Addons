@@ -72,7 +72,7 @@ public abstract class CommandSuggestionsMixin {
                         );
                     }
                 }
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
         }
     }
 
@@ -122,7 +122,7 @@ public abstract class CommandSuggestionsMixin {
                 this.pendingSuggestions.thenRun(() -> {
                     if (this.pendingSuggestions.isDone() && this.allowSuggestions) {
                         if (this.currentParse != null && this.currentParse.getReader().getString().equals(value)) {
-                            ((CommandSuggestions) (Object) this).showSuggestions(false);
+                            this.showSuggestions(false);
                         }
                     }
                 });

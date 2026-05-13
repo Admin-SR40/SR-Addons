@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.suggestion.SuggestionProvider
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.utils.sendPartyChat
-import com.sraddons.util.Constants
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
@@ -24,14 +23,14 @@ object CarryCommand {
             }
 
             root.then(addTypeNode())
-                .then(addNode())
+                .then(addClientNode())
                 .then(setPriceNode())
                 .then(setBulkPriceNode())
                 .then(setAmountNode())
                 .then(addAmountNode())
                 .then(removeAmountNode())
                 .then(calcPriceNode())
-                .then(removeNode())
+                .then(removeClientNode())
                 .then(removeTypeNode())
                 .then(listClientNode())
                 .then(listTypeNode())
@@ -47,17 +46,6 @@ object CarryCommand {
         }
     }
 
-    private fun enabledCheck(source: FabricClientCommandSource): Boolean {
-        if (!SRConfig.settings.carry.enabled) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.disabled").withColor(0xFF5555))
-            )
-            return false
-        }
-        return true
-    }
-
     private val suggestTypes = SuggestionProvider<FabricClientCommandSource> { _, builder ->
         CarryState.types.values.forEach { builder.suggest(it.name) }
         builder.buildFuture()
@@ -69,7 +57,7 @@ object CarryCommand {
     }
 
     private val suggestMinibossNames = SuggestionProvider<FabricClientCommandSource> { _, builder ->
-        SRConfig.settings.carry.minibossNames.forEach { builder.suggest("\"$it\"") }
+        CarryState.minibossNames.forEach { builder.suggest("\"$it\"") }
         builder.buildFuture()
     }
 
@@ -79,10 +67,7 @@ object CarryCommand {
     }
 
     private fun showHelp(source: FabricClientCommandSource) {
-        source.sendFeedback(
-            Constants.makePrefix().copy()
-                .append(Component.translatable("sraddons.carry.help.title").withColor(0xFFFFFF))
-        )
+        source.feedback(Component.translatable("sraddons.carry.help.title").withColor(0xFFFFFF))
         source.sendFeedback(buildHelpLine("§7/cm add-type §b<type> §8- §f", "sraddons.carry.help.add_type_desc"))
         source.sendFeedback(buildHelpLine("§7/cm add §d<player> §b<type> §f<amount> §8- §f", "sraddons.carry.help.add_desc"))
         source.sendFeedback(buildHelpLine("§7/cm set-price §b<type> §6<price> §8- §f", "sraddons.carry.help.set_price_desc"))
@@ -111,32 +96,26 @@ object CarryCommand {
         .then(
             ClientCommandManager.argument("typeName", StringArgumentType.word())
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
                     CarryState.saveUndo()
                     val typeName = StringArgumentType.getString(context, "typeName")
                     val key = typeName.lowercase()
                     if (CarryState.types.containsKey(key)) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.type_already_exists",
+                        context.source.feedback(Component.translatable("sraddons.carry.type_already_exists",
                                     Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
                     CarryState.types[key] = CarryType(name = typeName)
                     CarryState.saveData()
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.type_added",
+                    context.source.feedback(Component.translatable("sraddons.carry.type_added",
                                 Component.literal(typeName).withColor(0x55FFFF)).withColor(0x55FF55))
-                    )
                     1
                 }
         )
 
-    // ---- /cm add <playerName> <typeName> <amount> ----
+    // ---- /cm add-client <playerName> <typeName> <amount> ----
 
-    private fun addNode() = ClientCommandManager.literal("add")
+    private fun addClientNode() = ClientCommandManager.literal("add-client")
         .then(
             ClientCommandManager.argument("playerName", StringArgumentType.word())
                 .then(
@@ -145,7 +124,7 @@ object CarryCommand {
                         .then(
                             ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
                                 .executes { context ->
-                                    if (!enabledCheck(context.source)) return@executes 1
+                                    if (!context.source.requireEnabled()) return@executes 1
                                     CarryState.saveUndo()
                                     val playerName = StringArgumentType.getString(context, "playerName")
                                     val typeName = StringArgumentType.getString(context, "typeName")
@@ -154,19 +133,13 @@ object CarryCommand {
                                     val clientKey = playerName.lowercase()
 
                                     if (!CarryState.types.containsKey(typeKey)) {
-                                        context.source.sendFeedback(
-                                            Constants.makePrefix().copy()
-                                                .append(Component.translatable("sraddons.carry.type_not_found",
+                                        context.source.feedback(Component.translatable("sraddons.carry.type_not_found",
                                                     Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                                        )
                                         return@executes 1
                                     }
                                     if (CarryState.clients.containsKey(clientKey)) {
-                                        context.source.sendFeedback(
-                                            Constants.makePrefix().copy()
-                                                .append(Component.translatable("sraddons.carry.client_already_exists",
+                                        context.source.feedback(Component.translatable("sraddons.carry.client_already_exists",
                                                     Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                                        )
                                         return@executes 1
                                     }
                                     CarryState.clients[clientKey] = CarryClient(
@@ -175,13 +148,10 @@ object CarryCommand {
                                         amount = amount
                                     )
                                     CarryState.saveData()
-                                    context.source.sendFeedback(
-                                        Constants.makePrefix().copy()
-                                            .append(Component.translatable("sraddons.carry.client_added",
+                                    context.source.feedback(Component.translatable("sraddons.carry.client_added",
                                                 Component.literal(playerName).withColor(0xFF55FF),
                                                 Component.literal(amount.toString()).withColor(0xFFAA00),
-                                                Component.literal(typeName).withColor(0x55FFFF)
-                                            ).withColor(0x55FF55))
+                                                Component.literal(typeName).withColor(0x55FFFF).withColor(0x55FF55))
                                     )
                                     1
                                 }
@@ -198,36 +168,27 @@ object CarryCommand {
                 .then(
                     ClientCommandManager.argument("price", StringArgumentType.string())
                         .executes { context ->
-                            if (!enabledCheck(context.source)) return@executes 1
+                            if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
                             val typeName = StringArgumentType.getString(context, "typeName")
                             val priceStr = StringArgumentType.getString(context, "price")
                             val key = typeName.lowercase()
                             val type = CarryState.types[key]
                             if (type == null) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.translatable("sraddons.carry.type_not_found",
+                                context.source.feedback(Component.translatable("sraddons.carry.type_not_found",
                                             Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                                )
                                 return@executes 1
                             }
                             val parsed = CarryPriceUtil.parsePrice(priceStr)
                             if (parsed == null) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.translatable("sraddons.carry.price_invalid").withColor(0xFF5555))
-                                )
+                                context.source.feedback(Component.translatable("sraddons.carry.price_invalid").withColor(0xFF5555))
                                 return@executes 1
                             }
                             type.price = parsed
                             CarryState.saveData()
-                            context.source.sendFeedback(
-                                Constants.makePrefix().copy()
-                                    .append(Component.translatable("sraddons.carry.price_set",
+                            context.source.feedback(Component.translatable("sraddons.carry.price_set",
                                         Component.literal(type.name).withColor(0x55FFFF),
-                                        Component.literal(CarryPriceUtil.formatPrice(parsed)).withColor(0xFFAA00)
-                                    ).withColor(0x55FF55))
+                                        Component.literal(CarryPriceUtil.formatPrice(parsed)).withColor(0xFFAA00).withColor(0x55FF55))
                             )
                             1
                         }
@@ -245,7 +206,7 @@ object CarryCommand {
                         .then(
                             ClientCommandManager.argument("threshold", IntegerArgumentType.integer(1))
                                 .executes { context ->
-                                    if (!enabledCheck(context.source)) return@executes 1
+                                    if (!context.source.requireEnabled()) return@executes 1
                                     CarryState.saveUndo()
                                     val typeName = StringArgumentType.getString(context, "typeName")
                                     val bulkPriceStr = StringArgumentType.getString(context, "bulkPrice")
@@ -253,31 +214,22 @@ object CarryCommand {
                                     val key = typeName.lowercase()
                                     val type = CarryState.types[key]
                                     if (type == null) {
-                                        context.source.sendFeedback(
-                                            Constants.makePrefix().copy()
-                                                .append(Component.translatable("sraddons.carry.type_not_found",
+                                        context.source.feedback(Component.translatable("sraddons.carry.type_not_found",
                                                     Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                                        )
                                         return@executes 1
                                     }
                                     val parsed = CarryPriceUtil.parsePrice(bulkPriceStr)
                                     if (parsed == null) {
-                                        context.source.sendFeedback(
-                                            Constants.makePrefix().copy()
-                                                .append(Component.translatable("sraddons.carry.price_invalid").withColor(0xFF5555))
-                                        )
+                                        context.source.feedback(Component.translatable("sraddons.carry.price_invalid").withColor(0xFF5555))
                                         return@executes 1
                                     }
                                     type.bulkPrice = parsed
                                     type.bulkThreshold = threshold
                                     CarryState.saveData()
-                                    context.source.sendFeedback(
-                                        Constants.makePrefix().copy()
-                                            .append(Component.translatable("sraddons.carry.bulk_price_set",
+                                    context.source.feedback(Component.translatable("sraddons.carry.bulk_price_set",
                                                 Component.literal(type.name).withColor(0x55FFFF),
                                                 Component.literal(CarryPriceUtil.formatPrice(parsed)).withColor(0xFFAA00),
-                                                Component.literal(threshold.toString()).withColor(0x55FFFF)
-                                            ).withColor(0x55FF55))
+                                                Component.literal(threshold.toString()).withColor(0x55FFFF).withColor(0x55FF55))
                                     )
                                     1
                                 }
@@ -294,33 +246,24 @@ object CarryCommand {
                 .then(
                     ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
-                            if (!enabledCheck(context.source)) return@executes 1
+                            if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
                             val playerName = StringArgumentType.getString(context, "playerName")
                             val amount = IntegerArgumentType.getInteger(context, "amount")
                             val client = CarryState.clients[playerName.lowercase()]
                             if (client == null) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                             Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                                )
                                 return@executes 1
                             }
                             client.amount += amount
                             CarryState.saveData()
-                            context.source.sendFeedback(
-                                Constants.makePrefix().copy()
-                                    .append(Component.translatable("sraddons.carry.amount_added",
+                            context.source.feedback(Component.translatable("sraddons.carry.amount_added",
                                         Component.literal(amount.toString()).withColor(0xFFAA00),
-                                        Component.literal(client.playerName).withColor(0xFF55FF)
-                                    ).withColor(0x55FF55))
+                                        Component.literal(client.playerName).withColor(0xFF55FF).withColor(0x55FF55))
                             )
-                            context.source.sendFeedback(
-                                Constants.makePrefix().copy()
-                                    .append(Component.translatable("sraddons.carry.amount_total",
+                            context.source.feedback(Component.translatable("sraddons.carry.amount_total",
                                         Component.literal(client.amount.toString()).withColor(0xFFFFFF)).withColor(0xAAAAAA))
-                            )
                             1
                         }
                 )
@@ -335,17 +278,14 @@ object CarryCommand {
                 .then(
                     ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
-                            if (!enabledCheck(context.source)) return@executes 1
+                            if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
                             val playerName = StringArgumentType.getString(context, "playerName")
                             val amount = IntegerArgumentType.getInteger(context, "amount")
                             val client = CarryState.clients[playerName.lowercase()]
                             if (client == null) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                             Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                                )
                                 return@executes 1
                             }
                             val actualRemove = amount.coerceAtMost(client.amount)
@@ -354,18 +294,12 @@ object CarryCommand {
                                 client.completed = client.amount
                             }
                             CarryState.saveData()
-                            context.source.sendFeedback(
-                                Constants.makePrefix().copy()
-                                    .append(Component.translatable("sraddons.carry.amount_removed",
+                            context.source.feedback(Component.translatable("sraddons.carry.amount_removed",
                                         Component.literal(actualRemove.toString()).withColor(0xFFAA00),
-                                        Component.literal(client.playerName).withColor(0xFF55FF)
-                                    ).withColor(0x55FF55))
+                                        Component.literal(client.playerName).withColor(0xFF55FF).withColor(0x55FF55))
                             )
-                            context.source.sendFeedback(
-                                Constants.makePrefix().copy()
-                                    .append(Component.translatable("sraddons.carry.amount_total",
+                            context.source.feedback(Component.translatable("sraddons.carry.amount_total",
                                         Component.literal(client.amount.toString()).withColor(0xFFFFFF)).withColor(0xAAAAAA))
-                            )
                             1
                         }
                 )
@@ -380,17 +314,14 @@ object CarryCommand {
                 .then(
                     ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
-                            if (!enabledCheck(context.source)) return@executes 1
+                            if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
                             val playerName = StringArgumentType.getString(context, "playerName")
                             val amount = IntegerArgumentType.getInteger(context, "amount")
                             val client = CarryState.clients[playerName.lowercase()]
                             if (client == null) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                             Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                                )
                                 return@executes 1
                             }
                             client.amount = amount
@@ -399,31 +330,25 @@ object CarryCommand {
                                 client.completed = client.amount
                             }
                             CarryState.saveData()
-                            context.source.sendFeedback(
-                                Constants.makePrefix().copy()
-                                    .append(Component.translatable("sraddons.carry.amount_set",
+                            context.source.feedback(Component.translatable("sraddons.carry.amount_set",
                                         Component.literal(client.playerName).withColor(0xFF55FF),
                                         Component.literal(amount.toString()).withColor(0xFFAA00),
-                                        Component.translatable("sraddons.carry.bool.false").withColor(0xAAAAAA)
-                                    ).withColor(0x55FF55))
+                                        Component.translatable("sraddons.carry.bool.false").withColor(0xAAAAAA).withColor(0x55FF55))
                             )
                             1
                         }
                         .then(
                             ClientCommandManager.argument("useBulk", BoolArgumentType.bool())
                                 .executes { context ->
-                                    if (!enabledCheck(context.source)) return@executes 1
+                                    if (!context.source.requireEnabled()) return@executes 1
                                     CarryState.saveUndo()
                                     val playerName = StringArgumentType.getString(context, "playerName")
                                     val amount = IntegerArgumentType.getInteger(context, "amount")
                                     val useBulk = BoolArgumentType.getBool(context, "useBulk")
                                     val client = CarryState.clients[playerName.lowercase()]
                                     if (client == null) {
-                                        context.source.sendFeedback(
-                                            Constants.makePrefix().copy()
-                                                .append(Component.translatable("sraddons.carry.client_not_found",
+                                        context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                                     Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                                        )
                                         return@executes 1
                                     }
                                     client.amount = amount
@@ -433,13 +358,10 @@ object CarryCommand {
                                     }
                                     CarryState.saveData()
                                     val bulkKey = if (useBulk) "sraddons.carry.bool.true" else "sraddons.carry.bool.false"
-                                    context.source.sendFeedback(
-                                        Constants.makePrefix().copy()
-                                            .append(Component.translatable("sraddons.carry.amount_set",
+                                    context.source.feedback(Component.translatable("sraddons.carry.amount_set",
                                                 Component.literal(client.playerName).withColor(0xFF55FF),
                                                 Component.literal(amount.toString()).withColor(0xFFAA00),
-                                                Component.translatable(bulkKey).withColor(0xAAAAAA)
-                                            ).withColor(0x55FF55))
+                                                Component.translatable(bulkKey).withColor(0xAAAAAA).withColor(0x55FF55))
                                     )
                                     1
                                 }
@@ -451,7 +373,7 @@ object CarryCommand {
 
     private fun calcPriceNode() = ClientCommandManager.literal("calc-price")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             calcPriceWithDefault(context.source)
             1
         }
@@ -459,15 +381,12 @@ object CarryCommand {
             ClientCommandManager.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
                     val playerName = StringArgumentType.getString(context, "playerName")
                     val client = CarryState.clients[playerName.lowercase()]
                     if (client == null) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.client_not_found",
+                        context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                     Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
                     calcPriceForClient(context.source, client)
@@ -478,18 +397,12 @@ object CarryCommand {
     private fun calcPriceWithDefault(source: FabricClientCommandSource) {
         val clientCount = CarryState.clients.size
         if (clientCount == 0) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
-            )
+            source.feedback(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
             return
         }
         if (clientCount > 1) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.specify_player",
+            source.feedback(Component.translatable("sraddons.carry.specify_player",
                         Component.literal(clientCount.toString()).withColor(0xFFFFFF)).withColor(0xFF5555))
-            )
             return
         }
         calcPriceForClient(source, CarryState.clients.values.first())
@@ -498,63 +411,48 @@ object CarryCommand {
     private fun calcPriceForClient(source: FabricClientCommandSource, client: CarryClient) {
         val type = CarryState.types[client.typeName.lowercase()]
         if (type == null) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.type_not_found",
+            source.feedback(Component.translatable("sraddons.carry.type_not_found",
                         Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-            )
             return
         }
         val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
         val total = unitPrice * client.amount
         val usingBulk = type.bulkPrice != null && client.amount >= type.bulkThreshold
         if (usingBulk) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.calc_price.bulk",
+            source.feedback(Component.translatable("sraddons.carry.calc_price.bulk",
                         Component.literal(client.amount.toString()).withColor(0x55FFFF),
                         Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
                         Component.literal(type.bulkThreshold.toString()).withColor(0xFFFFFF),
-                        Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
-                    ).withColor(0xFFFFFF))
+                        Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00).withColor(0xFFFFFF))
             )
         } else {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.calc_price.standard",
+            source.feedback(Component.translatable("sraddons.carry.calc_price.standard",
                         Component.literal(client.amount.toString()).withColor(0x55FFFF),
                         Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
-                        Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00)
-                    ).withColor(0xFFFFFF))
+                        Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00).withColor(0xFFFFFF))
             )
         }
     }
 
-    // ---- /cm remove <playerName> ----
+    // ---- /cm remove-client <playerName> ----
 
-    private fun removeNode() = ClientCommandManager.literal("remove")
+    private fun removeClientNode() = ClientCommandManager.literal("remove-client")
         .then(
             ClientCommandManager.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
                     CarryState.saveUndo()
                     val playerName = StringArgumentType.getString(context, "playerName")
                     val removed = CarryState.clients.remove(playerName.lowercase())
                     CarryState.saveData()
                     if (removed == null) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.client_not_found",
+                        context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                     Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.client_removed",
+                    context.source.feedback(Component.translatable("sraddons.carry.client_removed",
                                 Component.literal(removed.playerName).withColor(0xFF55FF)).withColor(0x55FF55))
-                    )
                     1
                 }
         )
@@ -566,37 +464,28 @@ object CarryCommand {
             ClientCommandManager.argument("typeName", StringArgumentType.word())
                 .suggests(suggestTypes)
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
                     CarryState.saveUndo()
                     val typeName = StringArgumentType.getString(context, "typeName")
                     val key = typeName.lowercase()
                     val type = CarryState.types[key]
                     if (type == null) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.type_not_found",
+                        context.source.feedback(Component.translatable("sraddons.carry.type_not_found",
                                     Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
                     val referencingClients = CarryState.clients.values.filter {
                         it.typeName.equals(typeName, ignoreCase = true)
                     }
                     if (referencingClients.isNotEmpty()) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.type_in_use",
+                        context.source.feedback(Component.translatable("sraddons.carry.type_in_use",
                                     Component.literal(typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
                     CarryState.types.remove(key)
                     CarryState.saveData()
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.type_removed",
+                    context.source.feedback(Component.translatable("sraddons.carry.type_removed",
                                 Component.literal(typeName).withColor(0x55FFFF)).withColor(0x55FF55))
-                    )
                     1
                 }
         )
@@ -605,18 +494,12 @@ object CarryCommand {
 
     private fun listClientNode() = ClientCommandManager.literal("list-client")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             if (CarryState.clients.isEmpty()) {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFFFF55))
-                )
+                context.source.feedback(Component.translatable("sraddons.carry.client_zero").withColor(0xFFFF55))
             } else {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.client_count",
-                            Component.literal(CarryState.clients.size.toString()).withColor(0xFFFFFF)
-                        ).withColor(0xFFFFFF))
+                context.source.feedback(Component.translatable("sraddons.carry.client_count",
+                            Component.literal(CarryState.clients.size.toString()).withColor(0xFFFFFF).withColor(0xFFFFFF))
                 )
                 CarryState.clients.values.forEach { client ->
                     context.source.sendFeedback(
@@ -636,17 +519,11 @@ object CarryCommand {
 
     private fun listTypeNode() = ClientCommandManager.literal("list-type")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             if (CarryState.types.isEmpty()) {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.types_empty").withColor(0xFFFF55))
-                )
+                context.source.feedback(Component.translatable("sraddons.carry.types_empty").withColor(0xFFFF55))
             } else {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.types_available").withColor(0xFFFFFF))
-                )
+                context.source.feedback(Component.translatable("sraddons.carry.types_available").withColor(0xFFFFFF))
                 CarryState.types.values.forEach { type ->
                     val priceStr = Component.literal(CarryPriceUtil.formatPrice(type.price)).withColor(0xFFAA00)
                     val bulkStr = type.bulkPrice?.let {
@@ -668,7 +545,7 @@ object CarryCommand {
 
     private fun doneNode() = ClientCommandManager.literal("done")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             doneWithDefaultAmount(context.source, 1)
             1
         }
@@ -676,15 +553,12 @@ object CarryCommand {
             ClientCommandManager.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
                     val playerName = StringArgumentType.getString(context, "playerName")
                     val client = CarryState.clients[playerName.lowercase()]
                     if (client == null) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.client_not_found",
+                        context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                     Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
                     executeDone(context.source, 1, client)
@@ -693,16 +567,13 @@ object CarryCommand {
                 .then(
                     ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
-                            if (!enabledCheck(context.source)) return@executes 1
+                            if (!context.source.requireEnabled()) return@executes 1
                             val playerName = StringArgumentType.getString(context, "playerName")
                             val amount = IntegerArgumentType.getInteger(context, "amount")
                             val client = CarryState.clients[playerName.lowercase()]
                             if (client == null) {
-                                context.source.sendFeedback(
-                                    Constants.makePrefix().copy()
-                                        .append(Component.translatable("sraddons.carry.client_not_found",
+                                context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                             Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                                )
                                 return@executes 1
                             }
                             executeDone(context.source, amount, client)
@@ -714,18 +585,12 @@ object CarryCommand {
     private fun doneWithDefaultAmount(source: FabricClientCommandSource, amount: Int) {
         val clientCount = CarryState.clients.size
         if (clientCount == 0) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
-            )
+            source.feedback(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
             return
         }
         if (clientCount > 1) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.specify_player",
+            source.feedback(Component.translatable("sraddons.carry.specify_player",
                         Component.literal(clientCount.toString()).withColor(0xFFFFFF)).withColor(0xFF5555))
-            )
             return
         }
         val client = CarryState.clients.values.first()
@@ -736,20 +601,14 @@ object CarryCommand {
         CarryState.saveUndo()
         val type = CarryState.types[client.typeName.lowercase()]
         if (type == null) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.type_not_found",
+            source.feedback(Component.translatable("sraddons.carry.type_not_found",
                         Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-            )
             return
         }
         val remaining = client.amount - client.completed
         if (remaining <= 0) {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.no_remaining",
+            source.feedback(Component.translatable("sraddons.carry.no_remaining",
                         Component.literal(client.playerName).withColor(0xFF55FF)).withColor(0xFFFF55))
-            )
             return
         }
         val actualDone = amount.coerceAtMost(remaining)
@@ -766,24 +625,15 @@ object CarryCommand {
             CarryState.clients.remove(client.playerName.lowercase())
             CarryState.saveData()
 
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.finished").withColor(0x55FF55))
-            )
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.auto_removed",
+            source.feedback(Component.translatable("sraddons.carry.finished").withColor(0x55FF55))
+            source.feedback(Component.translatable("sraddons.carry.auto_removed",
                         Component.literal(client.playerName).withColor(0xFF55FF)).withColor(0x55FF55))
-            )
         } else {
-            source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.progress",
+            source.feedback(Component.translatable("sraddons.carry.progress",
                         Component.literal(actualDone.toString()).withColor(0x55FF55),
                         Component.literal(client.playerName).withColor(0xFF55FF),
                         Component.literal(client.completed.toString()).withColor(0x55FF55),
-                        Component.literal(client.amount.toString()).withColor(0xFFAA00)
-                    ).withColor(0xFFFFFF))
+                        Component.literal(client.amount.toString()).withColor(0xFFAA00).withColor(0xFFFFFF))
             )
         }
     }
@@ -795,54 +645,39 @@ object CarryCommand {
             ClientCommandManager.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
                     CarryState.saveUndo()
                     val playerName = StringArgumentType.getString(context, "playerName")
                     val client = CarryState.clients[playerName.lowercase()]
                     if (client == null) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.client_not_found",
+                        context.source.feedback(Component.translatable("sraddons.carry.client_not_found",
                                     Component.literal(playerName).withColor(0xFF55FF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
                     val type = CarryState.types[client.typeName.lowercase()]
                     if (type == null) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.type_not_found",
+                        context.source.feedback(Component.translatable("sraddons.carry.type_not_found",
                                     Component.literal(client.typeName).withColor(0x55FFFF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
                     val remaining = client.amount - client.completed
                     val unitPrice = CarryPriceUtil.effectivePrice(type, client.amount)
                     val refundAmount = remaining * unitPrice
 
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.refund_info",
+                    context.source.feedback(Component.translatable("sraddons.carry.refund_info",
                                 Component.literal(client.playerName).withColor(0xFF55FF),
                                 Component.literal(client.amount.toString()).withColor(0xFFAA00),
-                                Component.literal(client.completed.toString()).withColor(0x55FF55)
-                            ).withColor(0xFFFFFF))
+                                Component.literal(client.completed.toString()).withColor(0x55FF55).withColor(0xFFFFFF))
                     )
 
                     if (remaining > 0) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.refund_amount",
+                        context.source.feedback(Component.translatable("sraddons.carry.refund_amount",
                                     Component.literal(remaining.toString()).withColor(0x55FFFF),
                                     Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
-                                    Component.literal(CarryPriceUtil.formatPrice(refundAmount)).withColor(0xFFAA00)
-                                ).withColor(0xFFFFFF))
+                                    Component.literal(CarryPriceUtil.formatPrice(refundAmount)).withColor(0xFFAA00).withColor(0xFFFFFF))
                         )
                     } else {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.refund_none").withColor(0xFFFF55))
-                        )
+                        context.source.feedback(Component.translatable("sraddons.carry.refund_none").withColor(0xFFFF55))
                     }
 
                     if (client.completed > 0) {
@@ -854,15 +689,9 @@ object CarryCommand {
 
                     CarryState.clients.remove(playerName.lowercase())
                     CarryState.saveData()
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.finished").withColor(0x55FF55))
-                    )
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.auto_removed",
+                    context.source.feedback(Component.translatable("sraddons.carry.finished").withColor(0x55FF55))
+                    context.source.feedback(Component.translatable("sraddons.carry.auto_removed",
                                 Component.literal(client.playerName).withColor(0xFF55FF)).withColor(0x55FF55))
-                    )
                     1
                 }
         )
@@ -871,26 +700,17 @@ object CarryCommand {
 
     private fun statusNode() = ClientCommandManager.literal("status")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             val s = CarryState.status
             if (s.totalOrders == 0 && s.totalCarries == 0 && s.totalEarned == 0L) {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.no_orders").withColor(0xFFFF55))
-                )
+                context.source.feedback(Component.translatable("sraddons.carry.no_orders").withColor(0xFFFF55))
             } else {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.orders_summary",
+                context.source.feedback(Component.translatable("sraddons.carry.orders_summary",
                             Component.literal(s.totalOrders.toString()).withColor(0xFFAA00),
-                            Component.literal(s.totalCarries.toString()).withColor(0x55FFFF)
-                        ).withColor(0xFFFFFF))
+                            Component.literal(s.totalCarries.toString()).withColor(0x55FFFF).withColor(0xFFFFFF))
                 )
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.earnings_summary",
-                            Component.literal(CarryPriceUtil.formatPrice(s.totalEarned)).withColor(0xFFAA00)
-                        ).withColor(0xFFFFFF))
+                context.source.feedback(Component.translatable("sraddons.carry.earnings_summary",
+                            Component.literal(CarryPriceUtil.formatPrice(s.totalEarned)).withColor(0xFFAA00).withColor(0xFFFFFF))
                 )
             }
             1
@@ -900,14 +720,11 @@ object CarryCommand {
 
     private fun clearClientNode() = ClientCommandManager.literal("clear-client")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             CarryState.saveUndo()
             CarryState.clients.clear()
             CarryState.saveData()
-            context.source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.all_cleared").withColor(0xFFFF55))
-            )
+            context.source.feedback(Component.translatable("sraddons.carry.all_cleared").withColor(0xFFFF55))
             1
         }
 
@@ -915,14 +732,11 @@ object CarryCommand {
 
     private fun clearHistoryNode() = ClientCommandManager.literal("clear-history")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             CarryState.saveUndo()
             CarryState.status = CarryStatus()
             CarryState.saveHistory()
-            context.source.sendFeedback(
-                Constants.makePrefix().copy()
-                    .append(Component.translatable("sraddons.carry.history_reset").withColor(0xFFFF55))
-            )
+            context.source.feedback(Component.translatable("sraddons.carry.history_reset").withColor(0xFFFF55))
             1
         }
 
@@ -930,17 +744,11 @@ object CarryCommand {
 
     private fun undoNode() = ClientCommandManager.literal("undo")
         .executes { context ->
-            if (!enabledCheck(context.source)) return@executes 1
+            if (!context.source.requireEnabled()) return@executes 1
             if (CarryState.undo()) {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.undo.success").withColor(0x55FF55))
-                )
+                context.source.feedback(Component.translatable("sraddons.carry.undo.success").withColor(0x55FF55))
             } else {
-                context.source.sendFeedback(
-                    Constants.makePrefix().copy()
-                        .append(Component.translatable("sraddons.carry.undo.nothing").withColor(0xFFFF55))
-                )
+                context.source.feedback(Component.translatable("sraddons.carry.undo.nothing").withColor(0xFFFF55))
             }
             1
         }
@@ -951,35 +759,26 @@ object CarryCommand {
         .then(
             ClientCommandManager.argument("name", StringArgumentType.string())
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
 
                     val argNode = context.nodes.find { it.node.name == "name" } ?: return@executes 1
                     val rawArg = context.input.substring(argNode.range.start, argNode.range.end)
                     if (!rawArg.startsWith("\"") || !rawArg.endsWith("\"")) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.quotes_required").withColor(0xFF5555))
-                        )
+                        context.source.feedback(Component.translatable("sraddons.carry.quotes_required").withColor(0xFF5555))
                         return@executes 1
                     }
 
                     val name = StringArgumentType.getString(context, "name")
-                    val list = SRConfig.settings.carry.minibossNames
-                    if (list.any { it.equals(name, ignoreCase = true) }) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.miniboss_already_exists",
+                    
+                    if (CarryState.minibossNames.any { it.equals(name, ignoreCase = true) }) {
+                        context.source.feedback(Component.translatable("sraddons.carry.miniboss_already_exists",
                                     Component.literal(name).withColor(0x55FFFF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
-                    SRConfig.settings.carry.minibossNames = list + name
-                    SRConfig.save()
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.miniboss_added",
+                    CarryState.minibossNames.add(name)
+                    CarryState.saveData()
+                    context.source.feedback(Component.translatable("sraddons.carry.miniboss_added",
                                 Component.literal(name).withColor(0x55FFFF)).withColor(0x55FF55))
-                    )
                     1
                 }
         )
@@ -991,35 +790,26 @@ object CarryCommand {
             ClientCommandManager.argument("name", StringArgumentType.string())
                 .suggests(suggestMinibossNames)
                 .executes { context ->
-                    if (!enabledCheck(context.source)) return@executes 1
+                    if (!context.source.requireEnabled()) return@executes 1
 
                     val argNode = context.nodes.find { it.node.name == "name" } ?: return@executes 1
                     val rawArg = context.input.substring(argNode.range.start, argNode.range.end)
                     if (!rawArg.startsWith("\"") || !rawArg.endsWith("\"")) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.quotes_required").withColor(0xFF5555))
-                        )
+                        context.source.feedback(Component.translatable("sraddons.carry.quotes_required").withColor(0xFF5555))
                         return@executes 1
                     }
 
                     val name = StringArgumentType.getString(context, "name")
-                    val list = SRConfig.settings.carry.minibossNames
-                    if (list.none { it.equals(name, ignoreCase = true) }) {
-                        context.source.sendFeedback(
-                            Constants.makePrefix().copy()
-                                .append(Component.translatable("sraddons.carry.miniboss_not_found",
+                    
+                    if (CarryState.minibossNames.none { it.equals(name, ignoreCase = true) }) {
+                        context.source.feedback(Component.translatable("sraddons.carry.miniboss_not_found",
                                     Component.literal(name).withColor(0x55FFFF)).withColor(0xFF5555))
-                        )
                         return@executes 1
                     }
-                    SRConfig.settings.carry.minibossNames = list.filter { !it.equals(name, ignoreCase = true) }
-                    SRConfig.save()
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.carry.miniboss_removed",
+                    CarryState.minibossNames.removeAll { it.equals(name, ignoreCase = true) }
+                    CarryState.saveData()
+                    context.source.feedback(Component.translatable("sraddons.carry.miniboss_removed",
                                 Component.literal(name).withColor(0x55FFFF)).withColor(0x55FF55))
-                    )
                     1
                 }
         )

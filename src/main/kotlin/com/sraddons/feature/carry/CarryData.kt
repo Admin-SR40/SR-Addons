@@ -2,6 +2,7 @@ package com.sraddons.feature.carry
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.sraddons.config.SRConfig
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import java.io.File
@@ -35,7 +36,8 @@ data class CarryStatus(
 
 private data class CarryDataFile(
     val types: List<CarryType>,
-    val clients: List<CarryClient>
+    val clients: List<CarryClient>,
+    val minibossNames: List<String>? = null
 )
 
 object CarryState {
@@ -47,6 +49,7 @@ object CarryState {
 
     val types = ConcurrentHashMap<String, CarryType>()
     val clients = ConcurrentHashMap<String, CarryClient>()
+    val minibossNames: MutableSet<String> = ConcurrentHashMap.newKeySet()
     @Volatile
     var status = CarryStatus()
 
@@ -90,7 +93,8 @@ object CarryState {
                 OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
                     val file = CarryDataFile(
                         types = types.values.toList(),
-                        clients = clients.values.toList()
+                        clients = clients.values.toList(),
+                        minibossNames = minibossNames.toList()
                     )
                     GSON.toJson(file, writer)
                 }
@@ -105,14 +109,22 @@ object CarryState {
     }
 
     fun loadData() {
-        if (!DATA_FILE.exists()) return
         synchronized(this) {
+            // Seed miniboss names from config defaults on first load
+            if (minibossNames.isEmpty()) {
+                minibossNames.addAll(SRConfig.settings.carry.minibossNames)
+            }
+            if (!DATA_FILE.exists()) return
             try {
                 InputStreamReader(FileInputStream(DATA_FILE), StandardCharsets.UTF_8).use { reader ->
                     val file = GSON.fromJson(reader, CarryDataFile::class.java)
                     if (file != null) {
                         file.types.forEach { types[it.name.lowercase()] = it }
                         file.clients.forEach { clients[it.playerName.lowercase()] = it }
+                        if (file.minibossNames != null) {
+                            minibossNames.clear()
+                            minibossNames.addAll(file.minibossNames)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -131,43 +143,37 @@ object CarryState {
 
     // -- Undo support --
 
-    @Volatile
-    private var undoSnapshot: String? = null
-
     private data class UndoSnapshot(
-        val types: List<CarryType>,
-        val clients: List<CarryClient>,
+        val types: Map<String, CarryType>,
+        val clients: Map<String, CarryClient>,
         val status: CarryStatus
     )
 
+    @Volatile
+    private var undoSnapshot: UndoSnapshot? = null
+
     fun saveUndo() {
         synchronized(this) {
-            undoSnapshot = GSON.toJson(UndoSnapshot(
-                types = types.values.toList(),
-                clients = clients.values.toList(),
+            undoSnapshot = UndoSnapshot(
+                types = types.mapValues { it.value.copy() },
+                clients = clients.mapValues { it.value.copy() },
                 status = status.copy()
-            ))
+            )
         }
     }
 
     fun undo(): Boolean {
-        val json = undoSnapshot ?: return false
+        val snapshot = undoSnapshot ?: return false
         synchronized(this) {
-            try {
-                val snapshot = GSON.fromJson(json, UndoSnapshot::class.java) ?: return false
-                types.clear()
-                clients.clear()
-                snapshot.types.forEach { types[it.name.lowercase()] = it }
-                snapshot.clients.forEach { clients[it.playerName.lowercase()] = it }
-                status = snapshot.status
-                undoSnapshot = null
-                saveData()
-                saveHistory()
-                return true
-            } catch (e: Exception) {
-                LOGGER.error("Failed to undo carry state", e)
-                return false
-            }
+            types.clear()
+            clients.clear()
+            snapshot.types.forEach { types[it.key] = it.value }
+            snapshot.clients.forEach { clients[it.key] = it.value }
+            status = snapshot.status.copy()
+            undoSnapshot = null
+            saveData()
+            saveHistory()
+            return true
         }
     }
 }

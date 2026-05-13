@@ -64,8 +64,6 @@
   "sraddons.gui.pc.respond_party.desc": "将命令回复发送到队伍聊天",
   "sraddons.gui.pc.respond_local": "在本地显示回复",
   "sraddons.gui.pc.respond_local.desc": "在你自己聊天 HUD 中显示命令回复",
-  "sraddons.gui.pc.remove_separator": "移除分隔线",
-  "sraddons.gui.pc.remove_separator.desc": "隐藏 Hypixel 聊天中的装饰性分隔线（---）",
   "sraddons.gui.pc.auto_reply_mod": "自动回复 !mod",
   "sraddons.gui.pc.auto_reply_mod.desc": "当队伍成员发送 !mod 时自动回复",
   "sraddons.gui.pc.note_message": "便签消息",
@@ -242,6 +240,10 @@
   "sraddons.pc.countdown.remaining": "%s 剩余（%s）",
   "sraddons.pc.countdown.auto_join": "正在自动加入 %s...",
   "sraddons.pc.countdown.cancelled_by": "倒计时已被 %s 取消",
+  "sraddons.pc.countdown.party.started": "倒计时 - %s - 已开始: %s",
+  "sraddons.pc.countdown.party.queued": "已排队 %s - 将在 %s 后进入",
+  "sraddons.pc.countdown.party.cancel_hint": "输入 !cancel 可取消队列",
+  "sraddons.pc.countdown.party.remaining": "倒计时 - %s - 剩余 %s",
 
   "sraddons.pc.party_list.title": "队伍状态",
   "sraddons.pc.party_list.leader": "队长",
@@ -426,6 +428,8 @@
   "sraddons.gui.general.group.display.desc": "与屏幕上显示内容相关的设置",
   "sraddons.gui.general.show_own_name": "在第三人称显示自己的 Nametag",
   "sraddons.gui.general.show_own_name.desc": "在第三人称视角下渲染自己的 Nametag",
+  "sraddons.gui.general.remove_separator": "移除分隔线",
+  "sraddons.gui.general.remove_separator.desc": "隐藏 Hypixel 聊天中的装饰性分隔线（---）",
 
   "sraddons.pc.label.cd": "倒计时"
 }

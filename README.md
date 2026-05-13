@@ -2,7 +2,7 @@
 
 Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, and CarryModule into a single addon.
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.4.3-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.5.0-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
 
 ---
 
@@ -13,7 +13,7 @@ Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, Par
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.4.3.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.5.0.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -80,7 +80,7 @@ All modules support **i18n** (English / 简体中文).
 | Command | Description |
 |---------|-------------|
 | `/cm add-type <type>` | Add a carry type |
-| `/cm add <player> <type> <n>` | Add a client with carry count |
+| `/cm add-client <player> <type> <n>` | Add a client with carry count |
 | `/cm set-price <type> <price>` | Set unit price (e.g. `1.8M`, `500K`) |
 | `/cm set-bulk-price <type> <price> <n>` | Set bulk price for `n+` carries |
 
@@ -91,7 +91,7 @@ All modules support **i18n** (English / 简体中文).
 | `/cm add-amount <player> <n>` | Increase carry count |
 | `/cm set-amount <player> <n> [true\|false]` | Set carry count & bulk toggle |
 | `/cm remove-amount <player> <n>` | Decrease carry count |
-| `/cm remove <player>` | Remove a client |
+| `/cm remove-client <player>` | Remove a client |
 | `/cm remove-type <type>` | Remove a carry type |
 
 **Info**
@@ -138,8 +138,6 @@ All modules support **i18n** (English / 简体中文).
 | `!coords` / `!co` | Show coordinates |
 | `!holding` / `!hold` | Show held item |
 | `!status` | Show party member list |
-| `!ver` | Show mod version |
-
 **Party Management** *(leader only)*
 
 | Command | Description |
@@ -185,8 +183,6 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 | `!cd <time>` | Start countdown (`60`, `5m`, `1h`, `5m30s`, max 12h) |
 | `!clear` | Clear current countdown |
 | `!note [message]` | Save/send note to party |
-| `!gui` | Open config GUI |
-
 </details>
 
 <details>
@@ -231,7 +227,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 21  
-**Output:** `build/libs/SR-Addons-1.4.3.jar`
+**Output:** `build/libs/SR-Addons-1.5.0.jar`
 
 ---
 
