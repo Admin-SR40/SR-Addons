@@ -430,6 +430,8 @@
   "sraddons.gui.general.show_own_name.desc": "Shows your own nametag when in third-person perspective",
   "sraddons.gui.general.remove_separator": "Remove Separator Lines",
   "sraddons.gui.general.remove_separator.desc": "Hide decorative separator lines (---) from Hypixel chat",
+  "sraddons.gui.general.auto_check_updates": "Auto Check Updates",
+  "sraddons.gui.general.auto_check_updates.desc": "Automatically check for mod updates on game launch and notify when entering a world",
 
   "sraddons.pc.label.cd": "Countdown"
 }

@@ -24,7 +24,8 @@ object SRConfig {
 
     data class GeneralConfigData(
         var showOwnNameInThirdPerson: Boolean = true,
-        var removeSeparator: Boolean = true
+        var removeSeparator: Boolean = true,
+        var autoCheckUpdates: Boolean = false
     )
 
     data class EntityFireConfigData(

@@ -73,13 +73,13 @@ object HighlightUtil {
         return entity.boundingBox.move(x - entity.x, y - entity.y, z - entity.z)
     }
 
-    fun findNearestMobBelow(armorStand: ArmorStand, mobs: List<LivingEntity>): LivingEntity? {
+    fun findNearestMobBelow(armorStand: ArmorStand, entities: Iterable<Entity>): LivingEntity? {
         var closest: LivingEntity? = null
         var closestDist = Double.MAX_VALUE
         val asPos = armorStand.position()
 
-        for (entity in mobs) {
-            if (entity is ArmorStand || entity == Minecraft.getInstance().player) continue
+        for (entity in entities) {
+            if (entity !is LivingEntity || entity is ArmorStand || entity == Minecraft.getInstance().player) continue
             val pos = entity.position()
             val dx = pos.x - asPos.x
             val dz = pos.z - asPos.z
@@ -94,10 +94,6 @@ object HighlightUtil {
             }
         }
         return closest
-    }
-
-    fun filterLivingMobs(entities: Iterable<Entity>): List<LivingEntity> {
-        return entities.filterIsInstance<LivingEntity>().filter { it !is ArmorStand && it != Minecraft.getInstance().player }
     }
 
     fun collectBoxes(

@@ -430,6 +430,8 @@
   "sraddons.gui.general.show_own_name.desc": "在第三人称视角下渲染自己的 Nametag",
   "sraddons.gui.general.remove_separator": "移除分隔线",
   "sraddons.gui.general.remove_separator.desc": "隐藏 Hypixel 聊天中的装饰性分隔线（---）",
+  "sraddons.gui.general.auto_check_updates": "自动检查更新",
+  "sraddons.gui.general.auto_check_updates.desc": "在游戏启动时自动检查模组版本更新，在进入世界时提示",
 
   "sraddons.pc.label.cd": "倒计时"
 }

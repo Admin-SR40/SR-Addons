@@ -66,17 +66,18 @@ object StarredMobRenderer {
         }
     }
 
-    private val nonDigitRegex = Regex("[^0-9]")
-
     private fun isDamageNumber(name: String): Boolean {
-        val cleaned = name.replace(STAR_SYMBOL, "").replace(nonDigitRegex, "")
-        return cleaned.isNotEmpty()
+        val cleaned = name
+            .replace(STAR_SYMBOL, "")
+            .replace(",", "")
+            .replace(" ", "")
+            .replace(".", "")
+        return cleaned.isNotEmpty() && cleaned.all { it.isDigit() }
     }
 
     private fun findStarredMobs(entities: Iterable<Entity>): List<LivingEntity> {
-        val result = LinkedHashSet<LivingEntity>()
+        val result = mutableListOf<LivingEntity>()
         val starredArmorStands = mutableListOf<ArmorStand>()
-        val mobs = HighlightUtil.filterLivingMobs(entities)
 
         for (entity in entities) {
             if (entity is ArmorStand) {
@@ -86,19 +87,19 @@ object StarredMobRenderer {
                 }
             } else if (entity is LivingEntity) {
                 val name = entity.customName?.string ?: entity.name.string
-                if (name.contains(STAR_SYMBOL)) {
+                if (name.contains(STAR_SYMBOL) && entity !in result) {
                     result.add(entity)
                 }
             }
         }
 
         for (armorStand in starredArmorStands) {
-            val target = HighlightUtil.findNearestMobBelow(armorStand, mobs)
-            if (target != null) {
+            val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
+            if (target != null && target !in result) {
                 result.add(target)
             }
         }
 
-        return result.toList()
+        return result
     }
 }
