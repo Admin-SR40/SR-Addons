@@ -31,6 +31,7 @@ object SRConfigGui {
             .category(createPartyCommandsCategory())
             .category(createStarredMobCategory())
             .category(createCarryCategory())
+            .category(createRagnarockCategory())
             .build()
             .generateScreen(parent)
     }
@@ -456,7 +457,7 @@ object SRConfigGui {
                 dev.isxander.yacl3.api.Option.createBuilder<String>()
                     .name(Component.translatable("sraddons.gui.carry.boss_notification_text"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.boss_notification_text.desc")))
-                    .binding("BOSS SPAWNED", { SRConfig.settings.carry.bossSpawnNotificationText }, { SRConfig.settings.carry.bossSpawnNotificationText = it })
+                    .binding("&cBOSS SPAWNED", { SRConfig.settings.carry.bossSpawnNotificationText }, { SRConfig.settings.carry.bossSpawnNotificationText = it })
                     .controller(StringControllerBuilder::create)
                     .build()
             )
@@ -577,6 +578,105 @@ object SRConfigGui {
                     .name(Component.translatable("sraddons.gui.carry.see_through"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.see_through.desc")))
                     .binding(false, { SRConfig.settings.carry.seeThroughWalls }, { SRConfig.settings.carry.seeThroughWalls = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    // ========== Helper Category ==========
+
+    private fun createRagnarockCategory(): ConfigCategory {
+        return ConfigCategory.createBuilder()
+            .name(Component.translatable("sraddons.gui.helper"))
+            .tooltip(Component.translatable("sraddons.gui.helper.desc"))
+            .group(createRagnarockGroup())
+            .group(createCalculatorGroup())
+            .build()
+    }
+
+    private fun createCalculatorGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.helper.calculator"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.calculator.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.calculator.standalone"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.calculator.standalone.desc")))
+                    .binding(false, { SRConfig.settings.helper.calculator.enableStandaloneCalc }, { SRConfig.settings.helper.calculator.enableStandaloneCalc = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createRagnarockGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.helper.ragnarock"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.enabled.desc")))
+                    .binding(true, { SRConfig.settings.helper.ragnarock.enabled }, { SRConfig.settings.helper.ragnarock.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.play_sound"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.play_sound.desc")))
+                    .binding(true, { SRConfig.settings.helper.ragnarock.playSound }, { SRConfig.settings.helper.ragnarock.playSound = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cast_notification"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cast_notification.desc")))
+                    .binding(true, { SRConfig.settings.helper.ragnarock.castNotification }, { SRConfig.settings.helper.ragnarock.castNotification = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<String>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cast_message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cast_message.desc")))
+                    .binding("&aCasted Rag", { SRConfig.settings.helper.ragnarock.castMessage }, { SRConfig.settings.helper.ragnarock.castMessage = it })
+                    .controller(StringControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cancel_notification"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cancel_notification.desc")))
+                    .binding(true, { SRConfig.settings.helper.ragnarock.cancelNotification }, { SRConfig.settings.helper.ragnarock.cancelNotification = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<String>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cancel_message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cancel_message.desc")))
+                    .binding("&cRagnarock Cancelled!", { SRConfig.settings.helper.ragnarock.cancelMessage }, { SRConfig.settings.helper.ragnarock.cancelMessage = it })
+                    .controller(StringControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.show_strength"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.show_strength.desc")))
+                    .binding(true, { SRConfig.settings.helper.ragnarock.showStrengthGained }, { SRConfig.settings.helper.ragnarock.showStrengthGained = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ragnarock.announce_strength"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.announce_strength.desc")))
+                    .binding(false, { SRConfig.settings.helper.ragnarock.announceStrengthInParty }, { SRConfig.settings.helper.ragnarock.announceStrengthInParty = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )

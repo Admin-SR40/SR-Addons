@@ -3,6 +3,7 @@ build/
 .kotlin/
 *.class
 *.jar
+!gradle-wrapper.jar
 *.log
 .idea/
 .vscode/

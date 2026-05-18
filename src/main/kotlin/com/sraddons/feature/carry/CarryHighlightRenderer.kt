@@ -3,6 +3,7 @@ package com.sraddons.feature.carry
 import com.sraddons.config.SRConfig
 import com.sraddons.config.toColor
 import com.sraddons.render.HighlightUtil
+import com.sraddons.util.TitleUtil
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.RenderType
@@ -167,11 +168,7 @@ object CarryHighlightRenderer {
     }
 
     private fun triggerBossSpawnNotification() {
-        val mc = Minecraft.getInstance()
-        val text = SRConfig.settings.carry.bossSpawnNotificationText.trim()
-        mc.gui.setTimes(0, 20, 0)
-        mc.gui.setTitle(Component.empty())
-        mc.gui.setSubtitle(Component.literal(text).withColor(0xFF5555))
+        TitleUtil.showSubtitle(SRConfig.settings.carry.bossSpawnNotificationText.trim())
     }
 
     private fun findMinibosses(entities: Iterable<Entity>, clientPlayers: List<LivingEntity>, maxDistance: Int): List<LivingEntity> {

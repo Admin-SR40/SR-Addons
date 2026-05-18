@@ -26,6 +26,8 @@
   "sraddons.command.help.gui_desc": "Open config GUI",
   "sraddons.command.help.version_desc": "Show version info",
   "sraddons.command.help.update_desc": "Check for updates",
+  "sraddons.command.help.calc_desc": "Evaluate a math expression",
+  "sraddons.command.calc.error": "Invalid expression",
 
   "sraddons.gui.title": "SR-Addons",
   "sraddons.gui.entityfire": "EntityFire",
@@ -433,5 +435,31 @@
   "sraddons.gui.general.auto_check_updates": "Auto Check Updates",
   "sraddons.gui.general.auto_check_updates.desc": "Automatically check for mod updates on game launch and notify when entering a world",
 
-  "sraddons.pc.label.cd": "Countdown"
+  "sraddons.pc.label.cd": "Countdown",
+
+  "sraddons.gui.helper": "Helper",
+  "sraddons.gui.helper.desc": "Miscellaneous utility features",
+  "sraddons.gui.helper.ragnarock": "Ragnarock Notifier",
+  "sraddons.gui.helper.ragnarock.desc": "Alerts when you cast Ragnarock or it gets cancelled",
+  "sraddons.gui.helper.ragnarock.enabled": "Enabled",
+  "sraddons.gui.helper.ragnarock.enabled.desc": "Master toggle for Ragnarock notifications",
+  "sraddons.gui.helper.ragnarock.play_sound": "Play Sound",
+  "sraddons.gui.helper.ragnarock.play_sound.desc": "Play a pling sound when a notification is shown",
+  "sraddons.gui.helper.ragnarock.cast_notification": "Cast Notification",
+  "sraddons.gui.helper.ragnarock.cast_notification.desc": "Show a subtitle when you cast Ragnarock",
+  "sraddons.gui.helper.ragnarock.cast_message": "Cast Message",
+  "sraddons.gui.helper.ragnarock.cast_message.desc": "Custom message shown when casting Ragnarock",
+  "sraddons.gui.helper.ragnarock.cancel_notification": "Cancel Notification",
+  "sraddons.gui.helper.ragnarock.cancel_notification.desc": "Show a subtitle when Ragnarock is cancelled",
+  "sraddons.gui.helper.ragnarock.cancel_message": "Cancel Message",
+  "sraddons.gui.helper.ragnarock.cancel_message.desc": "Custom message shown when Ragnarock is cancelled",
+  "sraddons.gui.helper.ragnarock.show_strength": "Show Strength Gained",
+  "sraddons.gui.helper.ragnarock.show_strength.desc": "Show gained strength in chat when casting",
+  "sraddons.gui.helper.ragnarock.announce_strength": "Announce in Party Chat",
+  "sraddons.gui.helper.ragnarock.announce_strength.desc": "Announce gained strength in party chat",
+
+  "sraddons.gui.helper.calculator": "Calculator",
+  "sraddons.gui.helper.calculator.desc": "In-game math expression evaluator",
+  "sraddons.gui.helper.calculator.standalone": "Enable /calc Command",
+  "sraddons.gui.helper.calculator.standalone.desc": "Register the standalone /calc command with override priority. Supports suffixes: K (thousand), M (million), B (billion)."
 }

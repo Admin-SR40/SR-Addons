@@ -8,7 +8,9 @@
     "ChatScreenMixin",
     "CommandSuggestionsMixin",
     "ClientPacketListenerMixin",
-    "ShowOwnNametagMixin"
+    "ShowOwnNametagMixin",
+    "SoundPacketMixin",
+    "CalcCommandMixin"
   ],
   "injectors": {
     "defaultRequire": 1

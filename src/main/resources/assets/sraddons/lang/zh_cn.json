@@ -15,6 +15,9 @@
   "sraddons.command.version": "SR-Addons v%s",
   "sraddons.command.author": "作者 Admin_SR40",
   "sraddons.command.update.checking": "正在检查更新...",
+  "sraddons.command.help.calc_desc": "计算数学表达式",
+  "sraddons.command.calc.error": "表达式无效",
+
   "sraddons.command.update.available": "发现新版本！最新：v%s（当前：v%s）",
   "sraddons.command.update.click": "点击 ",
   "sraddons.command.update.here": "这里",
@@ -433,5 +436,31 @@
   "sraddons.gui.general.auto_check_updates": "自动检查更新",
   "sraddons.gui.general.auto_check_updates.desc": "在游戏启动时自动检查模组版本更新，在进入世界时提示",
 
-  "sraddons.pc.label.cd": "倒计时"
+  "sraddons.pc.label.cd": "倒计时",
+
+  "sraddons.gui.helper": "小工具",
+  "sraddons.gui.helper.desc": "各类杂项辅助功能",
+  "sraddons.gui.helper.ragnarock": "Ragnarock 通知",
+  "sraddons.gui.helper.ragnarock.desc": "施放 Ragnarock 或被打断时显示通知",
+  "sraddons.gui.helper.ragnarock.enabled": "启用",
+  "sraddons.gui.helper.ragnarock.enabled.desc": "Ragnarock 通知总开关",
+  "sraddons.gui.helper.ragnarock.play_sound": "播放音效",
+  "sraddons.gui.helper.ragnarock.play_sound.desc": "显示通知时播放提示音效",
+  "sraddons.gui.helper.ragnarock.cast_notification": "施法通知",
+  "sraddons.gui.helper.ragnarock.cast_notification.desc": "施放 Ragnarock 时显示副标题提示",
+  "sraddons.gui.helper.ragnarock.cast_message": "施法消息",
+  "sraddons.gui.helper.ragnarock.cast_message.desc": "施放 Ragnarock 时显示的自定义消息",
+  "sraddons.gui.helper.ragnarock.cancel_notification": "打断通知",
+  "sraddons.gui.helper.ragnarock.cancel_notification.desc": "Ragnarock 被打断时显示副标题提示",
+  "sraddons.gui.helper.ragnarock.cancel_message": "打断消息",
+  "sraddons.gui.helper.ragnarock.cancel_message.desc": "Ragnarock 被打断时显示的自定义消息",
+  "sraddons.gui.helper.ragnarock.show_strength": "显示获得的力量",
+  "sraddons.gui.helper.ragnarock.show_strength.desc": "施法时在聊天中显示获得的力量值",
+  "sraddons.gui.helper.ragnarock.announce_strength": "在队伍广播",
+  "sraddons.gui.helper.ragnarock.announce_strength.desc": "在队伍聊天中广播获得的力量值",
+
+  "sraddons.gui.helper.calculator": "计算器",
+  "sraddons.gui.helper.calculator.desc": "游戏内数学表达式求值",
+  "sraddons.gui.helper.calculator.standalone": "启用 /calc 命令",
+  "sraddons.gui.helper.calculator.standalone.desc": "注册独立的 /calc 命令（覆盖优先级）。支持后缀：K（千）、M（百万）、B（十亿）。"
 }

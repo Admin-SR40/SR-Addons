@@ -3,12 +3,14 @@ package com.sraddons.command
 import com.sraddons.config.SRConfig
 import com.sraddons.gui.SRConfigGui
 import com.sraddons.update.UpdateChecker
+import com.sraddons.util.CalcUtil
 import com.sraddons.util.Constants
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import com.mojang.brigadier.arguments.StringArgumentType
 import kotlinx.coroutines.CoroutineScope
 import java.net.URI
 import kotlinx.coroutines.Dispatchers
@@ -114,6 +116,29 @@ object SRACommand {
                     1
                 }
 
+            // /sra calc <expression>
+            val calcNode = ClientCommandManager.literal("calc")
+                .then(
+                    ClientCommandManager.argument("expression", StringArgumentType.greedyString())
+                        .executes { context ->
+                            val expr = StringArgumentType.getString(context, "expression")
+                            val prefix = Constants.makePrefix()
+                            try {
+                                val result = CalcUtil.evaluate(expr)
+                                context.source.sendFeedback(
+                                    prefix.copy()
+                                        .append(Component.literal("§7$expr = §a${CalcUtil.format(result)}"))
+                                )
+                            } catch (e: Exception) {
+                                context.source.sendFeedback(
+                                    prefix.copy()
+                                        .append(Component.translatable("sraddons.command.calc.error").withColor(0xFF5555))
+                                )
+                            }
+                            1
+                        }
+                )
+
             // /sra (no arguments - show help)
             val helpNode = root.executes { context ->
                 val prefix = Constants.makePrefix()
@@ -141,6 +166,10 @@ object SRACommand {
                     Component.literal("§7/sra update §8- §f")
                         .append(Component.translatable("sraddons.command.help.update_desc"))
                 )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra calc <expression> §8- §f")
+                        .append(Component.translatable("sraddons.command.help.calc_desc"))
+                )
                 1
             }
 
@@ -150,7 +179,9 @@ object SRACommand {
                 .then(guiNode)
                 .then(versionNode)
                 .then(updateNode)
+                .then(calcNode)
                 .also { dispatcher.register(it) }
         }
     }
+
 }

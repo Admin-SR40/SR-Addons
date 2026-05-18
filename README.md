@@ -1,8 +1,12 @@
-# SR-Addons
+<h1 align="center">SR-Addons</h1>
 
-Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, and CarryModule into a single addon.
+<p align="center">Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, CarryModule, and some Helpers into a single addon.</p>
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net) [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Version](https://img.shields.io/badge/Version-1.5.2-orange)](https://github.com/Admin-SR40/SR-Addons/releases/latest)
+<p align="center">
+  <a href="https://minecraft.net"><img src="https://img.shields.io/badge/Minecraft-1.21.11-green" alt="Minecraft"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
+  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.5.3-orange" alt="Version"></a>
+</p>
 
 ---
 
@@ -13,14 +17,14 @@ Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, Par
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.5.2.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.5.3.jar` and place it in `.minecraft/mods/`
 
 ---
 
 ## Features
 
 <details open>
-<summary>modules</summary>
+<summary>Modules</summary>
 
 ### EntityFire
 - Hide fire animation on burning entities
@@ -51,6 +55,10 @@ Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, Par
 - Earnings history, refund calculator, undo support
 - Auto price calculation (no player name needed when only 1 client)
 
+### Helper
+- **Ragnarock Notifier** — subtitle alerts when casting Ragnarock or when cancelled, with configurable messages and optional party chat strength announcement
+- **Calculator** — `/sra calc <expression>` evaluates math expressions (supports `+ - * / % ^`, parentheses, and K/M/B suffixes). Optional standalone `/calc` command via config
+
 All modules support **i18n** (English / 简体中文).
 
 </details>
@@ -60,7 +68,7 @@ All modules support **i18n** (English / 简体中文).
 ## Commands
 
 <details open>
-<summary>/sra — mod management</summary>
+<summary>/sra — ModManagement</summary>
 
 | Command | Description |
 |---------|-------------|
@@ -69,11 +77,12 @@ All modules support **i18n** (English / 简体中文).
 | `/sra config` / `/sra gui` | Open config GUI |
 | `/sra version` | Show version info |
 | `/sra update` | Check for updates |
+| `/sra calc <expr>` | Evaluate a math expression |
 
 </details>
 
 <details>
-<summary>/cm — carry module</summary>
+<summary>/cm — CarryModule</summary>
 
 **Setup**
 
@@ -123,7 +132,7 @@ All modules support **i18n** (English / 简体中文).
 </details>
 
 <details>
-<summary>! — party commands</summary>
+<summary>!command — PartyCommands</summary>
 
 **Info**
 
@@ -186,7 +195,7 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 </details>
 
 <details>
-<summary>key bindings</summary>
+<summary>Key Bindings</summary>
 
 | Key | Action |
 |-----|--------|
@@ -201,9 +210,9 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 ## Configuration
 
 <details>
-<summary>config tabs</summary>
+<summary>Configurations</summary>
 
-All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) with 4 tabs:
+All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) with 6 tabs:
 
 | Tab | Settings |
 |-----|----------|
@@ -211,6 +220,7 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 | **PartyCommands** | Prefix, 40+ individual command toggles (separate switches for each queue floor: f1–f7, m1–m7, t1–t5), response routing (party chat / local), separator removal, auto `!mod` reply, note message, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode (Outline/Fill/Both), line width, max distance, see-through-walls |
 | **Carry** | Master toggle, client / boss / miniboss highlight (separate colors), miniboss distance, boss spawn subtitle notification (toggle + custom text), render mode, line width, max distance, see-through-walls |
+| **Helper** | Ragnarock Notifier (cast/cancel alerts, customizable messages, strength display, party announcement), Calculator (standalone `/calc` toggle) |
 
 Config file: `.minecraft/config/sraddons.json`
 
@@ -227,7 +237,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 21  
-**Output:** `build/libs/SR-Addons-1.5.2.jar`
+**Output:** `build/libs/SR-Addons-1.5.3.jar`
 
 ---
 

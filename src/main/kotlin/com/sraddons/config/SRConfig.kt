@@ -71,11 +71,31 @@ object SRConfig {
             "Flare Demon", "Kindleheart Demon", "Burningsoul Demon"
         ),
         var bossSpawnNotification: Boolean = true,
-        var bossSpawnNotificationText: String = "BOSS SPAWNED",
+        var bossSpawnNotificationText: String = "&cBOSS SPAWNED",
         var seeThroughWalls: Boolean = false,
         var renderMode: String = "BOTH",
         var lineWidth: Int = 3,
         var maxDistance: Int = 64
+    )
+
+    data class RagnarockConfigData(
+        var enabled: Boolean = true,
+        var castNotification: Boolean = true,
+        var cancelNotification: Boolean = true,
+        var castMessage: String = "&aCasted Rag",
+        var cancelMessage: String = "&cRagnarock Cancelled!",
+        var showStrengthGained: Boolean = true,
+        var announceStrengthInParty: Boolean = false,
+        var playSound: Boolean = true
+    )
+
+    data class CalculatorConfigData(
+        var enableStandaloneCalc: Boolean = false
+    )
+
+    data class HelperConfigData(
+        var ragnarock: RagnarockConfigData = RagnarockConfigData(),
+        var calculator: CalculatorConfigData = CalculatorConfigData()
     )
 
     data class StarredMobConfigData(
@@ -95,7 +115,8 @@ object SRConfig {
         var entityFire: EntityFireConfigData = EntityFireConfigData(),
         var partyCommands: PartyCommandsConfigData = PartyCommandsConfigData(),
         var starredMob: StarredMobConfigData = StarredMobConfigData(),
-        var carry: CarryConfigData = CarryConfigData()
+        var carry: CarryConfigData = CarryConfigData(),
+        var helper: HelperConfigData = HelperConfigData()
     )
 
     fun load() {
