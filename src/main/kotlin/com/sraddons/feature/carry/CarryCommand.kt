@@ -707,11 +707,11 @@ object CarryCommand {
             } else {
                 context.source.feedback(Component.translatable("sraddons.carry.orders_summary",
                             Component.literal(s.totalOrders.toString()).withColor(0xFFAA00),
-                            Component.literal(s.totalCarries.toString()).withColor(0x55FFFF).withColor(0xFFFFFF))
-                )
+                            Component.literal(s.totalCarries.toString()).withColor(0x55FFFF)
+                        ).withColor(0xFFFFFF))
                 context.source.feedback(Component.translatable("sraddons.carry.earnings_summary",
-                            Component.literal(CarryPriceUtil.formatPrice(s.totalEarned)).withColor(0xFFAA00).withColor(0xFFFFFF))
-                )
+                            Component.literal(CarryPriceUtil.formatPrice(s.totalEarned)).withColor(0xFFAA00)
+                        ).withColor(0xFFFFFF))
             }
             1
         }
