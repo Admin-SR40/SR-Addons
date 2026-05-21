@@ -1,6 +1,6 @@
 package com.sraddons.mixin
 
-import com.sraddons.feature.ragnarock.RagnarockNotifier
+import com.sraddons.util.SoundPacketHandler
 import net.minecraft.client.multiplayer.ClientPacketListener
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import org.spongepowered.asm.mixin.Mixin
@@ -13,6 +13,6 @@ class SoundPacketMixin {
 
     @Inject(method = ["handleSoundEvent"], at = [At("HEAD")])
     private fun onSoundEvent(packet: ClientboundSoundPacket, ci: CallbackInfo) {
-        RagnarockNotifier.onSoundPacket(packet)
+        SoundPacketHandler.dispatch(packet)
     }
 }

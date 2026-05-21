@@ -1,8 +1,9 @@
-package com.sraddons.feature.ragnarock
+package com.sraddons.feature.helper
 
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.utils.modMessage
 import com.sraddons.feature.partycommands.utils.sendPartyChat
+import com.sraddons.util.SoundPacketHandler
 import com.sraddons.util.TitleUtil
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
@@ -45,9 +46,10 @@ object RagnarockNotifier {
         ClientReceiveMessageEvents.GAME.register { message, _ ->
             handleChatMessage(message.string)
         }
+        SoundPacketHandler.register { onSoundPacket(it) }
     }
 
-    fun onSoundPacket(packet: ClientboundSoundPacket) {
+    private fun onSoundPacket(packet: ClientboundSoundPacket) {
         if (!config.enabled || !config.castNotification) return
         if (packet.pitch != RAGNAROCK_PITCH) return
 

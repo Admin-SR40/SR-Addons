@@ -17,10 +17,8 @@ object StarredMobRenderer {
     private val LOGGER = LogManager.getLogger("SR-Addons-StarredMob")
     private const val STAR_SYMBOL = "\u272f"
 
-    private val filledXrayType: RenderType by lazy { HighlightUtil.createFilledType("starredmob", true) }
-    private val linesXrayType: RenderType by lazy { HighlightUtil.createLinesType("starredmob", true) }
-    private val filledType: RenderType by lazy { HighlightUtil.createFilledType("starredmob", false) }
-    private val linesType: RenderType by lazy { HighlightUtil.createLinesType("starredmob", false) }
+    private val filledType: RenderType by lazy { HighlightUtil.createFilledType("starredmob") }
+    private val linesType: RenderType by lazy { HighlightUtil.createLinesType("starredmob") }
 
     fun init() {
         WorldRenderEvents.END_MAIN.register { context ->
@@ -41,7 +39,6 @@ object StarredMobRenderer {
             if (starredMobs.isEmpty()) return@register
 
             val color = SRConfig.settings.starredMob.toColor()
-            val seeThroughWalls = SRConfig.settings.starredMob.seeThroughWalls
             val renderMode = SRConfig.settings.starredMob.renderMode.uppercase()
             val lineWidth = SRConfig.settings.starredMob.lineWidth.coerceIn(1, 10).toFloat()
             val maxDistance = SRConfig.settings.starredMob.maxDistance.coerceIn(10, 128)
@@ -58,8 +55,8 @@ object StarredMobRenderer {
             val boxes = HighlightUtil.collectBoxes(starredMobs, player, maxDistance, partialTicks, LOGGER)
 
             if (boxes.isNotEmpty()) {
-                HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth, seeThroughWalls,
-                    filledType, linesType, filledXrayType, linesXrayType, LOGGER)
+                HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth,
+                    filledType, linesType, LOGGER)
             }
 
             poseStack.popPose()

@@ -10,7 +10,7 @@ import com.sraddons.feature.partycommands.commands.PartyCommandHandler
 import com.sraddons.feature.partycommands.utils.AutoPartyListUpdater
 import com.sraddons.feature.partycommands.utils.ChatListener
 import com.sraddons.feature.partycommands.utils.CommandKeyBinding
-import com.sraddons.feature.ragnarock.RagnarockNotifier
+import com.sraddons.feature.helper.RagnarockNotifier
 import com.sraddons.feature.starredmob.renderer.StarredMobRenderer
 import com.sraddons.update.UpdateChecker
 import com.sraddons.util.Constants

@@ -34,34 +34,32 @@ object HighlightUtil {
         a.coerceIn(0, 255)
     )
 
-    fun createFilledType(id: String, seeThrough: Boolean): RenderType {
-        val suffix = if (seeThrough) "${id}_filled_xray" else "${id}_filled"
+    fun createFilledType(id: String): RenderType {
         val pipeline = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-                .withLocation(Identifier.fromNamespaceAndPath("sraddons", suffix))
+                .withLocation(Identifier.fromNamespaceAndPath("sraddons", "${id}_filled"))
                 .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
-                .withDepthWrite(!seeThrough)
-                .withDepthTestFunction(if (seeThrough) DepthTestFunction.NO_DEPTH_TEST else DepthTestFunction.LEQUAL_DEPTH_TEST)
+                .withDepthWrite(true)
+                .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
                 .build()
         )
         return RenderType.create(
-            "sraddons_$suffix",
+            "sraddons_${id}_filled",
             RenderSetup.builder(pipeline).createRenderSetup()
         )
     }
 
-    fun createLinesType(id: String, seeThrough: Boolean): RenderType {
-        val suffix = if (seeThrough) "${id}_lines_xray" else "${id}_lines"
+    fun createLinesType(id: String): RenderType {
         val pipeline = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
-                .withLocation(Identifier.fromNamespaceAndPath("sraddons", suffix))
+                .withLocation(Identifier.fromNamespaceAndPath("sraddons", "${id}_lines"))
                 .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
-                .withDepthWrite(!seeThrough)
-                .withDepthTestFunction(if (seeThrough) DepthTestFunction.NO_DEPTH_TEST else DepthTestFunction.LEQUAL_DEPTH_TEST)
+                .withDepthWrite(true)
+                .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
                 .build()
         )
         return RenderType.create(
-            "sraddons_$suffix",
+            "sraddons_${id}_lines",
             RenderSetup.builder(pipeline).createRenderSetup()
         )
     }
@@ -122,11 +120,8 @@ object HighlightUtil {
         color: Color,
         renderMode: String,
         lineWidth: Float,
-        seeThroughWalls: Boolean,
         filledType: RenderType,
         linesType: RenderType,
-        filledXrayType: RenderType,
-        linesXrayType: RenderType,
         logger: Logger
     ) {
         try {
@@ -142,7 +137,7 @@ object HighlightUtil {
                 val meshData = buffer.build()
                 if (meshData != null) {
                     try {
-                        (if (seeThroughWalls) filledXrayType else filledType).draw(meshData)
+                        filledType.draw(meshData)
                     } catch (e: Exception) {
                         logger.error("Error drawing filled boxes", e)
                     }
@@ -161,7 +156,7 @@ object HighlightUtil {
                 val meshData = buffer.build()
                 if (meshData != null) {
                     try {
-                        (if (seeThroughWalls) linesXrayType else linesType).draw(meshData)
+                        linesType.draw(meshData)
                     } catch (e: Exception) {
                         logger.error("Error drawing outline boxes", e)
                     }

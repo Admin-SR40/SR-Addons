@@ -72,7 +72,6 @@ object SRConfig {
         ),
         var bossSpawnNotification: Boolean = true,
         var bossSpawnNotificationText: String = "&cBOSS SPAWNED",
-        var seeThroughWalls: Boolean = false,
         var renderMode: String = "BOTH",
         var lineWidth: Int = 3,
         var maxDistance: Int = 64
@@ -104,7 +103,6 @@ object SRConfig {
         var colorGreen: Int = 255,
         var colorBlue: Int = 0,
         var colorAlpha: Int = 200,
-        var seeThroughWalls: Boolean = false,
         var renderMode: String = "BOTH",
         var lineWidth: Int = 3,
         var maxDistance: Int = 64

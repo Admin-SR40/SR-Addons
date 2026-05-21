@@ -246,7 +246,6 @@ object SRConfigGui {
             .tooltip(Component.translatable("sraddons.gui.starredmob.desc"))
             .group(createSMGeneralGroup())
             .group(createSMRenderGroup())
-            .group(createSMDebugGroup())
             .build()
     }
 
@@ -260,22 +259,6 @@ object SRConfigGui {
                     .name(Component.translatable("sraddons.gui.starredmob.enabled"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.enabled.desc")))
                     .binding(true, { SRConfig.settings.starredMob.enabled }, { SRConfig.settings.starredMob.enabled = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .build()
-    }
-
-    private fun createSMDebugGroup(): OptionGroup {
-        return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.starredmob.debug"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.debug.desc")))
-            .collapsed(true)
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.starredmob.see_through"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.see_through.desc")))
-                    .binding(false, { SRConfig.settings.starredMob.seeThroughWalls }, { SRConfig.settings.starredMob.seeThroughWalls = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
@@ -411,7 +394,6 @@ object SRConfigGui {
             ))
             .group(createBossNotificationGroup())
             .group(createCarryRenderGroup())
-            .group(createCarryDebugGroup())
             .group(createMinibossDistanceGroup())
             .build()
     }
@@ -563,22 +545,6 @@ object SRConfigGui {
                             .range(10, 128)
                             .step(1)
                     }
-                    .build()
-            )
-            .build()
-    }
-
-    private fun createCarryDebugGroup(): OptionGroup {
-        return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.carry.debug"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.debug.desc")))
-            .collapsed(true)
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.carry.see_through"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.see_through.desc")))
-                    .binding(false, { SRConfig.settings.carry.seeThroughWalls }, { SRConfig.settings.carry.seeThroughWalls = it })
-                    .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .build()

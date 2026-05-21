@@ -631,10 +631,10 @@ object CarryCommand {
         } else {
             source.feedback(Component.translatable("sraddons.carry.progress",
                         Component.literal(actualDone.toString()).withColor(0x55FF55),
-                        Component.literal(client.playerName).withColor(0xFF55FF),
+                        Component.literal(client.playerName).withColor(0xFF55FF)))
+            source.feedback(Component.translatable("sraddons.carry.progress_detail",
                         Component.literal(client.completed.toString()).withColor(0x55FF55),
-                        Component.literal(client.amount.toString()).withColor(0xFFAA00).withColor(0xFFFFFF))
-            )
+                        Component.literal(client.amount.toString()).withColor(0xFFAA00)))
         }
     }
 

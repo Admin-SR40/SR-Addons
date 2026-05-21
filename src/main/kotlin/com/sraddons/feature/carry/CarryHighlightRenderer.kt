@@ -27,20 +27,14 @@ object CarryHighlightRenderer {
     // Hypixel SkyBlock Slayer miniboss name tags, driven by config.
     // Set-based lookup provides O(1) contains() for entity matching in the render loop.
 
-    private val clientFilledXray: RenderType by lazy { HighlightUtil.createFilledType("carry_client", true) }
-    private val clientLinesXray: RenderType by lazy { HighlightUtil.createLinesType("carry_client", true) }
-    private val clientFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_client", false) }
-    private val clientLines: RenderType by lazy { HighlightUtil.createLinesType("carry_client", false) }
+    private val clientFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_client") }
+    private val clientLines: RenderType by lazy { HighlightUtil.createLinesType("carry_client") }
 
-    private val bossFilledXray: RenderType by lazy { HighlightUtil.createFilledType("carry_boss", true) }
-    private val bossLinesXray: RenderType by lazy { HighlightUtil.createLinesType("carry_boss", true) }
-    private val bossFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_boss", false) }
-    private val bossLines: RenderType by lazy { HighlightUtil.createLinesType("carry_boss", false) }
+    private val bossFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_boss") }
+    private val bossLines: RenderType by lazy { HighlightUtil.createLinesType("carry_boss") }
 
-    private val minibossFilledXray: RenderType by lazy { HighlightUtil.createFilledType("carry_miniboss", true) }
-    private val minibossLinesXray: RenderType by lazy { HighlightUtil.createLinesType("carry_miniboss", true) }
-    private val minibossFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_miniboss", false) }
-    private val minibossLines: RenderType by lazy { HighlightUtil.createLinesType("carry_miniboss", false) }
+    private val minibossFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_miniboss") }
+    private val minibossLines: RenderType by lazy { HighlightUtil.createLinesType("carry_miniboss") }
 
     fun init() {
         WorldRenderEvents.END_MAIN.register { context ->
@@ -81,7 +75,6 @@ object CarryHighlightRenderer {
 
             if (clientPlayers.isEmpty() && bossMobs.isEmpty() && minibosses.isEmpty()) return@register
 
-            val seeThroughWalls = cfg.seeThroughWalls
             val renderMode = cfg.renderMode.uppercase()
             val lineWidth = cfg.lineWidth.coerceIn(1, 10).toFloat()
             val maxDistance = cfg.maxDistance.coerceIn(10, 128)
@@ -96,16 +89,16 @@ object CarryHighlightRenderer {
             val pose = poseStack.last()
 
             if (clientEnabled && clientPlayers.isNotEmpty()) {
-                renderGroup(pose, clientPlayers, cfg.clientHighlight, maxDistance, partialTicks, renderMode, lineWidth, seeThroughWalls,
-                    clientFilled, clientLines, clientFilledXray, clientLinesXray)
+                renderGroup(pose, clientPlayers, cfg.clientHighlight, maxDistance, partialTicks, renderMode, lineWidth,
+                    clientFilled, clientLines)
             }
             if (bossMobs.isNotEmpty()) {
-                renderGroup(pose, bossMobs, cfg.bossHighlight, maxDistance, partialTicks, renderMode, lineWidth, seeThroughWalls,
-                    bossFilled, bossLines, bossFilledXray, bossLinesXray)
+                renderGroup(pose, bossMobs, cfg.bossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
+                    bossFilled, bossLines)
             }
             if (minibosses.isNotEmpty()) {
-                renderGroup(pose, minibosses, cfg.minibossHighlight, maxDistance, partialTicks, renderMode, lineWidth, seeThroughWalls,
-                    minibossFilled, minibossLines, minibossFilledXray, minibossLinesXray)
+                renderGroup(pose, minibosses, cfg.minibossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
+                    minibossFilled, minibossLines)
             }
 
             poseStack.popPose()
@@ -117,17 +110,15 @@ object CarryHighlightRenderer {
         entities: List<LivingEntity>,
         config: SRConfig.CarryHighlightConfig,
         maxDistance: Int, partialTicks: Float,
-        renderMode: String, lineWidth: Float, seeThroughWalls: Boolean,
+        renderMode: String, lineWidth: Float,
         filledType: net.minecraft.client.renderer.rendertype.RenderType,
-        linesType: net.minecraft.client.renderer.rendertype.RenderType,
-        filledXrayType: net.minecraft.client.renderer.rendertype.RenderType,
-        linesXrayType: net.minecraft.client.renderer.rendertype.RenderType
+        linesType: net.minecraft.client.renderer.rendertype.RenderType
     ) {
         val color = config.toColor()
         val boxes = HighlightUtil.collectBoxes(entities, Minecraft.getInstance().player!!, maxDistance, partialTicks, LOGGER)
         if (boxes.isNotEmpty()) {
-            HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth, seeThroughWalls,
-                filledType, linesType, filledXrayType, linesXrayType, LOGGER)
+            HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth,
+                filledType, linesType, LOGGER)
         }
     }
 
