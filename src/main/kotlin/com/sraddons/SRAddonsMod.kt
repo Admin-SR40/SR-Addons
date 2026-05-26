@@ -5,13 +5,13 @@ import com.sraddons.config.SRConfig
 import com.sraddons.feature.carry.CarryCommand
 import com.sraddons.feature.carry.CarryHighlightRenderer
 import com.sraddons.feature.carry.CarryState
-import com.sraddons.feature.partycommands.commands.Commands
 import com.sraddons.feature.partycommands.commands.PartyCommandHandler
 import com.sraddons.feature.partycommands.utils.AutoPartyListUpdater
 import com.sraddons.feature.partycommands.utils.ChatListener
 import com.sraddons.feature.partycommands.utils.CommandKeyBinding
 import com.sraddons.feature.helper.PingTpsAlertNotifier
 import com.sraddons.feature.helper.RagnarockNotifier
+import com.sraddons.feature.helper.TextReplacer
 import com.sraddons.feature.starredmob.renderer.StarredMobRenderer
 import com.sraddons.update.UpdateChecker
 import com.sraddons.util.Constants
@@ -45,6 +45,7 @@ class SRAddonsMod : ClientModInitializer {
         CommandKeyBinding.init()
         RagnarockNotifier.init()
         PingTpsAlertNotifier.init()
+        TextReplacer.init()
 
         if (SRConfig.settings.general.autoCheckUpdates) {
             startAutoUpdateCheck()

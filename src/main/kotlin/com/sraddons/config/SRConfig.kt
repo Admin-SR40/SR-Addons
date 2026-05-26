@@ -108,11 +108,17 @@ object SRConfig {
         var enableStandaloneCalc: Boolean = false
     )
 
+    data class ReplaceTextsConfigData(
+        var enabled: Boolean = false,
+        var highlightDevName: Boolean = true
+    )
+
     data class HelperConfigData(
         var ragnarock: RagnarockConfigData = RagnarockConfigData(),
         var calculator: CalculatorConfigData = CalculatorConfigData(),
         var pingAlert: PingAlertConfigData = PingAlertConfigData(),
-        var tpsAlert: TpsAlertConfigData = TpsAlertConfigData()
+        var tpsAlert: TpsAlertConfigData = TpsAlertConfigData(),
+        var replaceTexts: ReplaceTextsConfigData = ReplaceTextsConfigData()
     )
 
     data class StarredMobConfigData(

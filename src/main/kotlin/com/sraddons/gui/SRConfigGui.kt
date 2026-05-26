@@ -560,6 +560,31 @@ object SRConfigGui {
             .group(createCalculatorGroup())
             .group(createPingAlertGroup())
             .group(createTpsAlertGroup())
+            .group(createReplaceTextsGroup())
+            .build()
+    }
+
+    private fun createReplaceTextsGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.helper.replace_texts"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.replace_texts.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.replace_texts.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.replace_texts.enabled.desc")))
+                    .binding(false, { SRConfig.settings.helper.replaceTexts.enabled }, { SRConfig.settings.helper.replaceTexts.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.replace_texts.highlight_dev"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.replace_texts.highlight_dev.desc")))
+                    .binding(true, { SRConfig.settings.helper.replaceTexts.highlightDevName }, { SRConfig.settings.helper.replaceTexts.highlightDevName = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
             .build()
     }
 

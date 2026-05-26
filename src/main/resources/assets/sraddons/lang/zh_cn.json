@@ -79,6 +79,10 @@
   "sraddons.gui.starredmob.general.desc": "通用设置",
   "sraddons.gui.starredmob.enabled": "启用",
   "sraddons.gui.starredmob.enabled.desc": "星号怪物高亮总开关",
+  "sraddons.gui.starredmob.debug": "Debug",
+  "sraddons.gui.starredmob.debug.desc": "仅供调试使用，非正常游戏功能",
+  "sraddons.gui.starredmob.see_through": "透视墙壁",
+  "sraddons.gui.starredmob.see_through.desc": "穿墙渲染高亮",
   "sraddons.gui.starredmob.render": "渲染设置",
   "sraddons.gui.starredmob.render.desc": "高亮外观设置",
   "sraddons.gui.starredmob.highlight_color": "高亮颜色",
@@ -117,6 +121,10 @@
   "sraddons.gui.carry.highlight_color.desc": "高亮使用的颜色",
   "sraddons.gui.carry.render": "渲染设置",
   "sraddons.gui.carry.render.desc": "高亮外观设置",
+  "sraddons.gui.carry.debug": "Debug",
+  "sraddons.gui.carry.debug.desc": "仅供调试使用，非正常游戏功能",
+  "sraddons.gui.carry.see_through": "透视墙壁",
+  "sraddons.gui.carry.see_through.desc": "穿墙渲染高亮",
   "sraddons.gui.carry.render_mode": "渲染模式",
   "sraddons.gui.carry.render_mode.desc": "OUTLINE = 仅线框, FILL = 仅实心填充, BOTH = 线框 + 填充",
   "sraddons.gui.carry.line_width": "线宽",
@@ -481,5 +489,12 @@
   "sraddons.gui.helper.tps_alert.message": "警报消息",
   "sraddons.gui.helper.tps_alert.message.desc": "触发警报时显示的字幕文本",
   "sraddons.gui.helper.tps_alert.play_sound": "播放提示音",
-  "sraddons.gui.helper.tps_alert.play_sound.desc": "触发警报时播放叮咚提示音"
+  "sraddons.gui.helper.tps_alert.play_sound.desc": "触发警报时播放叮咚提示音",
+
+  "sraddons.gui.helper.replace_texts": "文本替换",
+  "sraddons.gui.helper.replace_texts.desc": "替换渲染文字中的文本模式",
+  "sraddons.gui.helper.replace_texts.enabled": "启用文本替换",
+  "sraddons.gui.helper.replace_texts.enabled.desc": "所有文本替换的总开关",
+  "sraddons.gui.helper.replace_texts.highlight_dev": "高亮开发者名字",
+  "sraddons.gui.helper.replace_texts.highlight_dev.desc": "将 Admin_SR40 名字替换为带 DEV 前缀的样式版本"
 }

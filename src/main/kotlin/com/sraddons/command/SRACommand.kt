@@ -1,6 +1,7 @@
 package com.sraddons.command
 
 import com.sraddons.config.SRConfig
+import com.sraddons.feature.helper.TextReplacer
 import com.sraddons.gui.SRConfigGui
 import com.sraddons.update.UpdateChecker
 import com.sraddons.util.CalcUtil
@@ -72,7 +73,7 @@ object SRACommand {
                     1
                 }
 
-            // /sra update
+            // /sra update -- disabled in DEBUG version
             val updateNode = ClientCommandManager.literal("update")
                 .executes { context ->
                     val prefix = Constants.makePrefix()
@@ -170,8 +171,122 @@ object SRACommand {
                     Component.literal("§7/sra calc <expression> §8- §f")
                         .append(Component.translatable("sraddons.command.help.calc_desc"))
                 )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra replaceTexts add \"word\" \"replacement\" §8- §f")
+                        .append(Component.literal("Add text replacement"))
+                )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra replaceTexts remove \"word\" §8- §f")
+                        .append(Component.literal("Remove text replacement"))
+                )
+                context.source.sendFeedback(
+                    Component.literal("§7/sra replaceTexts list §8- §f")
+                        .append(Component.literal("List custom replacements"))
+                )
                 1
             }
+
+            // /sra replaceTexts
+            val rtNode = ClientCommandManager.literal("replaceTexts")
+                .executes { context ->
+                    val prefix = Constants.makePrefix()
+                    context.source.sendFeedback(
+                        prefix.copy()
+                            .append(Component.literal("Replace Texts Commands:").withColor(0x55FFFF))
+                    )
+                    context.source.sendFeedback(
+                        Component.literal("§7/sra replaceTexts add \"word\" \"replacement\" §8- §fAdd a replacement")
+                    )
+                    context.source.sendFeedback(
+                        Component.literal("§7/sra replaceTexts remove \"word\" §8- §fRemove a replacement")
+                    )
+                    context.source.sendFeedback(
+                        Component.literal("§7/sra replaceTexts list §8- §fList custom replacements")
+                    )
+                    context.source.sendFeedback(
+                        Component.literal("")
+                    )
+                    context.source.sendFeedback(
+                        Component.literal("§7Replacement formats:").withColor(0x55FFFF)
+                    )
+                    context.source.sendFeedback(
+                        Component.literal("  §7& codes: §f&cRed &lBold &nUnderline §8+ §7§r")
+                    )
+                    context.source.sendFeedback(
+                        Component.literal("  §7Gradient: §f:g:<name>:<text> §7§o(available: cyanToLightBlue, goldToYellow, aquaToGreen, redToOrange, purpleToPink)")
+                    )
+                    1
+                }
+                .then(
+                    ClientCommandManager.literal("add")
+                        .then(
+                            ClientCommandManager.argument("word", StringArgumentType.string())
+                                .then(
+                                    ClientCommandManager.argument("replacement", StringArgumentType.string())
+                                        .executes { context ->
+                                            val word = StringArgumentType.getString(context, "word")
+                                            val replacement = StringArgumentType.getString(context, "replacement")
+                                            val prefix = Constants.makePrefix()
+                                            TextReplacer.add(word, replacement)
+                                            context.source.sendFeedback(
+                                                prefix.copy()
+                                                    .append(Component.literal("Added replacement: \"$word\" → \"$replacement\"").withColor(0x55FF55))
+                                            )
+                                            1
+                                        }
+                                )
+                        )
+                )
+                .then(
+                    ClientCommandManager.literal("remove")
+                        .then(
+                            ClientCommandManager.argument("word", StringArgumentType.string())
+                                .suggests { _, builder ->
+                                    TextReplacer.customs.keys.forEach { builder.suggest("\"$it\"") }
+                                    builder.buildFuture()
+                                }
+                                .executes { context ->
+                                    val word = StringArgumentType.getString(context, "word")
+                                    val prefix = Constants.makePrefix()
+                                    if (TextReplacer.remove(word)) {
+                                        context.source.sendFeedback(
+                                            prefix.copy()
+                                                .append(Component.literal("Removed replacement: \"$word\"").withColor(0x55FF55))
+                                        )
+                                    } else {
+                                        context.source.sendFeedback(
+                                            prefix.copy()
+                                                .append(Component.literal("Replacement not found: \"$word\"").withColor(0xFF5555))
+                                        )
+                                    }
+                                    1
+                                }
+                        )
+                )
+                .then(
+                    ClientCommandManager.literal("list")
+                        .executes { context ->
+                            val prefix = Constants.makePrefix()
+                            val customs = TextReplacer.customs
+                            if (customs.isEmpty()) {
+                                context.source.sendFeedback(
+                                    prefix.copy()
+                                        .append(Component.literal("No custom replacements configured.").withColor(0xAAAAAA))
+                                )
+                            } else {
+                                context.source.sendFeedback(
+                                    prefix.copy()
+                                        .append(Component.literal("Custom Replacements (${customs.size}):").withColor(0x55FFFF))
+                                )
+                                customs.entries.forEachIndexed { i, (k, v) ->
+                                    context.source.sendFeedback(
+                                        Component.literal("§7${i + 1}. §f$k §8→ §f$v")
+                                    )
+                                }
+                            }
+                            1
+                        }
+                )
 
             root
                 .then(reloadNode)
@@ -180,6 +295,7 @@ object SRACommand {
                 .then(versionNode)
                 .then(updateNode)
                 .then(calcNode)
+                .then(rtNode)
                 .also { dispatcher.register(it) }
         }
     }

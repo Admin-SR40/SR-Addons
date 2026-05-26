@@ -10,7 +10,8 @@
     "ClientPacketListenerMixin",
     "ShowOwnNametagMixin",
     "SoundPacketMixin",
-    "CalcCommandMixin"
+    "CalcCommandMixin",
+    "TextReplaceMixin"
   ],
   "injectors": {
     "defaultRequire": 1
