@@ -455,5 +455,31 @@
   "sraddons.gui.helper.calculator": "计算器",
   "sraddons.gui.helper.calculator.desc": "游戏内数学表达式求值",
   "sraddons.gui.helper.calculator.standalone": "启用 /calc 命令",
-  "sraddons.gui.helper.calculator.standalone.desc": "注册独立的 /calc 命令（覆盖优先级）。支持后缀：K（千）、M（百万）、B（十亿）。"
+  "sraddons.gui.helper.calculator.standalone.desc": "注册独立的 /calc 命令（覆盖优先级）。支持后缀：K（千）、M（百万）、B（十亿）。",
+
+  "sraddons.gui.helper.ping_alert": "延迟警报",
+  "sraddons.gui.helper.ping_alert.desc": "当延迟持续过高时显示字幕提示",
+  "sraddons.gui.helper.ping_alert.enabled": "启用",
+  "sraddons.gui.helper.ping_alert.enabled.desc": "延迟警报总开关",
+  "sraddons.gui.helper.ping_alert.threshold": "延迟阈值 (ms)",
+  "sraddons.gui.helper.ping_alert.threshold.desc": "延迟超过此值将触发警报",
+  "sraddons.gui.helper.ping_alert.delay": "延迟时间 (秒)",
+  "sraddons.gui.helper.ping_alert.delay.desc": "延迟持续多少秒后才显示警报",
+  "sraddons.gui.helper.ping_alert.message": "警报消息",
+  "sraddons.gui.helper.ping_alert.message.desc": "触发警报时显示的字幕文本",
+  "sraddons.gui.helper.ping_alert.play_sound": "播放提示音",
+  "sraddons.gui.helper.ping_alert.play_sound.desc": "触发警报时播放叮咚提示音",
+
+  "sraddons.gui.helper.tps_alert": "TPS 警报",
+  "sraddons.gui.helper.tps_alert.desc": "当 TPS 持续过低时显示字幕提示",
+  "sraddons.gui.helper.tps_alert.enabled": "启用",
+  "sraddons.gui.helper.tps_alert.enabled.desc": "TPS 警报总开关",
+  "sraddons.gui.helper.tps_alert.threshold": "TPS 阈值",
+  "sraddons.gui.helper.tps_alert.threshold.desc": "TPS 低于此值将触发警报",
+  "sraddons.gui.helper.tps_alert.delay": "延迟时间 (秒)",
+  "sraddons.gui.helper.tps_alert.delay.desc": "TPS 持续多少秒后才显示警报",
+  "sraddons.gui.helper.tps_alert.message": "警报消息",
+  "sraddons.gui.helper.tps_alert.message.desc": "触发警报时显示的字幕文本",
+  "sraddons.gui.helper.tps_alert.play_sound": "播放提示音",
+  "sraddons.gui.helper.tps_alert.play_sound.desc": "触发警报时播放叮咚提示音"
 }

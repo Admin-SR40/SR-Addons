@@ -454,5 +454,31 @@
   "sraddons.gui.helper.calculator": "Calculator",
   "sraddons.gui.helper.calculator.desc": "In-game math expression evaluator",
   "sraddons.gui.helper.calculator.standalone": "Enable /calc Command",
-  "sraddons.gui.helper.calculator.standalone.desc": "Register the standalone /calc command with override priority. Supports suffixes: K (thousand), M (million), B (billion)."
+  "sraddons.gui.helper.calculator.standalone.desc": "Register the standalone /calc command with override priority. Supports suffixes: K (thousand), M (million), B (billion).",
+
+  "sraddons.gui.helper.ping_alert": "Ping Alert",
+  "sraddons.gui.helper.ping_alert.desc": "Show a subtitle when ping stays high for too long",
+  "sraddons.gui.helper.ping_alert.enabled": "Enabled",
+  "sraddons.gui.helper.ping_alert.enabled.desc": "Master toggle for ping alert",
+  "sraddons.gui.helper.ping_alert.threshold": "Ping Threshold (ms)",
+  "sraddons.gui.helper.ping_alert.threshold.desc": "Ping must exceed this value to trigger the alert",
+  "sraddons.gui.helper.ping_alert.delay": "Delay (seconds)",
+  "sraddons.gui.helper.ping_alert.delay.desc": "Ping must stay high for this many seconds before showing the alert",
+  "sraddons.gui.helper.ping_alert.message": "Alert Message",
+  "sraddons.gui.helper.ping_alert.message.desc": "Subtitle text shown when alert fires",
+  "sraddons.gui.helper.ping_alert.play_sound": "Play Sound",
+  "sraddons.gui.helper.ping_alert.play_sound.desc": "Play a pling sound when the alert fires",
+
+  "sraddons.gui.helper.tps_alert": "TPS Alert",
+  "sraddons.gui.helper.tps_alert.desc": "Show a subtitle when TPS stays low for too long",
+  "sraddons.gui.helper.tps_alert.enabled": "Enabled",
+  "sraddons.gui.helper.tps_alert.enabled.desc": "Master toggle for TPS alert",
+  "sraddons.gui.helper.tps_alert.threshold": "TPS Threshold",
+  "sraddons.gui.helper.tps_alert.threshold.desc": "TPS must drop below this value to trigger the alert",
+  "sraddons.gui.helper.tps_alert.delay": "Delay (seconds)",
+  "sraddons.gui.helper.tps_alert.delay.desc": "TPS must stay low for this many seconds before showing the alert",
+  "sraddons.gui.helper.tps_alert.message": "Alert Message",
+  "sraddons.gui.helper.tps_alert.message.desc": "Subtitle text shown when alert fires",
+  "sraddons.gui.helper.tps_alert.play_sound": "Play Sound",
+  "sraddons.gui.helper.tps_alert.play_sound.desc": "Play a pling sound when the alert fires"
 }

@@ -12,7 +12,8 @@ object ServerUtils {
     val currentPing: Int
         get() {
             val pingLog = mc.gui.debugOverlay.pingLogger
-            return if (pingLog.size() > 0) pingLog.get(0).toInt() else 0
+            val size = pingLog.size()
+            return if (size > 0) pingLog.get(size - 1).toInt() else 0
         }
 
     var averagePing: Int = 0

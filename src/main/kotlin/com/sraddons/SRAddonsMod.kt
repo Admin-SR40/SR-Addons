@@ -10,6 +10,7 @@ import com.sraddons.feature.partycommands.commands.PartyCommandHandler
 import com.sraddons.feature.partycommands.utils.AutoPartyListUpdater
 import com.sraddons.feature.partycommands.utils.ChatListener
 import com.sraddons.feature.partycommands.utils.CommandKeyBinding
+import com.sraddons.feature.helper.PingTpsAlertNotifier
 import com.sraddons.feature.helper.RagnarockNotifier
 import com.sraddons.feature.starredmob.renderer.StarredMobRenderer
 import com.sraddons.update.UpdateChecker
@@ -43,6 +44,7 @@ class SRAddonsMod : ClientModInitializer {
         AutoPartyListUpdater.init()
         CommandKeyBinding.init()
         RagnarockNotifier.init()
+        PingTpsAlertNotifier.init()
 
         if (SRConfig.settings.general.autoCheckUpdates) {
             startAutoUpdateCheck()

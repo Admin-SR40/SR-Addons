@@ -88,13 +88,31 @@ object SRConfig {
         var playSound: Boolean = true
     )
 
+    data class PingAlertConfigData(
+        var enabled: Boolean = false,
+        var threshold: Int = 400,
+        var delaySeconds: Int = 3,
+        var message: String = "&cHigh Ping",
+        var playSound: Boolean = true
+    )
+
+    data class TpsAlertConfigData(
+        var enabled: Boolean = false,
+        var threshold: Double = 16.0,
+        var delaySeconds: Int = 3,
+        var message: String = "&cLow TPS",
+        var playSound: Boolean = true
+    )
+
     data class CalculatorConfigData(
         var enableStandaloneCalc: Boolean = false
     )
 
     data class HelperConfigData(
         var ragnarock: RagnarockConfigData = RagnarockConfigData(),
-        var calculator: CalculatorConfigData = CalculatorConfigData()
+        var calculator: CalculatorConfigData = CalculatorConfigData(),
+        var pingAlert: PingAlertConfigData = PingAlertConfigData(),
+        var tpsAlert: TpsAlertConfigData = TpsAlertConfigData()
     )
 
     data class StarredMobConfigData(

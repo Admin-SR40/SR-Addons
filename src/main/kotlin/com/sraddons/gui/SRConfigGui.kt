@@ -558,6 +558,8 @@ object SRConfigGui {
             .tooltip(Component.translatable("sraddons.gui.helper.desc"))
             .group(createRagnarockGroup())
             .group(createCalculatorGroup())
+            .group(createPingAlertGroup())
+            .group(createTpsAlertGroup())
             .build()
     }
 
@@ -643,6 +645,134 @@ object SRConfigGui {
                     .name(Component.translatable("sraddons.gui.helper.ragnarock.announce_strength"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.announce_strength.desc")))
                     .binding(false, { SRConfig.settings.helper.ragnarock.announceStrengthInParty }, { SRConfig.settings.helper.ragnarock.announceStrengthInParty = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createPingAlertGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.helper.ping_alert"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ping_alert.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.enabled.desc")))
+                    .binding(false, { SRConfig.settings.helper.pingAlert.enabled }, { SRConfig.settings.helper.pingAlert.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Int>()
+                    .name(Component.translatable("sraddons.gui.helper.ping_alert.threshold"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.threshold.desc")))
+                    .binding(
+                        400,
+                        { SRConfig.settings.helper.pingAlert.threshold },
+                        { SRConfig.settings.helper.pingAlert.threshold = it.coerceIn(50, 5000) }
+                    )
+                    .controller { option ->
+                        IntegerSliderControllerBuilder.create(option)
+                            .range(50, 5000)
+                            .step(10)
+                    }
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Int>()
+                    .name(Component.translatable("sraddons.gui.helper.ping_alert.delay"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.delay.desc")))
+                    .binding(
+                        3,
+                        { SRConfig.settings.helper.pingAlert.delaySeconds },
+                        { SRConfig.settings.helper.pingAlert.delaySeconds = it.coerceIn(1, 30) }
+                    )
+                    .controller { option ->
+                        IntegerSliderControllerBuilder.create(option)
+                            .range(1, 30)
+                            .step(1)
+                    }
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<String>()
+                    .name(Component.translatable("sraddons.gui.helper.ping_alert.message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.message.desc")))
+                    .binding("&cHigh Ping", { SRConfig.settings.helper.pingAlert.message }, { SRConfig.settings.helper.pingAlert.message = it })
+                    .controller(StringControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.ping_alert.play_sound"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.play_sound.desc")))
+                    .binding(true, { SRConfig.settings.helper.pingAlert.playSound }, { SRConfig.settings.helper.pingAlert.playSound = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createTpsAlertGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.helper.tps_alert"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.tps_alert.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.enabled.desc")))
+                    .binding(false, { SRConfig.settings.helper.tpsAlert.enabled }, { SRConfig.settings.helper.tpsAlert.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Double>()
+                    .name(Component.translatable("sraddons.gui.helper.tps_alert.threshold"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.threshold.desc")))
+                    .binding(
+                        16.0,
+                        { SRConfig.settings.helper.tpsAlert.threshold },
+                        { SRConfig.settings.helper.tpsAlert.threshold = it.coerceIn(1.0, 20.0) }
+                    )
+                    .controller { option ->
+                        dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder.create(option)
+                            .range(1.0, 20.0)
+                            .step(0.5)
+                    }
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Int>()
+                    .name(Component.translatable("sraddons.gui.helper.tps_alert.delay"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.delay.desc")))
+                    .binding(
+                        3,
+                        { SRConfig.settings.helper.tpsAlert.delaySeconds },
+                        { SRConfig.settings.helper.tpsAlert.delaySeconds = it.coerceIn(1, 30) }
+                    )
+                    .controller { option ->
+                        IntegerSliderControllerBuilder.create(option)
+                            .range(1, 30)
+                            .step(1)
+                    }
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<String>()
+                    .name(Component.translatable("sraddons.gui.helper.tps_alert.message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.message.desc")))
+                    .binding("&cLow TPS", { SRConfig.settings.helper.tpsAlert.message }, { SRConfig.settings.helper.tpsAlert.message = it })
+                    .controller(StringControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.tps_alert.play_sound"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.play_sound.desc")))
+                    .binding(true, { SRConfig.settings.helper.tpsAlert.playSound }, { SRConfig.settings.helper.tpsAlert.playSound = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
