@@ -487,5 +487,10 @@
   "sraddons.gui.helper.replace_texts.enabled": "Enable Replace Texts",
   "sraddons.gui.helper.replace_texts.enabled.desc": "Master toggle for all text replacements",
   "sraddons.gui.helper.replace_texts.highlight_dev": "Highlight Developer's Name",
-  "sraddons.gui.helper.replace_texts.highlight_dev.desc": "Replace Admin_SR40 name tags with a styled DEV prefix"
+  "sraddons.gui.helper.replace_texts.highlight_dev.desc": "Replace Admin_SR40 name tags with a styled DEV prefix",
+
+  "sraddons.gui.helper.better_fov": "Better FOV",
+  "sraddons.gui.helper.better_fov.desc": "Disable Speed/Aiming/Submerged FOV changes",
+  "sraddons.gui.helper.better_fov.enabled": "Enabled",
+  "sraddons.gui.helper.better_fov.enabled.desc": "When enabled, sets Speed FOV, Aiming FOV, and Submerged FOV to 0%, keeping vanilla FOV unchanged"
 }

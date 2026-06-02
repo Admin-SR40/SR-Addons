@@ -93,34 +93,30 @@ object TextReplacer {
         val matches = findMatches(clean)
         if (matches.isEmpty()) return seq
 
-        var component: MutableComponent = Component.empty()
+        val segments = mutableListOf<FormattedCharSequence>()
         var pos = 0
         for ((start, end, replacement) in matches) {
-            component = appendStyleGrouped(chars, styles, pos, start, component)
-            component = component.append(buildReplacementComponent(replacement))
+            if (pos < start) {
+                segments.add(subSequence(chars, styles, pos, start))
+            }
+            segments.add(buildReplacementComponent(replacement).visualOrderText)
             pos = end
         }
-        component = appendStyleGrouped(chars, styles, pos, chars.size, component)
+        if (pos < chars.size) {
+            segments.add(subSequence(chars, styles, pos, chars.size))
+        }
 
-        return component.visualOrderText
+        return FormattedCharSequence.composite(segments)
     }
 
-    private fun appendStyleGrouped(
+    private fun subSequence(
         chars: List<Int>, styles: List<Style>,
-        from: Int, to: Int, root: MutableComponent
-    ): MutableComponent {
-        if (from >= to) return root
-        var result = root
-        var i = from
-        while (i < to) {
-            val style = styles[i]
-            var j = i
-            while (j < to && styles[j] == style) j++
-            val runText = buildString { for (k in i until j) appendCodePoint(chars[k]) }
-            result = result.append(Component.literal(runText).withStyle(style))
-            i = j
+        from: Int, to: Int
+    ): FormattedCharSequence = FormattedCharSequence { sink ->
+        for (i in from until to) {
+            sink.accept(i - from, styles[i], chars[i])
         }
-        return result
+        true
     }
 
     private fun buildReplacementComponent(value: String): Component {

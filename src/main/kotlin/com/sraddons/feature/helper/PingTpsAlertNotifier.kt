@@ -21,7 +21,7 @@ object PingTpsAlertNotifier {
     private var worldJoinTime = 0L
 
     private const val RECOVERY_COOLDOWN_MS = 60_000L
-    private const val WORLD_JOIN_GRACE_MS = 10_000L
+    private const val WORLD_JOIN_GRACE_MS = 15_000L
 
     fun init() {
         ClientTickEvents.END_CLIENT_TICK.register { _ ->

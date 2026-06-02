@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://minecraft.net"><img src="https://img.shields.io/badge/Minecraft-1.21.11-green" alt="Minecraft"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
-  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.5.6-orange" alt="Version"></a>
+  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.5.7-orange" alt="Version"></a>
 </p>
 
 ---
@@ -17,7 +17,7 @@
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.5.6.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.5.7.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -58,6 +58,10 @@
 ### Helper
 - **Ragnarock Notifier** — subtitle alerts when casting Ragnarock or when cancelled, with configurable messages and optional party chat strength announcement
 - **Calculator** — `/sra calc <expression>` evaluates math expressions (supports `+ - * / % ^`, parentheses, and K/M/B suffixes). Optional standalone `/calc` command via config
+- **Ping Alert** — subtitle warning when ping stays above a threshold for too long (configurable threshold, delay, message, and sound)
+- **TPS Alert** — subtitle warning when TPS drops below a threshold for too long (configurable threshold, delay, message, and sound)
+- **Replace Texts** — replace text patterns in all rendered text. Includes `&` color codes and `:g:` gradient syntax. Default Developer's Name highlight via separate toggle.
+- **Better FOV** — disable Speed/Aiming/Submerged FOV changes, keeping sprint FOV and vanilla FOV untouched
 
 All modules support **i18n** (English / 简体中文).
 
@@ -78,6 +82,10 @@ All modules support **i18n** (English / 简体中文).
 | `/sra version` | Show version info |
 | `/sra update` | Check for updates |
 | `/sra calc <expr>` | Evaluate a math expression |
+| `/sra replaceTexts add "<word>" "<replacement>"` | Add a text replacement |
+| `/sra replaceTexts remove "<word>"` | Remove a text replacement |
+| `/sra replaceTexts list` | List custom replacements |
+| `/sra replaceTexts debug` | Capture rendered texts for diagnostics |
 
 </details>
 
@@ -220,7 +228,7 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 | **PartyCommands** | Prefix, 40+ individual command toggles (separate switches for each queue floor: f1–f7, m1–m7, t1–t5), response routing (party chat / local), separator removal, auto `!mod` reply, note message, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode (Outline/Fill/Both), line width, max distance |
 | **Carry** | Master toggle, client / boss / miniboss highlight (separate colors), miniboss distance, boss spawn subtitle notification (toggle + custom text), render mode, line width, max distance |
-| **Helper** | Ragnarock Notifier (cast/cancel alerts, customizable messages, strength display, party announcement), Calculator (standalone `/calc` toggle) |
+| **Helper** | Ragnarock Notifier, Calculator, Ping Alert, TPS Alert, Replace Texts, Better FOV |
 
 Config file: `.minecraft/config/sraddons.json`
 
@@ -237,7 +245,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 21  
-**Output:** `build/libs/SR-Addons-1.5.6.jar`
+**Output:** `build/libs/SR-Addons-1.5.7.jar`
 
 ---
 

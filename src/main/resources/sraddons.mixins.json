@@ -11,7 +11,9 @@
     "ShowOwnNametagMixin",
     "SoundPacketMixin",
     "CalcCommandMixin",
-    "TextReplaceMixin"
+    "TextReplaceMixin",
+    "BetterFovCameraMixin",
+    "BetterFovPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

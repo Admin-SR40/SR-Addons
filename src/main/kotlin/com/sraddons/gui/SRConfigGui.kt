@@ -561,6 +561,7 @@ object SRConfigGui {
             .group(createPingAlertGroup())
             .group(createTpsAlertGroup())
             .group(createReplaceTextsGroup())
+            .group(createBetterFovGroup())
             .build()
     }
 
@@ -798,6 +799,22 @@ object SRConfigGui {
                     .name(Component.translatable("sraddons.gui.helper.tps_alert.play_sound"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.play_sound.desc")))
                     .binding(true, { SRConfig.settings.helper.tpsAlert.playSound }, { SRConfig.settings.helper.tpsAlert.playSound = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createBetterFovGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.helper.better_fov"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.better_fov.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.helper.better_fov.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.better_fov.enabled.desc")))
+                    .binding(false, { SRConfig.settings.helper.betterFov.enabled }, { SRConfig.settings.helper.betterFov.enabled = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )

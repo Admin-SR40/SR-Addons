@@ -42,6 +42,11 @@ object ServerUtils {
                 if (lastGameTime != 0L) {
                     val timeDiff = gameTime - lastGameTime
                     val tps = (timeDiff * 1000.0 / elapsed).coerceAtMost(20.0)
+                    if (tps < 0.0) {
+                        lastGameTime = gameTime
+                        lastTime = currentTime
+                        return
+                    }
                     synchronized(this) {
                         tpsHistory.add(tps)
                         if (tpsHistory.size > 10) {

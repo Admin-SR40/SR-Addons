@@ -488,5 +488,10 @@
   "sraddons.gui.helper.replace_texts.enabled": "启用文本替换",
   "sraddons.gui.helper.replace_texts.enabled.desc": "所有文本替换的总开关",
   "sraddons.gui.helper.replace_texts.highlight_dev": "高亮开发者名字",
-  "sraddons.gui.helper.replace_texts.highlight_dev.desc": "将 Admin_SR40 名字替换为带 DEV 前缀的样式版本"
+  "sraddons.gui.helper.replace_texts.highlight_dev.desc": "将 Admin_SR40 名字替换为带 DEV 前缀的样式版本",
+
+  "sraddons.gui.helper.better_fov": "Better FOV",
+  "sraddons.gui.helper.better_fov.desc": "禁用速度/瞄准/水下导致的 FOV 变化",
+  "sraddons.gui.helper.better_fov.enabled": "启用",
+  "sraddons.gui.helper.better_fov.enabled.desc": "开启后将速度 FOV、瞄准 FOV、水下 FOV 设为 0%，保持原版 FOV 不变"
 }

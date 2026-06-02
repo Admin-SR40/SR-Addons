@@ -113,12 +113,17 @@ object SRConfig {
         var highlightDevName: Boolean = true
     )
 
+    data class BetterFovConfigData(
+        var enabled: Boolean = false
+    )
+
     data class HelperConfigData(
         var ragnarock: RagnarockConfigData = RagnarockConfigData(),
         var calculator: CalculatorConfigData = CalculatorConfigData(),
         var pingAlert: PingAlertConfigData = PingAlertConfigData(),
         var tpsAlert: TpsAlertConfigData = TpsAlertConfigData(),
-        var replaceTexts: ReplaceTextsConfigData = ReplaceTextsConfigData()
+        var replaceTexts: ReplaceTextsConfigData = ReplaceTextsConfigData(),
+        var betterFov: BetterFovConfigData = BetterFovConfigData()
     )
 
     data class StarredMobConfigData(
