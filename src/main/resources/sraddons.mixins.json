@@ -13,7 +13,8 @@
     "CalcCommandMixin",
     "TextReplaceMixin",
     "BetterFovCameraMixin",
-    "BetterFovPlayerMixin"
+    "BetterFovPlayerMixin",
+    "FullbrightMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -2,7 +2,6 @@ package com.sraddons.gui
 
 import com.sraddons.config.SRConfig
 import com.sraddons.config.toColor
-import com.sraddons.render.HighlightUtil
 import com.sraddons.util.Scheduler
 import dev.isxander.yacl3.api.ConfigCategory
 import dev.isxander.yacl3.api.OptionDescription
@@ -10,6 +9,7 @@ import dev.isxander.yacl3.api.OptionGroup
 import dev.isxander.yacl3.api.YetAnotherConfigLib
 import dev.isxander.yacl3.api.controller.ColorControllerBuilder
 import dev.isxander.yacl3.api.controller.DropdownStringControllerBuilder
+import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.api.controller.StringControllerBuilder
@@ -27,11 +27,10 @@ object SRConfigGui {
             .title(Component.translatable("sraddons.gui.title"))
             .save { SRConfig.save() }
             .category(createGeneralCategory())
-            .category(createEntityFireCategory())
             .category(createPartyCommandsCategory())
             .category(createStarredMobCategory())
             .category(createCarryCategory())
-            .category(createRagnarockCategory())
+            .category(createAlertsCategory())
             .build()
             .generateScreen(parent)
     }
@@ -42,58 +41,112 @@ object SRConfigGui {
         return ConfigCategory.createBuilder()
             .name(Component.translatable("sraddons.gui.general"))
             .tooltip(Component.translatable("sraddons.gui.general.desc"))
-            .group(
-                OptionGroup.createBuilder()
-                    .name(Component.translatable("sraddons.gui.general.group.display"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.group.display.desc")))
-                    .option(
-                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                            .name(Component.translatable("sraddons.gui.general.show_own_name"))
-                            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.show_own_name.desc")))
-                            .binding(true, { SRConfig.settings.general.showOwnNameInThirdPerson }, { SRConfig.settings.general.showOwnNameInThirdPerson = it })
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                    )
-                    .option(
-                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                            .name(Component.translatable("sraddons.gui.general.remove_separator"))
-                            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.remove_separator.desc")))
-                            .binding(true, { SRConfig.settings.general.removeSeparator }, { SRConfig.settings.general.removeSeparator = it })
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                    )
-                    .option(
-                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                            .name(Component.translatable("sraddons.gui.general.auto_check_updates"))
-                            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.auto_check_updates.desc")))
-                            .binding(false, { SRConfig.settings.general.autoCheckUpdates }, { SRConfig.settings.general.autoCheckUpdates = it })
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                    )
+            .group(createDisplayGroup())
+            .group(createVisualTweaksGroup())
+            .group(createTextGroup())
+            .group(createQuickToolsGroup())
+            .build()
+    }
+
+    private fun createDisplayGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.general.group.display"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.group.display.desc")))
+            .collapsed(false)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.show_own_name"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.show_own_name.desc")))
+                    .binding(true, { SRConfig.settings.general.showOwnNameInThirdPerson }, { SRConfig.settings.general.showOwnNameInThirdPerson = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.remove_separator"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.remove_separator.desc")))
+                    .binding(true, { SRConfig.settings.general.removeSeparator }, { SRConfig.settings.general.removeSeparator = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.auto_check_updates"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.auto_check_updates.desc")))
+                    .binding(false, { SRConfig.settings.general.autoCheckUpdates }, { SRConfig.settings.general.autoCheckUpdates = it })
+                    .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .build()
     }
 
-    // ========== EntityFire Category ==========
+    private fun createVisualTweaksGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.general.visual_tweaks"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.visual_tweaks.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.hide_entity_fire"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.hide_entity_fire.desc")))
+                    .binding(false, { SRConfig.settings.general.hideEntityFire }, { SRConfig.settings.general.hideEntityFire = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.fullbright"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.fullbright.desc")))
+                    .binding(false, { SRConfig.settings.general.fullbright }, { SRConfig.settings.general.fullbright = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.better_fov"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.better_fov.desc")))
+                    .binding(false, { SRConfig.settings.general.betterFov }, { SRConfig.settings.general.betterFov = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
 
-    private fun createEntityFireCategory(): ConfigCategory {
-        return ConfigCategory.createBuilder()
-            .name(Component.translatable("sraddons.gui.entityfire"))
-            .tooltip(Component.translatable("sraddons.gui.entityfire.desc"))
-            .group(
-                OptionGroup.createBuilder()
-                    .name(Component.translatable("sraddons.gui.pc.group.general"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.pc.group.general.desc")))
-                    .collapsed(false)
-                    .option(
-                        dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                            .name(Component.translatable("sraddons.gui.entityfire.hidden_fire"))
-                            .description(OptionDescription.of(Component.translatable("sraddons.gui.entityfire.hidden_fire.desc")))
-                            .binding(false, { SRConfig.settings.entityFire.hiddenFire }, { SRConfig.settings.entityFire.hiddenFire = it })
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                    )
+    private fun createTextGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.general.text"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.text.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.replace_texts_enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.replace_texts_enabled.desc")))
+                    .binding(false, { SRConfig.settings.general.replaceTextsEnabled }, { SRConfig.settings.general.replaceTextsEnabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.highlight_dev_name"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.highlight_dev_name.desc")))
+                    .binding(true, { SRConfig.settings.general.highlightDevName }, { SRConfig.settings.general.highlightDevName = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createQuickToolsGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.general.quick_tools"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.general.quick_tools.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.general.enable_calc"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.general.enable_calc.desc")))
+                    .binding(false, { SRConfig.settings.general.enableStandaloneCalc }, { SRConfig.settings.general.enableStandaloneCalc = it })
+                    .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .build()
@@ -269,16 +322,14 @@ object SRConfigGui {
         return OptionGroup.createBuilder()
             .name(Component.translatable("sraddons.gui.starredmob.render"))
             .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.render.desc")))
-            .collapsed(false)
+            .collapsed(true)
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Color>()
                     .name(Component.translatable("sraddons.gui.starredmob.highlight_color"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.highlight_color.desc")))
                     .binding(
                         Color(255, 255, 0, 200),
-                        {
-                            SRConfig.settings.starredMob.toColor()
-                        },
+                        { SRConfig.settings.starredMob.toColor() },
                         {
                             SRConfig.settings.starredMob.colorRed = it.red
                             SRConfig.settings.starredMob.colorGreen = it.green
@@ -293,15 +344,9 @@ object SRConfigGui {
                 dev.isxander.yacl3.api.Option.createBuilder<String>()
                     .name(Component.translatable("sraddons.gui.starredmob.render_mode"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.render_mode.desc")))
-                    .binding(
-                        "BOTH",
-                        { SRConfig.settings.starredMob.renderMode },
-                        { SRConfig.settings.starredMob.renderMode = it }
-                    )
+                    .binding("BOTH", { SRConfig.settings.starredMob.renderMode }, { SRConfig.settings.starredMob.renderMode = it })
                     .controller { option ->
-                        DropdownStringControllerBuilder.create(option)
-                            .allowAnyValue(false)
-                            .values(listOf("OUTLINE", "FILL", "BOTH"))
+                        DropdownStringControllerBuilder.create(option).allowAnyValue(false).values(listOf("OUTLINE", "FILL", "BOTH"))
                     }
                     .build()
             )
@@ -309,32 +354,16 @@ object SRConfigGui {
                 dev.isxander.yacl3.api.Option.createBuilder<Int>()
                     .name(Component.translatable("sraddons.gui.starredmob.line_width"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.line_width.desc")))
-                    .binding(
-                        3,
-                        { SRConfig.settings.starredMob.lineWidth },
-                        { SRConfig.settings.starredMob.lineWidth = it.coerceIn(1, 10) }
-                    )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(1, 10)
-                            .step(1)
-                    }
+                    .binding(3, { SRConfig.settings.starredMob.lineWidth }, { SRConfig.settings.starredMob.lineWidth = it.coerceIn(1, 10) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(1, 10).step(1) }
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Int>()
                     .name(Component.translatable("sraddons.gui.starredmob.max_distance"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.starredmob.max_distance.desc")))
-                    .binding(
-                        64,
-                        { SRConfig.settings.starredMob.maxDistance },
-                        { SRConfig.settings.starredMob.maxDistance = it.coerceIn(10, 128) }
-                    )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(10, 128)
-                            .step(1)
-                    }
+                    .binding(64, { SRConfig.settings.starredMob.maxDistance }, { SRConfig.settings.starredMob.maxDistance = it.coerceIn(10, 128) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(10, 128).step(1) }
                     .build()
             )
             .build()
@@ -347,76 +376,107 @@ object SRConfigGui {
             .name(Component.translatable("sraddons.gui.carry"))
             .tooltip(Component.translatable("sraddons.gui.carry.desc"))
             .group(createCarryGeneralGroup())
-            .group(createCarryHighlightGroup(
-                "sraddons.gui.carry.client_highlight",
-                "sraddons.gui.carry.client_highlight.desc",
-                { SRConfig.settings.carry.clientHighlight.enabled },
-                { SRConfig.settings.carry.clientHighlight.enabled = it },
-                {
-                    SRConfig.settings.carry.clientHighlight.toColor()
-                },
-                { c ->
-                    SRConfig.settings.carry.clientHighlight.colorRed = c.red
-                    SRConfig.settings.carry.clientHighlight.colorGreen = c.green
-                    SRConfig.settings.carry.clientHighlight.colorBlue = c.blue
-                    SRConfig.settings.carry.clientHighlight.colorAlpha = c.alpha
-                }
-            ))
-            .group(createCarryHighlightGroup(
-                "sraddons.gui.carry.boss_highlight",
-                "sraddons.gui.carry.boss_highlight.desc",
-                { SRConfig.settings.carry.bossHighlight.enabled },
-                { SRConfig.settings.carry.bossHighlight.enabled = it },
-                {
-                    SRConfig.settings.carry.bossHighlight.toColor()
-                },
-                { c ->
-                    SRConfig.settings.carry.bossHighlight.colorRed = c.red
-                    SRConfig.settings.carry.bossHighlight.colorGreen = c.green
-                    SRConfig.settings.carry.bossHighlight.colorBlue = c.blue
-                    SRConfig.settings.carry.bossHighlight.colorAlpha = c.alpha
-                }
-            ))
-            .group(createCarryHighlightGroup(
-                "sraddons.gui.carry.miniboss_highlight",
-                "sraddons.gui.carry.miniboss_highlight.desc",
-                { SRConfig.settings.carry.minibossHighlight.enabled },
-                { SRConfig.settings.carry.minibossHighlight.enabled = it },
-                {
-                    SRConfig.settings.carry.minibossHighlight.toColor()
-                },
-                { c ->
-                    SRConfig.settings.carry.minibossHighlight.colorRed = c.red
-                    SRConfig.settings.carry.minibossHighlight.colorGreen = c.green
-                    SRConfig.settings.carry.minibossHighlight.colorBlue = c.blue
-                    SRConfig.settings.carry.minibossHighlight.colorAlpha = c.alpha
-                }
-            ))
+            .group(createCarryHighlightProfilesGroup())
             .group(createBossNotificationGroup())
             .group(createCarryRenderGroup())
             .group(createMinibossDistanceGroup())
             .build()
     }
 
-    private fun createMinibossDistanceGroup(): OptionGroup {
+    private fun createCarryGeneralGroup(): OptionGroup {
         return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.carry.miniboss_distance"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_distance.desc")))
+            .name(Component.translatable("sraddons.gui.carry.general"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.general.desc")))
+            .collapsed(false)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.carry.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.enabled.desc")))
+                    .binding(true, { SRConfig.settings.carry.enabled }, { SRConfig.settings.carry.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .build()
+    }
+
+    private fun createCarryHighlightProfilesGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.carry.highlight_profiles"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.highlight_profiles.desc")))
             .collapsed(true)
             .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Int>()
-                    .name(Component.translatable("sraddons.gui.carry.miniboss_max_distance"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_max_distance.desc")))
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.carry.client_highlight"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.client_highlight.desc")))
+                    .binding(true, { SRConfig.settings.carry.clientHighlight.enabled }, { SRConfig.settings.carry.clientHighlight.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Color>()
+                    .name(Component.translatable("sraddons.gui.carry.client_color"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.client_color.desc")))
                     .binding(
-                        16,
-                        { SRConfig.settings.carry.minibossMaxDistance },
-                        { SRConfig.settings.carry.minibossMaxDistance = it.coerceIn(4, 32) }
+                        Color(57, 255, 20, 200),
+                        { SRConfig.settings.carry.clientHighlight.toColor() },
+                        { c ->
+                            SRConfig.settings.carry.clientHighlight.colorRed = c.red
+                            SRConfig.settings.carry.clientHighlight.colorGreen = c.green
+                            SRConfig.settings.carry.clientHighlight.colorBlue = c.blue
+                            SRConfig.settings.carry.clientHighlight.colorAlpha = c.alpha
+                        }
                     )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(4, 32)
-                            .step(1)
-                    }
+                    .controller(ColorControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.carry.boss_highlight"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.boss_highlight.desc")))
+                    .binding(true, { SRConfig.settings.carry.bossHighlight.enabled }, { SRConfig.settings.carry.bossHighlight.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Color>()
+                    .name(Component.translatable("sraddons.gui.carry.boss_color"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.boss_color.desc")))
+                    .binding(
+                        Color(255, 50, 50, 200),
+                        { SRConfig.settings.carry.bossHighlight.toColor() },
+                        { c ->
+                            SRConfig.settings.carry.bossHighlight.colorRed = c.red
+                            SRConfig.settings.carry.bossHighlight.colorGreen = c.green
+                            SRConfig.settings.carry.bossHighlight.colorBlue = c.blue
+                            SRConfig.settings.carry.bossHighlight.colorAlpha = c.alpha
+                        }
+                    )
+                    .controller(ColorControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.carry.miniboss_highlight"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_highlight.desc")))
+                    .binding(true, { SRConfig.settings.carry.minibossHighlight.enabled }, { SRConfig.settings.carry.minibossHighlight.enabled = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Color>()
+                    .name(Component.translatable("sraddons.gui.carry.miniboss_color"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_color.desc")))
+                    .binding(
+                        Color(255, 165, 0, 200),
+                        { SRConfig.settings.carry.minibossHighlight.toColor() },
+                        { c ->
+                            SRConfig.settings.carry.minibossHighlight.colorRed = c.red
+                            SRConfig.settings.carry.minibossHighlight.colorGreen = c.green
+                            SRConfig.settings.carry.minibossHighlight.colorBlue = c.blue
+                            SRConfig.settings.carry.minibossHighlight.colorAlpha = c.alpha
+                        }
+                    )
+                    .controller(ColorControllerBuilder::create)
                     .build()
             )
             .build()
@@ -446,54 +506,6 @@ object SRConfigGui {
             .build()
     }
 
-    private fun createCarryGeneralGroup(): OptionGroup {
-        return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.carry.general"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.general.desc")))
-            .collapsed(false)
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.carry.enabled"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.enabled.desc")))
-                    .binding(true, { SRConfig.settings.carry.enabled }, { SRConfig.settings.carry.enabled = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .build()
-    }
-
-    private fun createCarryHighlightGroup(
-        nameKey: String,
-        descKey: String,
-        enabledGetter: () -> Boolean,
-        enabledSetter: (Boolean) -> Unit,
-        colorGetter: () -> Color,
-        colorSetter: (Color) -> Unit
-    ): OptionGroup {
-        val descStr = Component.translatable(descKey).string
-        return OptionGroup.createBuilder()
-            .name(Component.translatable(nameKey))
-            .description(OptionDescription.of(Component.translatable(descKey)))
-            .collapsed(true)
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.carry.highlight_enabled"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.highlight_enabled.desc", descStr)))
-                    .binding(true, enabledGetter, enabledSetter)
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Color>()
-                    .name(Component.translatable("sraddons.gui.carry.highlight_color"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.highlight_color.desc")))
-                    .binding(Color(255, 255, 0, 200), colorGetter, colorSetter)
-                    .controller(ColorControllerBuilder::create)
-                    .build()
-            )
-            .build()
-    }
-
     private fun createCarryRenderGroup(): OptionGroup {
         return OptionGroup.createBuilder()
             .name(Component.translatable("sraddons.gui.carry.render"))
@@ -503,15 +515,9 @@ object SRConfigGui {
                 dev.isxander.yacl3.api.Option.createBuilder<String>()
                     .name(Component.translatable("sraddons.gui.carry.render_mode"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.render_mode.desc")))
-                    .binding(
-                        "BOTH",
-                        { SRConfig.settings.carry.renderMode },
-                        { SRConfig.settings.carry.renderMode = it }
-                    )
+                    .binding("BOTH", { SRConfig.settings.carry.renderMode }, { SRConfig.settings.carry.renderMode = it })
                     .controller { option ->
-                        DropdownStringControllerBuilder.create(option)
-                            .allowAnyValue(false)
-                            .values(listOf("OUTLINE", "FILL", "BOTH"))
+                        DropdownStringControllerBuilder.create(option).allowAnyValue(false).values(listOf("OUTLINE", "FILL", "BOTH"))
                     }
                     .build()
             )
@@ -519,158 +525,115 @@ object SRConfigGui {
                 dev.isxander.yacl3.api.Option.createBuilder<Int>()
                     .name(Component.translatable("sraddons.gui.carry.line_width"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.line_width.desc")))
-                    .binding(
-                        3,
-                        { SRConfig.settings.carry.lineWidth },
-                        { SRConfig.settings.carry.lineWidth = it.coerceIn(1, 10) }
-                    )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(1, 10)
-                            .step(1)
-                    }
+                    .binding(3, { SRConfig.settings.carry.lineWidth }, { SRConfig.settings.carry.lineWidth = it.coerceIn(1, 10) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(1, 10).step(1) }
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Int>()
                     .name(Component.translatable("sraddons.gui.carry.max_distance"))
                     .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.max_distance.desc")))
-                    .binding(
-                        64,
-                        { SRConfig.settings.carry.maxDistance },
-                        { SRConfig.settings.carry.maxDistance = it.coerceIn(10, 128) }
-                    )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(10, 128)
-                            .step(1)
-                    }
+                    .binding(64, { SRConfig.settings.carry.maxDistance }, { SRConfig.settings.carry.maxDistance = it.coerceIn(10, 128) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(10, 128).step(1) }
                     .build()
             )
             .build()
     }
 
-    // ========== Helper Category ==========
+    private fun createMinibossDistanceGroup(): OptionGroup {
+        return OptionGroup.createBuilder()
+            .name(Component.translatable("sraddons.gui.carry.miniboss_distance"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_distance.desc")))
+            .collapsed(true)
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Int>()
+                    .name(Component.translatable("sraddons.gui.carry.miniboss_max_distance"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.carry.miniboss_max_distance.desc")))
+                    .binding(16, { SRConfig.settings.carry.minibossMaxDistance }, { SRConfig.settings.carry.minibossMaxDistance = it.coerceIn(4, 32) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(4, 32).step(1) }
+                    .build()
+            )
+            .build()
+    }
 
-    private fun createRagnarockCategory(): ConfigCategory {
+    // ========== Alerts Category ==========
+
+    private fun createAlertsCategory(): ConfigCategory {
         return ConfigCategory.createBuilder()
-            .name(Component.translatable("sraddons.gui.helper"))
-            .tooltip(Component.translatable("sraddons.gui.helper.desc"))
+            .name(Component.translatable("sraddons.gui.alerts"))
+            .tooltip(Component.translatable("sraddons.gui.alerts.desc"))
             .group(createRagnarockGroup())
-            .group(createCalculatorGroup())
             .group(createPingAlertGroup())
             .group(createTpsAlertGroup())
-            .group(createReplaceTextsGroup())
-            .group(createBetterFovGroup())
-            .build()
-    }
-
-    private fun createReplaceTextsGroup(): OptionGroup {
-        return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.helper.replace_texts"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.replace_texts.desc")))
-            .collapsed(true)
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.replace_texts.enabled"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.replace_texts.enabled.desc")))
-                    .binding(false, { SRConfig.settings.helper.replaceTexts.enabled }, { SRConfig.settings.helper.replaceTexts.enabled = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.replace_texts.highlight_dev"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.replace_texts.highlight_dev.desc")))
-                    .binding(true, { SRConfig.settings.helper.replaceTexts.highlightDevName }, { SRConfig.settings.helper.replaceTexts.highlightDevName = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .build()
-    }
-
-    private fun createCalculatorGroup(): OptionGroup {
-        return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.helper.calculator"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.calculator.desc")))
-            .collapsed(true)
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.calculator.standalone"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.calculator.standalone.desc")))
-                    .binding(false, { SRConfig.settings.helper.calculator.enableStandaloneCalc }, { SRConfig.settings.helper.calculator.enableStandaloneCalc = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
             .build()
     }
 
     private fun createRagnarockGroup(): OptionGroup {
         return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.helper.ragnarock"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.desc")))
+            .name(Component.translatable("sraddons.gui.alerts.ragnarock"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.desc")))
             .collapsed(true)
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.enabled"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.enabled.desc")))
-                    .binding(true, { SRConfig.settings.helper.ragnarock.enabled }, { SRConfig.settings.helper.ragnarock.enabled = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.enabled.desc")))
+                    .binding(true, { SRConfig.settings.ragnarock.enabled }, { SRConfig.settings.ragnarock.enabled = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.play_sound"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.play_sound.desc")))
-                    .binding(true, { SRConfig.settings.helper.ragnarock.playSound }, { SRConfig.settings.helper.ragnarock.playSound = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.play_sound"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.play_sound.desc")))
+                    .binding(true, { SRConfig.settings.ragnarock.playSound }, { SRConfig.settings.ragnarock.playSound = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cast_notification"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cast_notification.desc")))
-                    .binding(true, { SRConfig.settings.helper.ragnarock.castNotification }, { SRConfig.settings.helper.ragnarock.castNotification = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<String>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cast_message"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cast_message.desc")))
-                    .binding("&aCasted Rag", { SRConfig.settings.helper.ragnarock.castMessage }, { SRConfig.settings.helper.ragnarock.castMessage = it })
-                    .controller(StringControllerBuilder::create)
-                    .build()
-            )
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cancel_notification"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cancel_notification.desc")))
-                    .binding(true, { SRConfig.settings.helper.ragnarock.cancelNotification }, { SRConfig.settings.helper.ragnarock.cancelNotification = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.cast_notification"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.cast_notification.desc")))
+                    .binding(true, { SRConfig.settings.ragnarock.castNotification }, { SRConfig.settings.ragnarock.castNotification = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<String>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.cancel_message"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.cancel_message.desc")))
-                    .binding("&cRagnarock Cancelled!", { SRConfig.settings.helper.ragnarock.cancelMessage }, { SRConfig.settings.helper.ragnarock.cancelMessage = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.cast_message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.cast_message.desc")))
+                    .binding("&aCasted Rag", { SRConfig.settings.ragnarock.castMessage }, { SRConfig.settings.ragnarock.castMessage = it })
                     .controller(StringControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.show_strength"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.show_strength.desc")))
-                    .binding(true, { SRConfig.settings.helper.ragnarock.showStrengthGained }, { SRConfig.settings.helper.ragnarock.showStrengthGained = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.cancel_notification"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.cancel_notification.desc")))
+                    .binding(true, { SRConfig.settings.ragnarock.cancelNotification }, { SRConfig.settings.ragnarock.cancelNotification = it })
+                    .controller(TickBoxControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<String>()
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.cancel_message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.cancel_message.desc")))
+                    .binding("&cRagnarock Cancelled!", { SRConfig.settings.ragnarock.cancelMessage }, { SRConfig.settings.ragnarock.cancelMessage = it })
+                    .controller(StringControllerBuilder::create)
+                    .build()
+            )
+            .option(
+                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.show_strength"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.show_strength.desc")))
+                    .binding(true, { SRConfig.settings.ragnarock.showStrengthGained }, { SRConfig.settings.ragnarock.showStrengthGained = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ragnarock.announce_strength"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ragnarock.announce_strength.desc")))
-                    .binding(false, { SRConfig.settings.helper.ragnarock.announceStrengthInParty }, { SRConfig.settings.helper.ragnarock.announceStrengthInParty = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ragnarock.announce_strength"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ragnarock.announce_strength.desc")))
+                    .binding(false, { SRConfig.settings.ragnarock.announceStrengthInParty }, { SRConfig.settings.ragnarock.announceStrengthInParty = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
@@ -679,62 +642,46 @@ object SRConfigGui {
 
     private fun createPingAlertGroup(): OptionGroup {
         return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.helper.ping_alert"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.desc")))
+            .name(Component.translatable("sraddons.gui.alerts.ping_alert"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ping_alert.desc")))
             .collapsed(true)
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ping_alert.enabled"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.enabled.desc")))
-                    .binding(false, { SRConfig.settings.helper.pingAlert.enabled }, { SRConfig.settings.helper.pingAlert.enabled = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ping_alert.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ping_alert.enabled.desc")))
+                    .binding(false, { SRConfig.settings.pingAlert.enabled }, { SRConfig.settings.pingAlert.enabled = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Int>()
-                    .name(Component.translatable("sraddons.gui.helper.ping_alert.threshold"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.threshold.desc")))
-                    .binding(
-                        400,
-                        { SRConfig.settings.helper.pingAlert.threshold },
-                        { SRConfig.settings.helper.pingAlert.threshold = it.coerceIn(50, 5000) }
-                    )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(50, 5000)
-                            .step(10)
-                    }
+                    .name(Component.translatable("sraddons.gui.alerts.ping_alert.threshold"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ping_alert.threshold.desc")))
+                    .binding(400, { SRConfig.settings.pingAlert.threshold }, { SRConfig.settings.pingAlert.threshold = it.coerceIn(50, 5000) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(50, 5000).step(10) }
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Int>()
-                    .name(Component.translatable("sraddons.gui.helper.ping_alert.delay"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.delay.desc")))
-                    .binding(
-                        3,
-                        { SRConfig.settings.helper.pingAlert.delaySeconds },
-                        { SRConfig.settings.helper.pingAlert.delaySeconds = it.coerceIn(1, 30) }
-                    )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(1, 30)
-                            .step(1)
-                    }
+                    .name(Component.translatable("sraddons.gui.alerts.ping_alert.delay"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ping_alert.delay.desc")))
+                    .binding(3, { SRConfig.settings.pingAlert.delaySeconds }, { SRConfig.settings.pingAlert.delaySeconds = it.coerceIn(1, 30) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(1, 30).step(1) }
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<String>()
-                    .name(Component.translatable("sraddons.gui.helper.ping_alert.message"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.message.desc")))
-                    .binding("&cHigh Ping", { SRConfig.settings.helper.pingAlert.message }, { SRConfig.settings.helper.pingAlert.message = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ping_alert.message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ping_alert.message.desc")))
+                    .binding("&cHigh Ping", { SRConfig.settings.pingAlert.message }, { SRConfig.settings.pingAlert.message = it })
                     .controller(StringControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.ping_alert.play_sound"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.ping_alert.play_sound.desc")))
-                    .binding(true, { SRConfig.settings.helper.pingAlert.playSound }, { SRConfig.settings.helper.pingAlert.playSound = it })
+                    .name(Component.translatable("sraddons.gui.alerts.ping_alert.play_sound"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.ping_alert.play_sound.desc")))
+                    .binding(true, { SRConfig.settings.pingAlert.playSound }, { SRConfig.settings.pingAlert.playSound = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
@@ -743,78 +690,46 @@ object SRConfigGui {
 
     private fun createTpsAlertGroup(): OptionGroup {
         return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.helper.tps_alert"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.desc")))
+            .name(Component.translatable("sraddons.gui.alerts.tps_alert"))
+            .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.tps_alert.desc")))
             .collapsed(true)
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.tps_alert.enabled"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.enabled.desc")))
-                    .binding(false, { SRConfig.settings.helper.tpsAlert.enabled }, { SRConfig.settings.helper.tpsAlert.enabled = it })
+                    .name(Component.translatable("sraddons.gui.alerts.tps_alert.enabled"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.tps_alert.enabled.desc")))
+                    .binding(false, { SRConfig.settings.tpsAlert.enabled }, { SRConfig.settings.tpsAlert.enabled = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Double>()
-                    .name(Component.translatable("sraddons.gui.helper.tps_alert.threshold"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.threshold.desc")))
-                    .binding(
-                        16.0,
-                        { SRConfig.settings.helper.tpsAlert.threshold },
-                        { SRConfig.settings.helper.tpsAlert.threshold = it.coerceIn(1.0, 20.0) }
-                    )
-                    .controller { option ->
-                        dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder.create(option)
-                            .range(1.0, 20.0)
-                            .step(0.5)
-                    }
+                    .name(Component.translatable("sraddons.gui.alerts.tps_alert.threshold"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.tps_alert.threshold.desc")))
+                    .binding(16.0, { SRConfig.settings.tpsAlert.threshold }, { SRConfig.settings.tpsAlert.threshold = it.coerceIn(1.0, 20.0) })
+                    .controller { option -> DoubleSliderControllerBuilder.create(option).range(1.0, 20.0).step(0.5) }
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Int>()
-                    .name(Component.translatable("sraddons.gui.helper.tps_alert.delay"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.delay.desc")))
-                    .binding(
-                        3,
-                        { SRConfig.settings.helper.tpsAlert.delaySeconds },
-                        { SRConfig.settings.helper.tpsAlert.delaySeconds = it.coerceIn(1, 30) }
-                    )
-                    .controller { option ->
-                        IntegerSliderControllerBuilder.create(option)
-                            .range(1, 30)
-                            .step(1)
-                    }
+                    .name(Component.translatable("sraddons.gui.alerts.tps_alert.delay"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.tps_alert.delay.desc")))
+                    .binding(3, { SRConfig.settings.tpsAlert.delaySeconds }, { SRConfig.settings.tpsAlert.delaySeconds = it.coerceIn(1, 30) })
+                    .controller { option -> IntegerSliderControllerBuilder.create(option).range(1, 30).step(1) }
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<String>()
-                    .name(Component.translatable("sraddons.gui.helper.tps_alert.message"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.message.desc")))
-                    .binding("&cLow TPS", { SRConfig.settings.helper.tpsAlert.message }, { SRConfig.settings.helper.tpsAlert.message = it })
+                    .name(Component.translatable("sraddons.gui.alerts.tps_alert.message"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.tps_alert.message.desc")))
+                    .binding("&cLow TPS", { SRConfig.settings.tpsAlert.message }, { SRConfig.settings.tpsAlert.message = it })
                     .controller(StringControllerBuilder::create)
                     .build()
             )
             .option(
                 dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.tps_alert.play_sound"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.tps_alert.play_sound.desc")))
-                    .binding(true, { SRConfig.settings.helper.tpsAlert.playSound }, { SRConfig.settings.helper.tpsAlert.playSound = it })
-                    .controller(TickBoxControllerBuilder::create)
-                    .build()
-            )
-            .build()
-    }
-
-    private fun createBetterFovGroup(): OptionGroup {
-        return OptionGroup.createBuilder()
-            .name(Component.translatable("sraddons.gui.helper.better_fov"))
-            .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.better_fov.desc")))
-            .collapsed(true)
-            .option(
-                dev.isxander.yacl3.api.Option.createBuilder<Boolean>()
-                    .name(Component.translatable("sraddons.gui.helper.better_fov.enabled"))
-                    .description(OptionDescription.of(Component.translatable("sraddons.gui.helper.better_fov.enabled.desc")))
-                    .binding(false, { SRConfig.settings.helper.betterFov.enabled }, { SRConfig.settings.helper.betterFov.enabled = it })
+                    .name(Component.translatable("sraddons.gui.alerts.tps_alert.play_sound"))
+                    .description(OptionDescription.of(Component.translatable("sraddons.gui.alerts.tps_alert.play_sound.desc")))
+                    .binding(true, { SRConfig.settings.tpsAlert.playSound }, { SRConfig.settings.tpsAlert.playSound = it })
                     .controller(TickBoxControllerBuilder::create)
                     .build()
             )

@@ -22,7 +22,7 @@ abstract class BetterFovPlayerMixin {
         index = 2
     )
     private fun modifyFovModifierArg(f: Float): Float {
-        if (!SRConfig.settings.helper.betterFov.enabled) return f
+        if (!SRConfig.settings.general.betterFov) return f
         val player = this as AbstractClientPlayer
 
         val attr = player.getAttribute(Attributes.MOVEMENT_SPEED) ?: return f

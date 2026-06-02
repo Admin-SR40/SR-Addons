@@ -1,11 +1,11 @@
 <h1 align="center">SR-Addons</h1>
 
-<p align="center">Unified client-side Fabric mod for Hypixel SkyBlock — combines EntityFire, PartyCommands, StarredMobHighlighter, CarryModule, and some Helpers into a single addon.</p>
+<p align="center">Unified client-side Fabric mod for Hypixel SkyBlock — combines PartyCommands, StarredMobHighlighter, CarryModule, visual tweaks, and in-game alerts into a single addon.</p>
 
 <p align="center">
   <a href="https://minecraft.net"><img src="https://img.shields.io/badge/Minecraft-1.21.11-green" alt="Minecraft"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
-  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.5.7-orange" alt="Version"></a>
+  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.5.8-orange" alt="Version"></a>
 </p>
 
 ---
@@ -17,7 +17,7 @@
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.5.7.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.5.8.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -25,9 +25,6 @@
 
 <details open>
 <summary>Modules</summary>
-
-### EntityFire
-- Hide fire animation on burning entities
 
 ### StarredMobHighlighter
 - Wireframe / fill highlight for mobs with `✯` star symbol in name
@@ -55,13 +52,19 @@
 - Earnings history, refund calculator, undo support
 - Auto price calculation (no player name needed when only 1 client)
 
-### Helper
-- **Ragnarock Notifier** — subtitle alerts when casting Ragnarock or when cancelled, with configurable messages and optional party chat strength announcement
-- **Calculator** — `/sra calc <expression>` evaluates math expressions (supports `+ - * / % ^`, parentheses, and K/M/B suffixes). Optional standalone `/calc` command via config
-- **Ping Alert** — subtitle warning when ping stays above a threshold for too long (configurable threshold, delay, message, and sound)
-- **TPS Alert** — subtitle warning when TPS drops below a threshold for too long (configurable threshold, delay, message, and sound)
-- **Replace Texts** — replace text patterns in all rendered text. Includes `&` color codes and `:g:` gradient syntax. Default Developer's Name highlight via separate toggle.
-- **Better FOV** — disable Speed/Aiming/Submerged FOV changes, keeping sprint FOV and vanilla FOV untouched
+### Visual Tweaks
+- **Hide Entity Fire** — hide fire animation on burning entities
+- **Fullbright** — maximum global brightness, ignoring ambient light
+- **Better FOV** — disable Speed/Aiming/Submerged FOV changes, keeping sprint FOV untouched
+
+### Text & Tools
+- **Replace Texts** — replace text patterns in all rendered text, with Developer's Name highlight
+- **Calculator** — `/sra calc <expression>` with K/M/B suffix support
+
+### Alerts & Notifications
+- **Ragnarock Notifier** — subtitle alerts when casting Ragnarock or when cancelled
+- **Ping Alert** — subtitle warning when ping stays above threshold
+- **TPS Alert** — subtitle warning when TPS drops below threshold
 
 All modules support **i18n** (English / 简体中文).
 
@@ -220,15 +223,15 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 <details>
 <summary>Configurations</summary>
 
-All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) with 6 tabs:
+All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) with 5 tabs:
 
 | Tab | Settings |
 |-----|----------|
-| **EntityFire** | Toggle hidden fire |
-| **PartyCommands** | Prefix, 40+ individual command toggles (separate switches for each queue floor: f1–f7, m1–m7, t1–t5), response routing (party chat / local), separator removal, auto `!mod` reply, note message, countdown sound |
-| **StarredMob** | Enabled, highlight color (RGBA), render mode (Outline/Fill/Both), line width, max distance |
-| **Carry** | Master toggle, client / boss / miniboss highlight (separate colors), miniboss distance, boss spawn subtitle notification (toggle + custom text), render mode, line width, max distance |
-| **Helper** | Ragnarock Notifier, Calculator, Ping Alert, TPS Alert, Replace Texts, Better FOV |
+| **General** | Display (own nametag, separator, update check), Visual Tweaks (entity fire, fullbright, better FOV), Text (replace texts, dev name highlight), Quick Tools (standalone /calc) |
+| **PartyCommands** | Prefix, 40+ individual command toggles, response routing, auto !mod reply, note, countdown sound |
+| **StarredMob** | Enabled, highlight color (RGBA), render mode, line width, max distance |
+| **Carry** | Master toggle, highlight profiles (client/boss/miniboss colors), boss notification, render settings |
+| **Alerts** | Ragnarock Notifier, Ping Alert, TPS Alert |
 
 Config file: `.minecraft/config/sraddons.json`
 
@@ -245,7 +248,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 21  
-**Output:** `build/libs/SR-Addons-1.5.7.jar`
+**Output:** `build/libs/SR-Addons-1.5.8.jar`
 
 ---
 

@@ -17,7 +17,7 @@ class CalcCommandMixin {
 
     @Inject(method = ["handleChatInput"], at = [At("HEAD")], cancellable = true)
     private fun onChatInput(message: String, addToHistory: Boolean, ci: CallbackInfo) {
-        if (!SRConfig.settings.helper.calculator.enableStandaloneCalc) return
+        if (!SRConfig.settings.general.enableStandaloneCalc) return
         if (!message.startsWith("/calc")) return
         if (message.length > 5 && message[5] != ' ') return
 

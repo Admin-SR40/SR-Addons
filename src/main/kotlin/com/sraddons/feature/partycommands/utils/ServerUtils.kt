@@ -36,6 +36,14 @@ object ServerUtils {
         val elapsed = currentTime - lastTime
 
         if (elapsed >= 1000) {
+            // Skip TPS recording while game is paused (config GUI etc.)
+            val screen = mc.screen
+            if (screen != null && screen.isPauseScreen) {
+                lastTime = currentTime
+                lastGameTime = mc.level?.gameTime ?: 0L
+                return
+            }
+
             val level = mc.level
             if (level != null) {
                 val gameTime = level.gameTime

@@ -39,7 +39,7 @@ object TextReplacer {
     fun rebuild() {
         patterns.clear()
 
-        if (SRConfig.settings.helper.replaceTexts.highlightDevName) {
+        if (SRConfig.settings.general.highlightDevName) {
             defaults.forEach { (k, v) -> patterns.add(k to v) }
         }
 
@@ -65,7 +65,7 @@ object TextReplacer {
     }
 
     fun replace(text: String): String {
-        if (!SRConfig.settings.helper.replaceTexts.enabled || patterns.isEmpty()) return text
+        if (!SRConfig.settings.general.replaceTextsEnabled || patterns.isEmpty()) return text
 
         val stripped = stripColorCodes(text)
         var result = stripped
@@ -80,7 +80,7 @@ object TextReplacer {
     }
 
     fun replaceFormattedSeq(seq: FormattedCharSequence): FormattedCharSequence {
-        if (!SRConfig.settings.helper.replaceTexts.enabled || patterns.isEmpty()) return seq
+        if (!SRConfig.settings.general.replaceTextsEnabled || patterns.isEmpty()) return seq
 
         val chars = mutableListOf<Int>()
         val styles = mutableListOf<Style>()

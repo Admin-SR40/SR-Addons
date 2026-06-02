@@ -17,7 +17,7 @@ import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.component.ItemLore
 
 object RagnarockNotifier {
-    private val config get() = SRConfig.settings.helper.ragnarock
+    private val config get() = SRConfig.settings.ragnarock
 
     private val cancelRegex = Regex("Ragnarock was cancelled due to (?:being hit|taking damage)!")
 

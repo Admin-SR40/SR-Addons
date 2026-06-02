@@ -13,7 +13,7 @@ abstract class BetterFovCameraMixin {
 
     @Inject(method = ["getFluidInCamera"], at = [At("TAIL")], cancellable = true)
     private fun onGetFluidInCamera(cir: CallbackInfoReturnable<FogType>) {
-        if (SRConfig.settings.helper.betterFov.enabled) {
+        if (SRConfig.settings.general.betterFov) {
             cir.returnValue = FogType.NONE
         }
     }

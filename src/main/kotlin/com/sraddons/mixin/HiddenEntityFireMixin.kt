@@ -20,7 +20,7 @@ abstract class HiddenEntityFireMixin {
         cameraState: net.minecraft.client.renderer.state.CameraRenderState,
         ci: CallbackInfo
     ) {
-        if (SRConfig.settings.entityFire.hiddenFire) {
+        if (SRConfig.settings.general.hideEntityFire) {
             (state as EntityRenderState).displayFireAnimation = false
         }
     }

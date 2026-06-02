@@ -46,8 +46,8 @@ object PingTpsAlertNotifier {
         val delta = now - lastCheckTime
         lastCheckTime = now
 
-        val pingCfg = SRConfig.settings.helper.pingAlert
-        val tpsCfg = SRConfig.settings.helper.tpsAlert
+        val pingCfg = SRConfig.settings.pingAlert
+        val tpsCfg = SRConfig.settings.tpsAlert
 
         if (pingCfg.enabled) tickPing(pingCfg, delta)
         if (tpsCfg.enabled) tickTps(tpsCfg, delta)
