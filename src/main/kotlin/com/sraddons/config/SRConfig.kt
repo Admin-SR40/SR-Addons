@@ -136,12 +136,13 @@ object SRConfig {
 
             try {
                 val rawJson = CONFIG_FILE.readText(StandardCharsets.UTF_8)
-                if (needsHelperMigration(rawJson)) {
-                    migrateFromHelper(rawJson)
+                val root = GSON.fromJson(rawJson, com.google.gson.JsonObject::class.java)
+                if (root?.has("helper") == true) {
+                    migrateFromHelper(root)
                     save()
                     return
                 }
-                val data = GSON.fromJson(rawJson, SRConfigData::class.java)
+                val data = GSON.fromJson(root, SRConfigData::class.java)
                 if (data != null) {
                     settings = data
                 }
@@ -152,13 +153,8 @@ object SRConfig {
         }
     }
 
-    private fun needsHelperMigration(rawJson: String): Boolean {
-        return rawJson.contains("\"helper\"")
-    }
-
-    private fun migrateFromHelper(rawJson: String) {
+    private fun migrateFromHelper(root: com.google.gson.JsonObject) {
         try {
-            val root = GSON.fromJson(rawJson, com.google.gson.JsonObject::class.java) ?: run { settings = SRConfigData(); return }
 
             settings = SRConfigData()
 

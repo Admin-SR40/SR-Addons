@@ -36,10 +36,7 @@ fun FabricClientCommandSource.lookupType(name: String): CarryType? {
     return type
 }
 
-fun FabricClientCommandSource.requireType(name: String): CarryType? {
-    CarryState.saveUndo()
-    return lookupType(name)
-}
+fun FabricClientCommandSource.requireType(name: String): CarryType? = lookupType(name)
 
 inline fun FabricClientCommandSource.withSingleClient(action: (CarryClient) -> Unit) {
     val count = CarryState.clients.size

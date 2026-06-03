@@ -52,10 +52,46 @@ object CarryHighlightRenderer {
 
             val entities = world.entitiesForRendering()
 
-            val clientPlayers = if (clientEnabled || minibossEnabled) findClientPlayers(entities) else emptyList()
-            val bossArmorStands = if (bossEnabled) findBossArmorStands(entities) else emptyList()
+            // Single-pass entity classification
+            val clientPlayers = mutableListOf<LivingEntity>()
+            val bossArmorStands = mutableListOf<ArmorStand>()
+            val minibossArmorStands = mutableListOf<ArmorStand>()
+
+            val hasClients = CarryState.clients.isNotEmpty()
+            val checkMiniboss = minibossEnabled && hasClients
+            val checkBoss = bossEnabled && hasClients
+            val checkClient = clientEnabled || (minibossEnabled && hasClients)
+
+            if (checkClient || checkBoss || checkMiniboss) {
+                val minibossNames = CarryState.minibossNames
+                for (entity in entities) {
+                    if (entity is Player && checkClient) {
+                        val nameLower = entity.name.string.lowercase()
+                        if (CarryState.clients.containsKey(nameLower)) {
+                            clientPlayers.add(entity)
+                        }
+                    } else if (entity is ArmorStand) {
+                        val name = entity.name.string
+                        if (checkBoss) {
+                            val idx = name.indexOf(BOSS_TAG)
+                            if (idx >= 0) {
+                                val playerNameLower = name.substring(idx + BOSS_TAG.length).trim().lowercase()
+                                if (CarryState.clients.containsKey(playerNameLower)) {
+                                    bossArmorStands.add(entity)
+                                }
+                            }
+                        }
+                        if (checkMiniboss && minibossNames.any { name.contains(it, ignoreCase = true) }) {
+                            minibossArmorStands.add(entity)
+                        }
+                    }
+                }
+            }
+
             val bossMobs = if (bossArmorStands.isNotEmpty()) findBossMobs(bossArmorStands, entities) else emptyList()
-            val minibosses = if (minibossEnabled) findMinibosses(entities, clientPlayers, cfg.minibossMaxDistance.coerceIn(4, 32)) else emptyList()
+            val minibosses = if (minibossArmorStands.isNotEmpty())
+                resolveMinibosses(minibossArmorStands, entities, clientPlayers, cfg.minibossMaxDistance.coerceIn(4, 32))
+            else emptyList()
 
             // Boss spawn notification — incremental tracking
             if (bossEnabled && cfg.bossSpawnNotification) {
@@ -122,64 +158,33 @@ object CarryHighlightRenderer {
         }
     }
 
-    private fun findClientPlayers(entities: Iterable<Entity>): List<LivingEntity> {
-        if (CarryState.clients.isEmpty()) return emptyList()
-        val result = mutableListOf<LivingEntity>()
-        for (entity in entities) {
-            if (entity is Player) {
-                val nameLower = entity.name.string.lowercase()
-                if (CarryState.clients.containsKey(nameLower)) {
-                    result.add(entity)
-                }
-            }
-        }
-        return result
-    }
-
     private fun findBossMobs(bossArmorStands: List<ArmorStand>, entities: Iterable<Entity>): List<LivingEntity> {
-        val result = mutableListOf<LivingEntity>()
+        val result = LinkedHashSet<LivingEntity>()
         for (armorStand in bossArmorStands) {
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
-            if (target != null && target !in result) {
-                result.add(target)
-            }
+            if (target != null) result.add(target)
         }
-        return result
-    }
-
-    private fun findBossArmorStands(entities: Iterable<Entity>): List<ArmorStand> {
-        if (CarryState.clients.isEmpty()) return emptyList()
-        return entities.filterIsInstance<ArmorStand>().filter { stand ->
-            val name = stand.name.string
-            val idx = name.indexOf(BOSS_TAG)
-            if (idx < 0) return@filter false
-            val playerNameLower = name.substring(idx + BOSS_TAG.length).trim().lowercase()
-            CarryState.clients.containsKey(playerNameLower)
-        }
+        return result.toList()
     }
 
     private fun triggerBossSpawnNotification() {
         TitleUtil.showSubtitle(SRConfig.settings.carry.bossSpawnNotificationText.trim())
     }
 
-    private fun findMinibosses(entities: Iterable<Entity>, clientPlayers: List<LivingEntity>, maxDistance: Int): List<LivingEntity> {
-        if (clientPlayers.isEmpty()) return emptyList()
-        val minibossArmorStands = entities.filterIsInstance<ArmorStand>().filter { stand ->
-            val name = stand.name.string
-            CarryState.minibossNames.any { name.contains(it, ignoreCase = true) }
-        }
-        if (minibossArmorStands.isEmpty()) return emptyList()
-
+    private fun resolveMinibosses(
+        minibossArmorStands: List<ArmorStand>,
+        entities: Iterable<Entity>,
+        clientPlayers: List<LivingEntity>,
+        maxDistance: Int
+    ): List<LivingEntity> {
         val maxDistSq = (maxDistance * maxDistance).toDouble()
-        val result = mutableListOf<LivingEntity>()
+        val result = LinkedHashSet<LivingEntity>()
         for (armorStand in minibossArmorStands) {
             val nearAnyClient = clientPlayers.any { armorStand.distanceToSqr(it) <= maxDistSq }
             if (!nearAnyClient) continue
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
-            if (target != null && target !in result) {
-                result.add(target)
-            }
+            if (target != null) result.add(target)
         }
-        return result
+        return result.toList()
     }
 }

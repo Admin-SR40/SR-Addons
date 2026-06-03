@@ -73,7 +73,7 @@ object StarredMobRenderer {
     }
 
     private fun findStarredMobs(entities: Iterable<Entity>): List<LivingEntity> {
-        val result = mutableListOf<LivingEntity>()
+        val result = LinkedHashSet<LivingEntity>()
         val starredArmorStands = mutableListOf<ArmorStand>()
 
         for (entity in entities) {
@@ -84,7 +84,7 @@ object StarredMobRenderer {
                 }
             } else if (entity is LivingEntity) {
                 val name = entity.customName?.string ?: entity.name.string
-                if (name.contains(STAR_SYMBOL) && entity !in result) {
+                if (name.contains(STAR_SYMBOL)) {
                     result.add(entity)
                 }
             }
@@ -92,11 +92,11 @@ object StarredMobRenderer {
 
         for (armorStand in starredArmorStands) {
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
-            if (target != null && target !in result) {
+            if (target != null) {
                 result.add(target)
             }
         }
 
-        return result
+        return result.toList()
     }
 }

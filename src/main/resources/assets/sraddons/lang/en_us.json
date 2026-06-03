@@ -82,6 +82,7 @@
   "sraddons.chat.autoreply.mod": "Using SR-Addons Mod by Admin_SR40",
   "sraddons.command.author": "Made by Admin_SR40",
   "sraddons.command.calc.error": "Invalid expression",
+  "sraddons.command.calc.standalone_disabled": "/calc is disabled in config. Enable \"Enable /calc Command\" in settings.",
   "sraddons.command.gui.opening": "Opening config GUI...",
   "sraddons.command.help.calc_desc": "Evaluate a math expression",
   "sraddons.command.help.config_desc": "Open config GUI",

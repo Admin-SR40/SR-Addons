@@ -46,8 +46,10 @@ fun getPositionString(): String {
 
 fun Double.toFixed(decimals: Int = 1): String = String.format("%.${decimals}f", this)
 
+private val COLOR_CODE_REGEX = Regex("\u00a7[0-9a-fk-or]")
+
 val String.noControlCodes: String
-    get() = this.replace(Regex("\u00a7[0-9a-fk-or]"), "")
+    get() = this.replace(COLOR_CODE_REGEX, "")
 
 fun respond(component: Component) {
     if (SRConfig.settings.partyCommands.respondInPartyChat && PartyUtils.isInParty) {

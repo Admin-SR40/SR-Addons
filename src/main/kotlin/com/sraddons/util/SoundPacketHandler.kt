@@ -3,7 +3,7 @@ package com.sraddons.util
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 
 object SoundPacketHandler {
-    private val listeners = mutableListOf<(ClientboundSoundPacket) -> Unit>()
+    private val listeners = java.util.concurrent.CopyOnWriteArrayList<(ClientboundSoundPacket) -> Unit>()
 
     fun register(listener: (ClientboundSoundPacket) -> Unit) {
         listeners += listener

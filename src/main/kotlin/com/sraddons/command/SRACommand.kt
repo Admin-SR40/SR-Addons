@@ -16,8 +16,11 @@ import kotlinx.coroutines.CoroutineScope
 import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.apache.logging.log4j.LogManager
 
 object SRACommand {
+
+    private val LOGGER = LogManager.getLogger("SR-Addons-Command")
 
     fun register() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
@@ -29,7 +32,9 @@ object SRACommand {
                     SRConfig.load()
                     try {
                         com.sraddons.feature.partycommands.commands.Commands.rebuildDispatcher()
-                    } catch (_: Exception) {}
+                    } catch (e: Exception) {
+                        LOGGER.warn("Failed to rebuild dispatcher during reload", e)
+                    }
                     context.source.sendFeedback(
                         Constants.makePrefix().copy()
                             .append(Component.translatable("sraddons.command.reloaded").withColor(0x55FF55))
@@ -123,19 +128,7 @@ object SRACommand {
                     ClientCommandManager.argument("expression", StringArgumentType.greedyString())
                         .executes { context ->
                             val expr = StringArgumentType.getString(context, "expression")
-                            val prefix = Constants.makePrefix()
-                            try {
-                                val result = CalcUtil.evaluate(expr)
-                                context.source.sendFeedback(
-                                    prefix.copy()
-                                        .append(Component.literal("§7$expr = §a${CalcUtil.format(result)}"))
-                                )
-                            } catch (e: Exception) {
-                                context.source.sendFeedback(
-                                    prefix.copy()
-                                        .append(Component.translatable("sraddons.command.calc.error").withColor(0xFF5555))
-                                )
-                            }
+                            executeCalc(context.source, expr)
                             1
                         }
                 )
@@ -297,6 +290,44 @@ object SRACommand {
                 .then(calcNode)
                 .then(rtNode)
                 .also { dispatcher.register(it) }
+
+            // Standalone /calc command (with TAB completion; Mixin ensures priority over other mods)
+            val calcRoot = ClientCommandManager.literal("calc")
+                .then(
+                    ClientCommandManager.argument("expression", StringArgumentType.greedyString())
+                        .executes { context ->
+                            if (!SRConfig.settings.general.enableStandaloneCalc) {
+                                context.source.sendFeedback(
+                                    Constants.makePrefix().copy()
+                                        .append(Component.translatable("sraddons.command.calc.standalone_disabled").withColor(0xFF5555))
+                                )
+                                return@executes 1
+                            }
+                            val expr = StringArgumentType.getString(context, "expression")
+                            executeCalc(context.source, expr)
+                            1
+                        }
+                )
+            dispatcher.register(calcRoot)
+        }
+    }
+
+    private fun executeCalc(
+        source: net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource,
+        expr: String
+    ) {
+        val prefix = Constants.makePrefix()
+        try {
+            val result = CalcUtil.evaluate(expr)
+            source.sendFeedback(
+                prefix.copy()
+                    .append(Component.literal("§7$expr = §a${CalcUtil.format(result)}"))
+            )
+        } catch (e: Exception) {
+            source.sendFeedback(
+                prefix.copy()
+                    .append(Component.translatable("sraddons.command.calc.error").withColor(0xFF5555))
+            )
         }
     }
 

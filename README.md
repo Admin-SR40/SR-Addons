@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://minecraft.net"><img src="https://img.shields.io/badge/Minecraft-1.21.11-green" alt="Minecraft"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
-  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.5.8-orange" alt="Version"></a>
+  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.6.0-orange" alt="Version"></a>
 </p>
 
 ---
@@ -17,7 +17,7 @@
 3. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 4. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 5. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-6. Download `SR-Addons-1.5.8.jar` and place it in `.minecraft/mods/`
+6. Download `SR-Addons-1.6.0.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -59,7 +59,7 @@
 
 ### Text & Tools
 - **Replace Texts** — replace text patterns in all rendered text, with Developer's Name highlight
-- **Calculator** — `/sra calc <expression>` with K/M/B suffix support
+- **Calculator** — `/calc <expression>` or `/sra calc <expression>` with K/M/B suffix support and TAB completion
 
 ### Alerts & Notifications
 - **Ragnarock Notifier** — subtitle alerts when casting Ragnarock or when cancelled
@@ -84,11 +84,10 @@ All modules support **i18n** (English / 简体中文).
 | `/sra config` / `/sra gui` | Open config GUI |
 | `/sra version` | Show version info |
 | `/sra update` | Check for updates |
-| `/sra calc <expr>` | Evaluate a math expression |
+| `/sra calc <expr>` | Evaluate a math expression (alias: `/calc`) |
 | `/sra replaceTexts add "<word>" "<replacement>"` | Add a text replacement |
 | `/sra replaceTexts remove "<word>"` | Remove a text replacement |
 | `/sra replaceTexts list` | List custom replacements |
-| `/sra replaceTexts debug` | Capture rendered texts for diagnostics |
 
 </details>
 
@@ -227,7 +226,7 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 
 | Tab | Settings |
 |-----|----------|
-| **General** | Display (own nametag, separator, update check), Visual Tweaks (entity fire, fullbright, better FOV), Text (replace texts, dev name highlight), Quick Tools (standalone /calc) |
+| **General** | Display (own nametag, separator, update check), Visual Tweaks (entity fire, fullbright, better FOV), Text (replace texts, dev name highlight), Quick Tools (`/calc` command) |
 | **PartyCommands** | Prefix, 40+ individual command toggles, response routing, auto !mod reply, note, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode, line width, max distance |
 | **Carry** | Master toggle, highlight profiles (client/boss/miniboss colors), boss notification, render settings |
@@ -248,7 +247,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 21  
-**Output:** `build/libs/SR-Addons-1.5.8.jar`
+**Output:** `build/libs/SR-Addons-1.6.0.jar`
 
 ---
 

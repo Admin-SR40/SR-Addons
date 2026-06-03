@@ -25,6 +25,7 @@ object TextReplacer {
         get() = patterns
 
     private val patterns: MutableList<Pair<String, String>> = mutableListOf()
+    private val compiledPatterns: MutableList<Pair<Regex, String>> = mutableListOf()
 
     val gradientNames = listOf(
         "cyanToLightBlue", "goldToYellow", "aquaToGreen", "redToOrange", "purpleToPink"
@@ -38,6 +39,7 @@ object TextReplacer {
 
     fun rebuild() {
         patterns.clear()
+        compiledPatterns.clear()
 
         if (SRConfig.settings.general.highlightDevName) {
             defaults.forEach { (k, v) -> patterns.add(k to v) }
@@ -46,6 +48,10 @@ object TextReplacer {
         customs.entries.forEach { (k, v) -> patterns.add(k to v) }
 
         patterns.sortByDescending { it.first.length }
+
+        for ((key, value) in patterns) {
+            compiledPatterns.add(Regex(Regex.escape(key)) to value)
+        }
     }
 
     fun add(key: String, value: String) {
@@ -70,10 +76,9 @@ object TextReplacer {
         val stripped = stripColorCodes(text)
         var result = stripped
 
-        for ((key, value) in patterns) {
-            val escaped = Regex.escape(key)
+        for ((regex, value) in compiledPatterns) {
             val plainReplacement = stripGradientAndColors(value)
-            result = result.replace(Regex(escaped), TitleUtil.parseColorCodes(plainReplacement) + "§r")
+            result = result.replace(regex, TitleUtil.parseColorCodes(plainReplacement) + "§r")
         }
 
         return result

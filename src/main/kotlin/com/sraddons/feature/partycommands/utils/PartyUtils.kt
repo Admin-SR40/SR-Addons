@@ -26,10 +26,12 @@ object PartyUtils {
     }
 
     var partyLeader: String? = null
-        internal set
+        @Synchronized internal set
+        @Synchronized get
 
     var isInParty: Boolean = false
-        internal set
+        @Synchronized internal set
+        @Synchronized get
 
     fun isLeader(): Boolean = synchronized(this) {
         partyLeader == mc.player?.name?.string

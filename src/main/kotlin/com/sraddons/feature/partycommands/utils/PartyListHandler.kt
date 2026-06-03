@@ -16,6 +16,8 @@ object PartyListHandler {
     private val partySizePattern = Regex("^Party Members \\((\\d+)\\)$")
     private val leaderPattern = Regex("^Party Leader: (.+)$")
     private val membersPattern = Regex("^Party Members: (.+)$")
+    private val memberWithBulletPattern = Regex("((?:\\[.+?])?\\s*[a-zA-Z0-9_]+)(?:\\s*(§[0-9a-f])?●)?")
+    private val separatorLinePattern = Regex("^[\\-▬─══=\\s]+\$")
 
     private val interceptSeparatorPatterns = listOf(
         Regex("^Party Finder > .+ joined the dungeon group!"),
@@ -175,7 +177,6 @@ object PartyListHandler {
             }
             membersPattern.find(line)?.let { match ->
                 val membersText = match.groupValues[1]
-                val memberWithBulletPattern = Regex("((?:\\[.+?])?\\s*[a-zA-Z0-9_]+)(?:\\s*(\u00a7[0-9a-f])?\u25cf)?")
                 memberWithBulletPattern.findAll(membersText).forEach { memberMatch ->
                     val memberName = memberMatch.groupValues[1].trim()
                     val bulletColor = memberMatch.groupValues[2]
@@ -271,6 +272,6 @@ object PartyListHandler {
     }
 
     private fun isSeparatorLine(text: String): Boolean {
-        return text.matches(Regex("^[\\-\u25ac\u2500\u2550\u2550=\\s]+\$"))
+        return text.matches(separatorLinePattern)
     }
 }

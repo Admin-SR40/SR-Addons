@@ -60,12 +60,14 @@ abstract class CommandSuggestionsMixin {
 
     @Inject(method = ["showSuggestions"], at = [At("HEAD")])
     private fun onShowSuggestions(bl: Boolean, ci: CallbackInfo) {
-        val value = input!!.value
+        val editBox = input ?: return
+        val pending = pendingSuggestions ?: return
+        val value = editBox.value
         val prefix = SRConfig.settings.partyCommands.prefix
 
-        if (value.startsWith(prefix) && pendingSuggestions != null && pendingSuggestions!!.isDone) {
+        if (value.startsWith(prefix) && pending.isDone) {
             try {
-                val brigadierSuggestions = pendingSuggestions!!.getNow(null)
+                val brigadierSuggestions = pending.getNow(null)
                 if (brigadierSuggestions != null) {
                     val filtered = brigadierSuggestions.list.filter { !it.text.startsWith("!") }
 
@@ -75,65 +77,70 @@ abstract class CommandSuggestionsMixin {
                         )
                     }
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                org.apache.logging.log4j.LogManager.getLogger("SR-Addons-Mixin")
+                    .warn("Failed to filter ! suggestions", e)
+            }
         }
     }
 
     @Inject(method = ["updateCommandInfo"], at = [At("HEAD")], cancellable = true)
     private fun onUpdateCommandInfo(ci: CallbackInfo) {
-        val value = input!!.value
+        val editBox = input ?: return
+        val value = editBox.value
         val prefix = SRConfig.settings.partyCommands.prefix
         val length = prefix.length
 
-        if (value.startsWith(prefix)) {
-            if (!keepSuggestions) {
-                input!!.setSuggestion(null)
-                suggestions = null
-            }
+        if (!value.startsWith(prefix)) return
 
-            if (currentParse != null && currentParse!!.reader.string != value) {
-                currentParse = null
-            }
-
-            val reader = StringReader(value)
-            reader.cursor = length
-
-            if (currentParse == null) {
-                val player = Minecraft.getInstance().player
-                if (player != null) {
-                    currentParse = Commands.DISPATCHER.parse(reader, player.connection.suggestionsProvider)
-                }
-            }
-
-            val cursor = input!!.cursorPosition
-            if (cursor >= length && (suggestions == null || !keepSuggestions)) {
-                if (currentParse != null && currentParse!!.exceptions.isNotEmpty()) {
-                    pendingSuggestions = CompletableFuture.completedFuture(
-                        Suggestions(StringRange.at(cursor), emptyList())
-                    )
-                } else {
-                    pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(currentParse, cursor)
-                }
-
-                pendingSuggestions = pendingSuggestions!!.thenApply { s ->
-                    val filtered = s.list.filter { !it.text.startsWith("!") }
-                    Suggestions(s.range, filtered)
-                }
-
-                if (pendingSuggestions!!.isDone && allowSuggestions) {
-                    if (currentParse != null && currentParse!!.reader.string == value) {
-                        showSuggestions(false)
-                    }
-                }
-            }
-
-            if (currentParse != null && currentParse!!.exceptions.isNotEmpty()) {
-                updateUsageInfo()
-            } else {
-                commandUsage!!.clear()
-            }
-
-            ci.cancel()
+        if (!keepSuggestions) {
+            editBox.setSuggestion(null)
+            suggestions = null
         }
+
+        if (currentParse?.reader?.string != value) {
+            currentParse = null
+        }
+
+        val reader = StringReader(value)
+        reader.cursor = length
+
+        if (currentParse == null) {
+            val player = Minecraft.getInstance().player
+            if (player != null) {
+                currentParse = Commands.DISPATCHER.parse(reader, player.connection.suggestionsProvider)
+            }
+        }
+
+        val cursor = editBox.cursorPosition
+        if (cursor >= length && (suggestions == null || !keepSuggestions)) {
+            val parse = currentParse
+            if (parse != null && parse.exceptions.isNotEmpty()) {
+                pendingSuggestions = CompletableFuture.completedFuture(
+                    Suggestions(StringRange.at(cursor), emptyList())
+                )
+            } else {
+                pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(parse, cursor)
+            }
+
+            pendingSuggestions = pendingSuggestions?.thenApply { s ->
+                val filtered = s.list.filter { !it.text.startsWith("!") }
+                Suggestions(s.range, filtered)
+            }
+
+            if (pendingSuggestions?.isDone == true && allowSuggestions) {
+                if (currentParse?.reader?.string == value) {
+                    showSuggestions(false)
+                }
+            }
+        }
+
+        if (currentParse?.exceptions?.isNotEmpty() == true) {
+            updateUsageInfo()
+        } else {
+            commandUsage?.clear()
+        }
+
+        ci.cancel()
     }
 }

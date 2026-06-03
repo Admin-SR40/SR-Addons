@@ -82,6 +82,7 @@
   "sraddons.chat.autoreply.mod": "正在使用 Admin_SR40 制作的 SR-Addons Mod",
   "sraddons.command.author": "作者 Admin_SR40",
   "sraddons.command.calc.error": "表达式无效",
+  "sraddons.command.calc.standalone_disabled": "/calc 已在配置中禁用。请在设置中启用 \"Enable /calc Command\"。",
   "sraddons.command.gui.opening": "正在打开配置界面...",
   "sraddons.command.help.calc_desc": "计算数学表达式",
   "sraddons.command.help.config_desc": "打开配置界面",
