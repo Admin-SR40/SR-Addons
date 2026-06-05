@@ -59,7 +59,8 @@ object PartyManagementCommands {
                 builder.then(Command.argument("player", StringArgumentType.word())
                     .suggests(suggestMembers)
                     .executes { ctx ->
-                        if (!PartyUtils.isInParty) {
+                        if (!SRConfig.isCommandEnabled("transfer")) { respondDisabled("transfer") }
+                        else if (!PartyUtils.isInParty) {
                             respond(formatResponse(label("error"), error("not_in_party")))
                         } else if (PartyUtils.isLeader()) {
                             val input = StringArgumentType.getString(ctx, "player")

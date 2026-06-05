@@ -26,7 +26,7 @@ object RagnarockNotifier {
 
     private const val RAGNAROCK_PITCH = 1.4920635f
     private const val RAGNAROCK_AXE_ID = "RAGNAROCK_AXE"
-    private const val CAST_COOLDOWN_MS = 1000L
+    private const val CAST_COOLDOWN_NS = 1_000_000_000L
 
     private var lastCastTime = 0L
 
@@ -56,8 +56,8 @@ object RagnarockNotifier {
         if (!config.enabled || !config.castNotification) return
         if (packet.pitch != RAGNAROCK_PITCH) return
 
-        val now = System.currentTimeMillis()
-        if (now - lastCastTime < CAST_COOLDOWN_MS) return
+        val now = System.nanoTime()
+        if (now - lastCastTime < CAST_COOLDOWN_NS) return
 
         val player = Minecraft.getInstance().player ?: return
         val mainHand = player.mainHandItem

@@ -12,11 +12,17 @@ object CarryPriceUtil {
         return when {
             trimmed.endsWith("M") -> {
                 val num = trimmed.dropLast(1).toDoubleOrNull() ?: return null
-                if (num < 0) null else (num * MILLION).toLong()
+                if (num < 0) null else {
+                    val value = num * MILLION
+                    if (value > Long.MAX_VALUE.toDouble()) null else value.toLong()
+                }
             }
             trimmed.endsWith("K") -> {
                 val num = trimmed.dropLast(1).toDoubleOrNull() ?: return null
-                if (num < 0) null else (num * THOUSAND).toLong()
+                if (num < 0) null else {
+                    val value = num * THOUSAND
+                    if (value > Long.MAX_VALUE.toDouble()) null else value.toLong()
+                }
             }
             else -> {
                 val num = trimmed.toLongOrNull() ?: return null
@@ -39,9 +45,10 @@ object CarryPriceUtil {
         return "${String.format("%.1f", coins.toDouble() / divisor)}$suffix"
     }
 
-    fun effectivePrice(type: CarryType, amount: Int): Long {
+    fun effectivePrice(type: CarryType, client: CarryClient): Long {
+        if (!client.useBulk) return type.price
         val bulk = type.bulkPrice
-        if (bulk != null && amount >= type.bulkThreshold) return bulk
+        if (bulk != null && client.amount >= type.bulkThreshold) return bulk
         return type.price
     }
 }

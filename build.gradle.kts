@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.sraddons"
-version = "1.6.0"
+version = "1.6.2"
 
 repositories {
     mavenCentral()

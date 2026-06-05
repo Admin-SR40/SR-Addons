@@ -70,11 +70,13 @@ object CarryState {
     }
 
     fun saveHistory() {
-        synchronized(this) {
+        val snapshot: CarryStatus
+        synchronized(this) { snapshot = status.copy() }
+        java.util.concurrent.CompletableFuture.runAsync {
             val tmpFile = File(HISTORY_FILE.parentFile, "${HISTORY_FILE.name}.tmp")
             try {
                 OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
-                    GSON.toJson(status, writer)
+                    GSON.toJson(snapshot, writer)
                 }
                 if (!tmpFile.renameTo(HISTORY_FILE)) {
                     LOGGER.warn("Failed to rename history tmp file")
@@ -87,16 +89,19 @@ object CarryState {
     }
 
     fun saveData() {
+        val snapshot: CarryDataFile
         synchronized(this) {
+            snapshot = CarryDataFile(
+                types = types.values.toList(),
+                clients = clients.values.toList(),
+                minibossNames = minibossNames.toList()
+            )
+        }
+        java.util.concurrent.CompletableFuture.runAsync {
             val tmpFile = File(DATA_FILE.parentFile, "${DATA_FILE.name}.tmp")
             try {
                 OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
-                    val file = CarryDataFile(
-                        types = types.values.toList(),
-                        clients = clients.values.toList(),
-                        minibossNames = minibossNames.toList()
-                    )
-                    GSON.toJson(file, writer)
+                    GSON.toJson(snapshot, writer)
                 }
                 if (!tmpFile.renameTo(DATA_FILE)) {
                     LOGGER.warn("Failed to rename carry data tmp file")

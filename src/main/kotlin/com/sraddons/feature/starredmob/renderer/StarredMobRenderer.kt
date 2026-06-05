@@ -1,7 +1,7 @@
 package com.sraddons.feature.starredmob.renderer
 
 import com.sraddons.config.SRConfig
-import com.sraddons.config.toColor
+import com.sraddons.config.toARGB
 import com.sraddons.render.HighlightUtil
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 import net.minecraft.client.Minecraft
@@ -38,7 +38,7 @@ object StarredMobRenderer {
 
             if (starredMobs.isEmpty()) return@register
 
-            val color = SRConfig.settings.starredMob.toColor()
+            val color = SRConfig.settings.starredMob.toARGB()
             val renderMode = SRConfig.settings.starredMob.renderMode.uppercase()
             val lineWidth = SRConfig.settings.starredMob.lineWidth.coerceIn(1, 10).toFloat()
             val maxDistance = SRConfig.settings.starredMob.maxDistance.coerceIn(10, 128)

@@ -7,7 +7,6 @@
     "ChatMixin",
     "ChatScreenMixin",
     "CommandSuggestionsMixin",
-    "ClientPacketListenerMixin",
     "ShowOwnNametagMixin",
     "SoundPacketMixin",
     "CalcCommandMixin",

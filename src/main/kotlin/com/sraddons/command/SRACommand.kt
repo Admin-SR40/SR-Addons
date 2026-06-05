@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import kotlinx.coroutines.CoroutineScope
 import java.net.URI
@@ -289,6 +290,7 @@ object SRACommand {
                 .then(updateNode)
                 .then(calcNode)
                 .then(rtNode)
+                .then(buildAlertNode())
                 .also { dispatcher.register(it) }
 
             // Standalone /calc command (with TAB completion; Mixin ensures priority over other mods)
@@ -330,5 +332,126 @@ object SRACommand {
             )
         }
     }
+
+    private fun buildAlertNode() = ClientCommandManager.literal("alert")
+        .executes { context ->
+            val prefix = Constants.makePrefix()
+            context.source.sendFeedback(prefix.copy().append(Component.literal("Chat Alert commands:").withColor(0x55FFFF)))
+            context.source.sendFeedback(Component.literal("§7/sra alert add \"keyword\" \"subtitle\" [cooldown] §8- §fAdd alert (cooldown in seconds, default 5)"))
+            context.source.sendFeedback(Component.literal("§7/sra alert remove \"keyword\" §8- §fRemove alert"))
+            context.source.sendFeedback(Component.literal("§7/sra alert list §8- §fList all alerts"))
+            context.source.sendFeedback(Component.literal("§7/sra alert clear §8- §fRemove all alerts"))
+            1
+        }
+        .then(
+            ClientCommandManager.literal("add")
+                .then(
+                    ClientCommandManager.argument("keyword", StringArgumentType.string())
+                        .then(
+                            ClientCommandManager.argument("subtitle", StringArgumentType.string())
+                                .executes { context ->
+                                    val keyword = StringArgumentType.getString(context, "keyword")
+                                    val subtitle = StringArgumentType.getString(context, "subtitle")
+                                    val prefix = Constants.makePrefix()
+                                    SRConfig.settings.chatAlert.entries.add("$keyword | $subtitle | 5 | yes | yes")
+                                    SRConfig.save()
+                                    context.source.sendFeedback(
+                                        prefix.copy()
+                                            .append(Component.literal("Added alert: \"$keyword\" → \"$subtitle\" (cooldown: 5s)").withColor(0x55FF55))
+                                    )
+                                    1
+                                }
+                                .then(
+                                    ClientCommandManager.argument("cooldown", IntegerArgumentType.integer(0))
+                                        .executes { context ->
+                                            val keyword = StringArgumentType.getString(context, "keyword")
+                                            val subtitle = StringArgumentType.getString(context, "subtitle")
+                                            val cooldown = IntegerArgumentType.getInteger(context, "cooldown")
+                                            val prefix = Constants.makePrefix()
+                                            SRConfig.settings.chatAlert.entries.add("$keyword | $subtitle | $cooldown | yes | yes")
+                                            SRConfig.save()
+                                            context.source.sendFeedback(
+                                                prefix.copy()
+                                                    .append(Component.literal("Added alert: \"$keyword\" → \"$subtitle\" (cooldown: ${cooldown}s)").withColor(0x55FF55))
+                                            )
+                                            1
+                                        }
+                                )
+                        )
+                )
+        )
+        .then(
+            ClientCommandManager.literal("remove")
+                .then(
+                    ClientCommandManager.argument("keyword", StringArgumentType.string())
+                        .suggests { _, builder ->
+                            SRConfig.settings.chatAlert.entries.forEach { entry ->
+                                val kw = entry.split(" | ").getOrElse(0) { entry }
+                                builder.suggest("\"$kw\"")
+                            }
+                            builder.buildFuture()
+                        }
+                        .executes { context ->
+                            val keyword = StringArgumentType.getString(context, "keyword")
+                            val prefix = Constants.makePrefix()
+                            val removed = SRConfig.settings.chatAlert.entries.removeAll {
+                                it.split(" | ").getOrElse(0) { "" }.equals(keyword, ignoreCase = true)
+                            }
+                            if (removed) {
+                                SRConfig.save()
+                                context.source.sendFeedback(
+                                    prefix.copy()
+                                        .append(Component.literal("Removed alert: \"$keyword\"").withColor(0x55FF55))
+                                )
+                            } else {
+                                context.source.sendFeedback(
+                                    prefix.copy()
+                                        .append(Component.literal("Alert not found: \"$keyword\"").withColor(0xFF5555))
+                                )
+                            }
+                            1
+                        }
+                )
+        )
+        .then(
+            ClientCommandManager.literal("list")
+                .executes { context ->
+                    val prefix = Constants.makePrefix()
+                    val entries = SRConfig.settings.chatAlert.entries
+                    if (entries.isEmpty()) {
+                        context.source.sendFeedback(prefix.copy().append(Component.literal("No alerts configured.").withColor(0xAAAAAA)))
+                    } else {
+                        context.source.sendFeedback(prefix.copy().append(Component.literal("Chat Alerts (${entries.size}):").withColor(0x55FFFF)))
+                        entries.forEachIndexed { i, raw ->
+                            val parts = raw.split(" | ", limit = 5)
+                            val kw = parts.getOrElse(0) { "" }
+                            val sub = parts.getOrElse(1) { "" }
+                            val cd = parts.getOrElse(2) { "5" }
+                            val ip = parts.getOrElse(3) { "yes" }
+                            val is_ = parts.getOrElse(4) { "yes" }
+                            val flags = when {
+                                ip == "no" && is_ == "no" -> "exact"
+                                ip == "no" -> "prefix"
+                                is_ == "no" -> "suffix"
+                                else -> "contains"
+                            }
+                            context.source.sendFeedback(
+                                Component.literal("§7${i + 1}. §f\"$kw\" §8→ §f\"$sub\" §7(${cd}s, $flags)")
+                            )
+                        }
+                    }
+                    1
+                }
+        )
+        .then(
+            ClientCommandManager.literal("clear")
+                .executes { context ->
+                    val prefix = Constants.makePrefix()
+                    SRConfig.settings.chatAlert.entries.clear()
+                    SRConfig.save()
+                    context.source.sendFeedback(prefix.copy().append(Component.literal("All alerts cleared.").withColor(0x55FF55)))
+                    1
+                }
+        )
 
 }

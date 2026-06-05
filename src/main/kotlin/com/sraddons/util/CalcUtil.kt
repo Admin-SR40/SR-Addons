@@ -52,8 +52,7 @@ object CalcUtil {
                     "+" -> a + b
                     "-" -> a - b
                     "*", "x" -> a * b
-                    "/" -> a / b
-                    "%" -> a % b
+                    "/", "%" -> if (b == 0.0) Double.NaN else if (o == "/") a / b else a % b
                     "^" -> a.pow(b)
                     else -> 0.0
                 }

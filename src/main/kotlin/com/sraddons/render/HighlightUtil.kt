@@ -16,9 +16,8 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
+import net.minecraft.util.ARGB
 import org.apache.logging.log4j.Logger
-import java.awt.Color
-import kotlin.math.sqrt
 
 object HighlightUtil {
 
@@ -26,13 +25,6 @@ object HighlightUtil {
     private const val MIN_VERTICAL_OFFSET = 0.0
     private const val MAX_VERTICAL_OFFSET = 6.0
     private const val FILL_ALPHA_MULTIPLIER = 0.3f
-
-    fun clampedColor(r: Int, g: Int, b: Int, a: Int): Color = Color(
-        r.coerceIn(0, 255),
-        g.coerceIn(0, 255),
-        b.coerceIn(0, 255),
-        a.coerceIn(0, 255)
-    )
 
     fun createFilledType(id: String): RenderType {
         val pipeline = RenderPipelines.register(
@@ -117,7 +109,7 @@ object HighlightUtil {
     fun drawBoxes(
         pose: PoseStack.Pose,
         boxes: List<AABB>,
-        color: Color,
+        color: Int,
         renderMode: String,
         lineWidth: Float,
         filledType: RenderType,
@@ -167,17 +159,17 @@ object HighlightUtil {
         }
     }
 
-    private fun drawFilledBox(pose: PoseStack.Pose, buffer: BufferBuilder, box: AABB, color: Color) {
+    private fun drawFilledBox(pose: PoseStack.Pose, buffer: BufferBuilder, box: AABB, color: Int) {
         val minX = box.minX.toFloat()
         val minY = box.minY.toFloat()
         val minZ = box.minZ.toFloat()
         val maxX = box.maxX.toFloat()
         val maxY = box.maxY.toFloat()
         val maxZ = box.maxZ.toFloat()
-        val r = color.red
-        val g = color.green
-        val b = color.blue
-        val a = (color.alpha * FILL_ALPHA_MULTIPLIER).toInt().coerceIn(0, 255)
+        val r = ARGB.red(color)
+        val g = ARGB.green(color)
+        val b = ARGB.blue(color)
+        val a = (ARGB.alpha(color) * FILL_ALPHA_MULTIPLIER).toInt().coerceIn(0, 255)
 
         // Bottom face
         buffer.addVertex(pose, minX, minY, minZ).setColor(r, g, b, a)
@@ -228,17 +220,17 @@ object HighlightUtil {
         buffer.addVertex(pose, maxX, minY, maxZ).setColor(r, g, b, a)
     }
 
-    private fun drawOutlineBox(pose: PoseStack.Pose, buffer: BufferBuilder, box: AABB, color: Color, lineWidth: Float) {
+    private fun drawOutlineBox(pose: PoseStack.Pose, buffer: BufferBuilder, box: AABB, color: Int, lineWidth: Float) {
         val minX = box.minX.toFloat()
         val minY = box.minY.toFloat()
         val minZ = box.minZ.toFloat()
         val maxX = box.maxX.toFloat()
         val maxY = box.maxY.toFloat()
         val maxZ = box.maxZ.toFloat()
-        val r = color.red
-        val g = color.green
-        val b = color.blue
-        val a = color.alpha
+        val r = ARGB.red(color)
+        val g = ARGB.green(color)
+        val b = ARGB.blue(color)
+        val a = ARGB.alpha(color)
 
         // Bottom edges
         addLine(pose, buffer, minX, minY, minZ, maxX, minY, minZ, r, g, b, a, lineWidth)

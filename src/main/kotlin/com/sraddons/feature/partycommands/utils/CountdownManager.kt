@@ -17,11 +17,14 @@ object CountdownManager {
 
     private fun getInstanceId(label: String): String? = FloorData.INSTANCES[label.lowercase()]
 
-    data class Countdown(
+    class Countdown(
         val totalSeconds: Int,
         val label: String,
-        var remainingSeconds: Int
-    )
+        remainingSeconds: Int
+    ) {
+        var remainingSeconds = remainingSeconds
+            internal set
+    }
 
     fun startCountdown(seconds: Int, label: String = CUSTOM_LABEL): Boolean {
         if (seconds <= 0) return false

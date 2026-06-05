@@ -22,10 +22,12 @@ object TextReplacer {
     val customs: LinkedHashMap<String, String> = linkedMapOf()
 
     val activePatterns: List<Pair<String, String>>
-        get() = patterns
+        get() = patterns.toList()
 
-    private val patterns: MutableList<Pair<String, String>> = mutableListOf()
-    private val compiledPatterns: MutableList<Pair<Regex, String>> = mutableListOf()
+    @Volatile
+    private var patterns: List<Pair<String, String>> = emptyList()
+    @Volatile
+    private var compiledPatterns: List<Pair<Regex, String>> = emptyList()
 
     val gradientNames = listOf(
         "cyanToLightBlue", "goldToYellow", "aquaToGreen", "redToOrange", "purpleToPink"
@@ -38,20 +40,20 @@ object TextReplacer {
     }
 
     fun rebuild() {
-        patterns.clear()
-        compiledPatterns.clear()
+        val newPatterns = mutableListOf<Pair<String, String>>()
 
         if (SRConfig.settings.general.highlightDevName) {
-            defaults.forEach { (k, v) -> patterns.add(k to v) }
+            defaults.forEach { (k, v) -> newPatterns.add(k to v) }
         }
 
-        customs.entries.forEach { (k, v) -> patterns.add(k to v) }
+        customs.entries.forEach { (k, v) -> newPatterns.add(k to v) }
 
-        patterns.sortByDescending { it.first.length }
+        newPatterns.sortByDescending { it.first.length }
 
-        for ((key, value) in patterns) {
-            compiledPatterns.add(Regex(Regex.escape(key)) to value)
-        }
+        val newCompiled = newPatterns.map { (k, v) -> Regex(Regex.escape(k)) to v }
+
+        patterns = newPatterns
+        compiledPatterns = newCompiled
     }
 
     fun add(key: String, value: String) {

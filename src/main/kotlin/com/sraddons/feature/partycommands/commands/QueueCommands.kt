@@ -30,7 +30,7 @@ object QueueCommands {
                         })
                     builder.executes {
                         if (isEnabled(cmd)) {
-                            val instance = floorInstances[cmd]!!
+                            val instance = floorInstances[cmd] ?: return@executes Command.SINGLE_SUCCESS
                             respond(formatResponse(Component.translatable("sraddons.pc.queue.label"), Component.literal("§e${cmd.uppercase()}")))
                             sendCommand("joininstance $instance")
                         } else { respondDisabled(cmd) }

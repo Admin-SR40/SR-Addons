@@ -117,6 +117,11 @@ object SRConfig {
         var maxDistance: Int = 64
     )
 
+    data class ChatAlertConfigData(
+        var enabled: Boolean = true,
+        var entries: MutableList<String> = mutableListOf()
+    )
+
     data class SRConfigData(
         var general: GeneralConfigData = GeneralConfigData(),
         var partyCommands: PartyCommandsConfigData = PartyCommandsConfigData(),
@@ -124,7 +129,8 @@ object SRConfig {
         var carry: CarryConfigData = CarryConfigData(),
         var ragnarock: RagnarockConfigData = RagnarockConfigData(),
         var pingAlert: PingAlertConfigData = PingAlertConfigData(),
-        var tpsAlert: TpsAlertConfigData = TpsAlertConfigData()
+        var tpsAlert: TpsAlertConfigData = TpsAlertConfigData(),
+        var chatAlert: ChatAlertConfigData = ChatAlertConfigData()
     )
 
     fun load() {
@@ -208,7 +214,17 @@ fun SRConfig.CarryHighlightConfig.toColor() = java.awt.Color(
     colorBlue.coerceIn(0, 255), colorAlpha.coerceIn(0, 255)
 )
 
+fun SRConfig.CarryHighlightConfig.toARGB(): Int = net.minecraft.util.ARGB.color(
+    colorAlpha.coerceIn(0, 255), colorRed.coerceIn(0, 255),
+    colorGreen.coerceIn(0, 255), colorBlue.coerceIn(0, 255)
+)
+
 fun SRConfig.StarredMobConfigData.toColor() = java.awt.Color(
     colorRed.coerceIn(0, 255), colorGreen.coerceIn(0, 255),
     colorBlue.coerceIn(0, 255), colorAlpha.coerceIn(0, 255)
+)
+
+fun SRConfig.StarredMobConfigData.toARGB(): Int = net.minecraft.util.ARGB.color(
+    colorAlpha.coerceIn(0, 255), colorRed.coerceIn(0, 255),
+    colorGreen.coerceIn(0, 255), colorBlue.coerceIn(0, 255)
 )

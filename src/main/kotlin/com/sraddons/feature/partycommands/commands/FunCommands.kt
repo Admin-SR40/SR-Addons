@@ -76,34 +76,40 @@ object FunCommands {
                     .then(Command.argument("min", StringArgumentType.word())
                         .then(Command.argument("max", StringArgumentType.word())
                             .executes { ctx ->
-                                val minStr = StringArgumentType.getString(ctx, "min")
-                                val maxStr = StringArgumentType.getString(ctx, "max")
-                                val min = minStr.toIntOrNull()
-                                val max = maxStr.toIntOrNull()
-                                if (min == null || max == null) {
-                                    respond(formatResponse(label("error"), Component.translatable("sraddons.pc.fun.random.error_range").withColor(0xFF5555)))
-                                } else {
-                                    val actualMin = minOf(min, max)
-                                    val actualMax = maxOf(min, max)
-                                    val result = (actualMin..actualMax).random()
-                                    respond(buildRandomResult(result, actualMin, actualMax))
-                                }
+                                if (SRConfig.isCommandEnabled("random")) {
+                                    val minStr = StringArgumentType.getString(ctx, "min")
+                                    val maxStr = StringArgumentType.getString(ctx, "max")
+                                    val min = minStr.toIntOrNull()
+                                    val max = maxStr.toIntOrNull()
+                                    if (min == null || max == null) {
+                                        respond(formatResponse(label("error"), Component.translatable("sraddons.pc.fun.random.error_range").withColor(0xFF5555)))
+                                    } else {
+                                        val actualMin = minOf(min, max)
+                                        val actualMax = maxOf(min, max)
+                                        val result = (actualMin..actualMax).random()
+                                        respond(buildRandomResult(result, actualMin, actualMax))
+                                    }
+                                } else { respondDisabled("fun random") }
                                 Command.SINGLE_SUCCESS
                             })
                         .executes { ctx ->
-                            val maxStr = StringArgumentType.getString(ctx, "min")
-                            val max = maxStr.toIntOrNull()
-                            if (max == null || max < 1) {
-                                respond(formatResponse(label("error"), Component.translatable("sraddons.pc.fun.random.error_single").withColor(0xFF5555)))
-                            } else {
-                                val result = (1..max).random()
-                                respond(buildRandomResult(result, 1, max))
-                            }
+                            if (SRConfig.isCommandEnabled("random")) {
+                                val maxStr = StringArgumentType.getString(ctx, "min")
+                                val max = maxStr.toIntOrNull()
+                                if (max == null || max < 1) {
+                                    respond(formatResponse(label("error"), Component.translatable("sraddons.pc.fun.random.error_single").withColor(0xFF5555)))
+                                } else {
+                                    val result = (1..max).random()
+                                    respond(buildRandomResult(result, 1, max))
+                                }
+                            } else { respondDisabled("fun random") }
                             Command.SINGLE_SUCCESS
                         })
                     .executes {
-                        val result = (1..100).random()
-                        respond(buildRandomResult(result, 1, 100))
+                        if (SRConfig.isCommandEnabled("random")) {
+                            val result = (1..100).random()
+                            respond(buildRandomResult(result, 1, 100))
+                        } else { respondDisabled("fun random") }
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {

@@ -6,7 +6,7 @@ object ServerUtils {
     private val mc = Minecraft.getInstance()
 
     private val tpsHistory = mutableListOf<Double>()
-    private var lastTime = System.currentTimeMillis()
+    private var lastTime = System.nanoTime()
     private var lastGameTime = 0L
 
     val currentPing: Int
@@ -15,9 +15,6 @@ object ServerUtils {
             val size = pingLog.size()
             return if (size > 0) pingLog.get(size - 1).toInt() else 0
         }
-
-    var averagePing: Int = 0
-        private set
 
     val currentFps: Int
         get() = mc.fps
@@ -32,56 +29,35 @@ object ServerUtils {
         }
 
     fun updateTps() {
-        val currentTime = System.currentTimeMillis()
-        val elapsed = currentTime - lastTime
+        val now = System.nanoTime()
+        val elapsedNs = now - lastTime
 
-        if (elapsed >= 1000) {
-            // Skip TPS recording while game is paused (config GUI etc.)
-            val screen = mc.screen
-            if (screen != null && screen.isPauseScreen) {
-                lastTime = currentTime
-                lastGameTime = mc.level?.gameTime ?: 0L
+        if (elapsedNs >= 1_000_000_000L) {
+            // Ignore if elapsed exceeds 5s — likely paused or tabbed out
+            if (elapsedNs > 5_000_000_000L) {
+                lastTime = now
                 return
             }
-
             val level = mc.level
             if (level != null) {
                 val gameTime = level.gameTime
                 if (lastGameTime != 0L) {
                     val timeDiff = gameTime - lastGameTime
-                    val tps = (timeDiff * 1000.0 / elapsed).coerceAtMost(20.0)
-                    if (tps < 0.0) {
-                        lastGameTime = gameTime
-                        lastTime = currentTime
-                        return
-                    }
-                    synchronized(this) {
-                        tpsHistory.add(tps)
-                        if (tpsHistory.size > 10) {
-                            tpsHistory.removeAt(0)
+                    // Skip if no server ticks arrived in this window
+                    if (timeDiff > 0) {
+                        val tps = (timeDiff * 1_000_000_000.0 / elapsedNs).coerceAtMost(20.0)
+                        synchronized(this) {
+                            tpsHistory.add(tps)
+                            if (tpsHistory.size > 10) {
+                                tpsHistory.removeAt(0)
+                            }
                         }
                     }
                 }
                 lastGameTime = gameTime
             }
-            lastTime = currentTime
+            lastTime = now
         }
     }
 
-    @JvmStatic
-    fun onPongResponse(time: Long) {
-        val pingLog = mc.gui.debugOverlay.pingLogger
-        val sampleSize = minOf(pingLog.size(), 20)
-
-        if (sampleSize == 0) {
-            averagePing = 0
-            return
-        }
-
-        var total = 0L
-        for (i in 0 until sampleSize) {
-            total += pingLog.get(i)
-        }
-        averagePing = (total / sampleSize).toInt()
-    }
 }

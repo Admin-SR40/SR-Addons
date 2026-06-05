@@ -1,7 +1,7 @@
 package com.sraddons.feature.carry
 
 import com.sraddons.config.SRConfig
-import com.sraddons.config.toColor
+import com.sraddons.config.toARGB
 import com.sraddons.render.HighlightUtil
 import com.sraddons.util.TitleUtil
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
@@ -150,8 +150,8 @@ object CarryHighlightRenderer {
         filledType: net.minecraft.client.renderer.rendertype.RenderType,
         linesType: net.minecraft.client.renderer.rendertype.RenderType
     ) {
-        val color = config.toColor()
-        val boxes = HighlightUtil.collectBoxes(entities, Minecraft.getInstance().player!!, maxDistance, partialTicks, LOGGER)
+        val color = config.toARGB()
+        val boxes = HighlightUtil.collectBoxes(entities, Minecraft.getInstance().player ?: return, maxDistance, partialTicks, LOGGER)
         if (boxes.isNotEmpty()) {
             HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth,
                 filledType, linesType, LOGGER)

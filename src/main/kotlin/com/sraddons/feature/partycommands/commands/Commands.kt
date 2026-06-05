@@ -30,8 +30,9 @@ object Commands {
 
     fun rebuildDispatcher() {
         synchronized(this) {
-            DISPATCHER = CommandDispatcher()
-            commandList.forEach { it.registerTo(DISPATCHER) }
+            val newDispatcher = CommandDispatcher<SharedSuggestionProvider>()
+            commandList.forEach { it.registerTo(newDispatcher) }
+            DISPATCHER = newDispatcher
         }
     }
 }

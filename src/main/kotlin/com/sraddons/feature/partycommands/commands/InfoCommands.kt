@@ -11,11 +11,15 @@ import java.time.format.DateTimeFormatter
 
 object InfoCommands {
     private val mc = Minecraft.getInstance()
+    private val TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
 
     fun register() {
         Commands.add(object : Command("help", "Show help message", "h") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes { showHelp(); Command.SINGLE_SUCCESS }
+                builder.executes {
+                    if (SRConfig.isCommandEnabled("help")) showHelp() else respondDisabled("help")
+                    Command.SINGLE_SUCCESS
+                }
             }
         })
 
@@ -75,7 +79,7 @@ object InfoCommands {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
                     if (SRConfig.isCommandEnabled("time")) {
-                        val time = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))
+                        val time = ZonedDateTime.now().format(TIME_FORMATTER)
                         respond(formatResponse(
                             Component.translatable("sraddons.pc.time.response"),
                             Component.literal(time).withColor(0xFFFFFF)

@@ -10,24 +10,26 @@ object ChatListener {
     private const val MOD_REPLY_DELAY_MS = 500L
     private const val GITHUB_REPLY_DELAY_MS = 800L
 
-    private val joinedSelf = Regex("^You have joined ((?:\\[[^]]*?])? ?)?(\\w{1,16})'s? party!$")
-    private val joinedOther = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) joined the party\\.$")
-    private val joinedLobby = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) joined the lobby!$")
-    private val leftParty = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) has left the party\\.$")
-    private val kickedParty = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) has been removed from the party\\.$")
-    private val kickedOffline = Regex("^Kicked ((?:\\[[^]]*?])? ?)?(\\w{1,16}) because they were offline\\.$")
-    private val kickedDisconnected = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) was removed from your party because they disconnected\\.$")
-    private val transferLeave = Regex("^The party was transferred to ((?:\\[[^]]*?])? ?)?(\\w{1,16}) because ((?:\\[[^]]*?])? ?)?(\\w{1,16}) left$")
-    private val transferBy = Regex("^The party was transferred to ((?:\\[[^]]*?])? ?)?(\\w{1,16}) by ((?:\\[[^]]*?])? ?)?(\\w{1,16})$")
-    private val partyInvite = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) invited ((?:\\[[^]]*?])? ?)?(\\w{1,16}) to the party! They have 60 seconds to accept.$")
-    private val leaderDisconnected = Regex("^The party leader, ((?:\\[[^]]*?])? ?)?(\\w{1,16}) has disconnected, they have 5 minutes to rejoin before the party is disbanded\\.$")
-    private val leaderRejoined = Regex("^The party leader ((?:\\[[^]]*?])? ?)?(\\w{1,16}) has rejoined\\.$")
-    private val memberDisconnected = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) has disconnected, they have 5 minutes to rejoin before they are removed from the party\\.$")
-    private val memberRejoined = Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) has rejoined\\.$")
-    private val membersList = Regex("^Party (Leader|Moderators|Members): (.+)$")
+    private const val RANK_AND_NAME = "((?:\\[[^]]*?])? ?)?(\\w{1,16})"
+
+    private val joinedSelf = Regex("^You have joined $RANK_AND_NAME's? party!\$")
+    private val joinedOther = Regex("^$RANK_AND_NAME joined the party\\.\$")
+    private val joinedLobby = Regex("^$RANK_AND_NAME joined the lobby!\$")
+    private val leftParty = Regex("^$RANK_AND_NAME has left the party\\.\$")
+    private val kickedParty = Regex("^$RANK_AND_NAME has been removed from the party\\.\$")
+    private val kickedOffline = Regex("^Kicked $RANK_AND_NAME because they were offline\\.\$")
+    private val kickedDisconnected = Regex("^$RANK_AND_NAME was removed from your party because they disconnected\\.\$")
+    private val transferLeave = Regex("^The party was transferred to $RANK_AND_NAME because $RANK_AND_NAME left\$")
+    private val transferBy = Regex("^The party was transferred to $RANK_AND_NAME by $RANK_AND_NAME\$")
+    private val partyInvite = Regex("^$RANK_AND_NAME invited $RANK_AND_NAME to the party! They have 60 seconds to accept.\$")
+    private val leaderDisconnected = Regex("^The party leader, $RANK_AND_NAME has disconnected, they have 5 minutes to rejoin before the party is disbanded\\.\$")
+    private val leaderRejoined = Regex("^The party leader $RANK_AND_NAME has rejoined\\.\$")
+    private val memberDisconnected = Regex("^$RANK_AND_NAME has disconnected, they have 5 minutes to rejoin before they are removed from the party\\.\$")
+    private val memberRejoined = Regex("^$RANK_AND_NAME has rejoined\\.\$")
+    private val membersList = Regex("^Party (Leader|Moderators|Members): (.+)\$")
     private val dungeonJoin = Regex("^Party Finder > (\\w{1,16}) joined the dungeon group! ")
-    private val kuudraJoin = Regex("^Party Finder > ((?:\\[[^]]*?])? ?)?(\\w{1,16}) joined the group!")
-    private val partyFinderQueued = Regex("^Party Finder > Your party has been queued in the party finder!$")
+    private val kuudraJoin = Regex("^Party Finder > $RANK_AND_NAME joined the group!")
+    private val partyFinderQueued = Regex("^Party Finder > Your party has been queued in the party finder!\$")
 
     private val colorCodeRegex = Regex("§[0-9a-fk-or]")
     private val rankStripRegex = Regex("\\[.+?]\\s*")
@@ -40,12 +42,12 @@ object ChatListener {
     )
 
     private val disbandPatterns = listOf(
-        Regex("^((?:\\[[^]]*?])? ?)?(\\w{1,16}) has disbanded the party!$"),
-        Regex("^You have been kicked from the party by ((?:\\[[^]]*?])? ?)?(\\w{1,16})$"),
-        Regex("^The party was disbanded because all invites expired and the party was empty.$"),
-        Regex("^The party was disbanded because the party leader disconnected.$"),
-        Regex("^You left the party.$"),
-        Regex("^You are not currently in a party.$")
+        Regex("^$RANK_AND_NAME has disbanded the party!\$"),
+        Regex("^You have been kicked from the party by $RANK_AND_NAME\$"),
+        Regex("^The party was disbanded because all invites expired and the party was empty.\$"),
+        Regex("^The party was disbanded because the party leader disconnected.\$"),
+        Regex("^You left the party.\$"),
+        Regex("^You are not currently in a party.\$")
     )
 
     fun init() {
