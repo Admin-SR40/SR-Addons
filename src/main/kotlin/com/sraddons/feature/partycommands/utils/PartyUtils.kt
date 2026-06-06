@@ -41,13 +41,13 @@ object PartyUtils {
         synchronized(this) {
             if (!isInParty) isInParty = true
             val cleanName = cleanPlayerName(playerName)
-        if (cleanName.isEmpty()) return
-        if (cleanName !in members) {
-            members.add(cleanName)
-        }
-        if (coloredName != null) {
-            memberColors[cleanName] = coloredName
-        }
+            if (cleanName.isEmpty()) return
+            if (cleanName !in members) {
+                members.add(cleanName)
+            }
+            if (coloredName != null) {
+                memberColors[cleanName] = coloredName
+            }
         }
     }
 

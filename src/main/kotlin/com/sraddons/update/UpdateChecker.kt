@@ -3,12 +3,14 @@ package com.sraddons.update
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.sraddons.util.Constants
+import org.apache.logging.log4j.LogManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.URI
 
 object UpdateChecker {
 
+    private val LOGGER = LogManager.getLogger("SR-Addons-Update")
     private val GSON = Gson()
 
     data class GitHubRelease(
@@ -39,6 +41,7 @@ object UpdateChecker {
 
             UpdateResult(hasUpdate, latestVersion, release.htmlUrl.takeIf { hasUpdate })
         } catch (e: Exception) {
+            LOGGER.warn("Update check failed", e)
             UpdateResult(hasUpdate = false, latestVersion = "unknown", downloadUrl = null)
         }
     }

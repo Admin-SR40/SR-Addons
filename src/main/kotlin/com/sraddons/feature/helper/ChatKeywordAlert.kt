@@ -6,10 +6,11 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.sounds.SoundEvents
+import java.util.concurrent.ConcurrentHashMap
 
 object ChatKeywordAlert {
 
-    private val cooldowns = mutableMapOf<String, Long>()
+    private val cooldowns = ConcurrentHashMap<String, Long>()
 
     fun init() {
         ClientReceiveMessageEvents.GAME.register { message, _ ->

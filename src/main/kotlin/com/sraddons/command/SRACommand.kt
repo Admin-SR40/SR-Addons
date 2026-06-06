@@ -44,25 +44,8 @@ object SRACommand {
                 }
 
             // /sra config / /sra gui
-            val configNode = ClientCommandManager.literal("config")
-                .executes { context ->
-                    SRConfigGui.open()
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.command.gui.opening").withColor(0x55FF55))
-                    )
-                    1
-                }
-
-            val guiNode = ClientCommandManager.literal("gui")
-                .executes { context ->
-                    SRConfigGui.open()
-                    context.source.sendFeedback(
-                        Constants.makePrefix().copy()
-                            .append(Component.translatable("sraddons.command.gui.opening").withColor(0x55FF55))
-                    )
-                    1
-                }
+            val configNode = ClientCommandManager.literal("config").executes(::openGuiCommand)
+            val guiNode = ClientCommandManager.literal("gui").executes(::openGuiCommand)
 
             // /sra version
             val versionNode = ClientCommandManager.literal("version")
@@ -236,7 +219,7 @@ object SRACommand {
                         .then(
                             ClientCommandManager.argument("word", StringArgumentType.string())
                                 .suggests { _, builder ->
-                                    TextReplacer.customs.keys.forEach { builder.suggest("\"$it\"") }
+                                    TextReplacer.getCustoms().keys.forEach { builder.suggest("\"$it\"") }
                                     builder.buildFuture()
                                 }
                                 .executes { context ->
@@ -261,7 +244,7 @@ object SRACommand {
                     ClientCommandManager.literal("list")
                         .executes { context ->
                             val prefix = Constants.makePrefix()
-                            val customs = TextReplacer.customs
+                            val customs = TextReplacer.getCustoms()
                             if (customs.isEmpty()) {
                                 context.source.sendFeedback(
                                     prefix.copy()
@@ -453,5 +436,14 @@ object SRACommand {
                     1
                 }
         )
+
+    private fun openGuiCommand(context: com.mojang.brigadier.context.CommandContext<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource>): Int {
+        SRConfigGui.open()
+        context.source.sendFeedback(
+            Constants.makePrefix().copy()
+                .append(Component.translatable("sraddons.command.gui.opening").withColor(0x55FF55))
+        )
+        return 1
+    }
 
 }

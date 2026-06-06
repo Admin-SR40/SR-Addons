@@ -52,30 +52,45 @@ object CarryCommand {
         builder.buildFuture()
     }
 
-    private fun buildHelpLine(syntax: String, descKey: String): Component =
-        Component.literal(syntax).append(Component.translatable(descKey))
+    private fun helpLine(
+        source: FabricClientCommandSource,
+        cmd: String,
+        descKey: String,
+        arg: String? = null,
+        argColor: Int = 0x55FFFF,
+        extra: String? = null,
+        extraColor: Int = 0xFFAA00
+    ) {
+        var line = Component.empty()
+            .append(Component.literal(cmd).withColor(0xAAAAAA))
+        if (arg != null) line = line.append(Component.literal(" $arg").withColor(argColor))
+        if (extra != null) line = line.append(Component.literal(" $extra").withColor(extraColor))
+        line = line.append(Component.literal(" - ").withColor(0x555555))
+            .append(Component.translatable(descKey).withColor(0xFFFFFF))
+        source.sendFeedback(line)
+    }
 
     private fun showHelp(source: FabricClientCommandSource) {
         source.feedback(Component.translatable("sraddons.carry.help.title").withColor(0xFFFFFF))
-        source.sendFeedback(buildHelpLine("§7/cm add-type §b<type> §8- §f", "sraddons.carry.help.add_type_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm add §d<player> §b<type> §f<amount> §8- §f", "sraddons.carry.help.add_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm set-price §b<type> §6<price> §8- §f", "sraddons.carry.help.set_price_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm set-bulk-price §b<type> §6<price> §f<threshold> §8- §f", "sraddons.carry.help.set_bulk_price_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm add-amount §d<player> §f<amount> §8- §f", "sraddons.carry.help.add_amount_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm set-amount §d<player> §f<amount> §7[§ftrue|false§7] §8- §f", "sraddons.carry.help.set_amount_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm remove-amount §d<player> §f<amount> §8- §f", "sraddons.carry.help.remove_amount_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm calc-price §d<player> §8- §f", "sraddons.carry.help.calc_price_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm undo §8- §f", "sraddons.carry.help.undo_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm remove §d<player> §8- §f", "sraddons.carry.help.remove_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm remove-type §b<type> §8- §f", "sraddons.carry.help.remove_type_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm list-client §8- §f", "sraddons.carry.help.list_client_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm list-type §8- §f", "sraddons.carry.help.list_type_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm done §7[§dplayer§7] §7[§famount§7] §8- §f", "sraddons.carry.help.done_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm refund §d<player> §8- §f", "sraddons.carry.help.refund_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm status §8- §f", "sraddons.carry.help.status_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm clear-client §8- §f", "sraddons.carry.help.clear_client_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm clear-history §8- §f", "sraddons.carry.help.clear_history_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm add-miniboss §b\"<NAME>\" §8- §f", "sraddons.carry.help.add_miniboss_desc"))
-        source.sendFeedback(buildHelpLine("§7/cm remove-miniboss §b\"<NAME>\" §8- §f", "sraddons.carry.help.remove_miniboss_desc"))
+        helpLine(source, "/cm add-type", "sraddons.carry.help.add_type_desc", arg = "<type>")
+        helpLine(source, "/cm add-client", "sraddons.carry.help.add_desc", arg = "<player> <type> <amount>", argColor = 0xFF55FF)
+        helpLine(source, "/cm set-price", "sraddons.carry.help.set_price_desc", arg = "<type>", extra = "<price>")
+        helpLine(source, "/cm set-bulk-price", "sraddons.carry.help.set_bulk_price_desc", arg = "<type>", extra = "<price> <threshold>")
+        helpLine(source, "/cm add-amount", "sraddons.carry.help.add_amount_desc", arg = "<player>", extra = "<amount>", extraColor = 0xFFFFFF)
+        helpLine(source, "/cm set-amount", "sraddons.carry.help.set_amount_desc", arg = "<player>", extra = "<amount> [true|false]", extraColor = 0xFFFFFF)
+        helpLine(source, "/cm remove-amount", "sraddons.carry.help.remove_amount_desc", arg = "<player>", extra = "<amount>", extraColor = 0xFFFFFF)
+        helpLine(source, "/cm calc-price", "sraddons.carry.help.calc_price_desc", arg = "[player]", argColor = 0xFF55FF)
+        helpLine(source, "/cm undo", "sraddons.carry.help.undo_desc")
+        helpLine(source, "/cm remove-client", "sraddons.carry.help.remove_desc", arg = "<player>", argColor = 0xFF55FF)
+        helpLine(source, "/cm remove-type", "sraddons.carry.help.remove_type_desc", arg = "<type>")
+        helpLine(source, "/cm list-client", "sraddons.carry.help.list_client_desc")
+        helpLine(source, "/cm list-type", "sraddons.carry.help.list_type_desc")
+        helpLine(source, "/cm done", "sraddons.carry.help.done_desc", arg = "[player] [amount]", argColor = 0xFF55FF)
+        helpLine(source, "/cm refund", "sraddons.carry.help.refund_desc", arg = "<player>", argColor = 0xFF55FF)
+        helpLine(source, "/cm status", "sraddons.carry.help.status_desc")
+        helpLine(source, "/cm clear-client", "sraddons.carry.help.clear_client_desc")
+        helpLine(source, "/cm clear-history", "sraddons.carry.help.clear_history_desc")
+        helpLine(source, "/cm add-miniboss", "sraddons.carry.help.add_miniboss_desc", arg = "\"<NAME>\"")
+        helpLine(source, "/cm remove-miniboss", "sraddons.carry.help.remove_miniboss_desc", arg = "\"<NAME>\"")
     }
 }

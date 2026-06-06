@@ -45,10 +45,10 @@ internal object CarryCommandActions {
                 .suggests(suggestClients)
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1
-                    CarryState.saveUndo()
                     val playerName = StringArgumentType.getString(context, "playerName")
                     val client = context.source.lookupClient(playerName) ?: return@executes 1
                     val type = context.source.lookupType(client.typeName) ?: return@executes 1
+                    CarryState.saveUndo()
                     val remaining = client.amount - client.completed
                     val unitPrice = CarryPriceUtil.effectivePrice(type, client)
                     val refundAmount = remaining * unitPrice

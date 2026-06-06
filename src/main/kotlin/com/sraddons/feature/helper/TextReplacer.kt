@@ -19,7 +19,9 @@ object TextReplacer {
         "Admin_SR40" to ":g:cyanToLightBlue:Admin_SR40"
     )
 
-    val customs: LinkedHashMap<String, String> = linkedMapOf()
+    private val customs: LinkedHashMap<String, String> = linkedMapOf()
+
+    fun getCustoms(): Map<String, String> = customs.toMap()
 
     val activePatterns: List<Pair<String, String>>
         get() = patterns.toList()

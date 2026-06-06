@@ -21,7 +21,11 @@ object Scheduler {
 
     fun <T> scheduleStaggered(items: List<T>, delayMs: Long, action: (T) -> Unit) {
         items.forEachIndexed { index, item ->
-            executor.schedule({ action(item) }, delayMs * (index + 1), TimeUnit.MILLISECONDS)
+            executor.schedule({
+                try { action(item) } catch (e: Exception) {
+                    org.apache.logging.log4j.LogManager.getLogger("SR-Addons-Scheduler").error("Staggered task failed", e)
+                }
+            }, delayMs * (index + 1), TimeUnit.MILLISECONDS)
         }
     }
 }
