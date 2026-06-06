@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.sraddons"
-version = "1.6.3"
+version = "1.6.3-debug"
 
 repositories {
     mavenCentral()
@@ -51,10 +51,10 @@ loom {
     }
 }
 
-val modVersion = project.version.toString()
-
 tasks {
     processResources {
+        val modVersion = project.version.toString()
+        inputs.property("version", modVersion)
         filesMatching("fabric.mod.json") {
             expand(mapOf("version" to modVersion))
         }
