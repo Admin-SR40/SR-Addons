@@ -26,7 +26,7 @@
 
 ## Features
 
-<details open>
+<details>
 <summary>Modules</summary>
 
 ### StarredMobHighlighter
@@ -68,6 +68,7 @@
 - **Ragnarock Notifier** — subtitle alerts when casting Ragnarock or when cancelled
 - **Ping Alert** — subtitle warning when ping stays above threshold
 - **TPS Alert** — subtitle warning when TPS drops below threshold
+- **Chat Keywords Alert** — subtitle notification when configurable keywords appear in chat, with per-keyword cooldown and prefix/suffix ignore flags
 
 All modules support **i18n** (English / 简体中文).
 
@@ -77,7 +78,7 @@ All modules support **i18n** (English / 简体中文).
 
 ## Commands
 
-<details open>
+<details>
 <summary>/sra — ModManagement</summary>
 
 | Command | Description |
@@ -91,6 +92,10 @@ All modules support **i18n** (English / 简体中文).
 | `/sra replaceTexts add "<word>" "<replacement>"` | Add a text replacement |
 | `/sra replaceTexts remove "<word>"` | Remove a text replacement |
 | `/sra replaceTexts list` | List custom replacements |
+| `/sra alert add "<keyword>" "<subtitle>" [cooldown]` | Add a chat keyword alert |
+| `/sra alert remove "<keyword>"` | Remove a chat keyword alert |
+| `/sra alert list` | List all chat keyword alerts |
+| `/sra alert clear` | Remove all chat keyword alerts |
 
 </details>
 
@@ -233,7 +238,7 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 | **PartyCommands** | Prefix, 40+ individual command toggles, response routing, auto !mod reply, note, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode, line width, max distance |
 | **Carry** | Master toggle, highlight profiles (client/boss/miniboss colors), boss notification, render settings |
-| **Alerts** | Ragnarock Notifier, Ping Alert, TPS Alert |
+| **Alerts** | Ragnarock Notifier, Ping Alert, TPS Alert, Chat Keywords Alert |
 
 Config file: `.minecraft/config/sraddons.json`
 
