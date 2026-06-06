@@ -1,6 +1,6 @@
 plugins {
     id("fabric-loom") version "1.14-SNAPSHOT"
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm") version "2.4.0"
     `maven-publish`
 }
 
@@ -26,7 +26,7 @@ dependencies {
     minecraft("com.mojang:minecraft:1.21.11")
     mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:0.16.10")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.8+kotlin.2.3.0")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.12+kotlin.2.4.0")
     modImplementation("net.fabricmc.fabric-api:fabric-api:0.141.3+1.21.11")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")

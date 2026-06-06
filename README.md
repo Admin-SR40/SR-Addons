@@ -4,8 +4,9 @@
 
 <p align="center">
   <a href="https://minecraft.net"><img src="https://img.shields.io/badge/Minecraft-1.21.11-green" alt="Minecraft"></a>
-  <a href="https://adoptium.net"><img src="https://img.shields.io/badge/Java-25-red" alt="Java"></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.3.0-purple" alt="Kotlin"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Java-25-red" alt="Java"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.4.0-purple" alt="Kotlin"></a>
+  <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.5.1-02303A" alt="Gradle"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
   <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.6.3-orange" alt="Version"></a>
 </p>
