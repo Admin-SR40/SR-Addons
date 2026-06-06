@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.14-SNAPSHOT"
+    id("fabric-loom") version "1.16.3"
     kotlin("jvm") version "2.4.0"
     `maven-publish`
 }
@@ -18,7 +18,6 @@ repositories {
             excludeGroup("dev.isxander.yacl")
         }
     }
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://maven.terraformersmc.com/")
 }
 
@@ -28,8 +27,6 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:0.16.10")
     modImplementation("net.fabricmc:fabric-language-kotlin:1.13.12+kotlin.2.4.0")
     modImplementation("net.fabricmc.fabric-api:fabric-api:0.141.3+1.21.11")
-
-    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
 
     // YACL - Yet Another Config Lib
     modImplementation("dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric")
@@ -43,9 +40,7 @@ loom {
         isIdeConfigGenerated = true
         vmArgs.addAll(
             arrayOf(
-                "-Dmixin.debug.export=true",
-                "-Ddevauth.enabled=true",
-                "-Ddevauth.account=main"
+                "-Dmixin.debug.export=true"
             )
         )
     }

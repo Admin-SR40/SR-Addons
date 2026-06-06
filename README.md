@@ -7,6 +7,7 @@
   <a href="#"><img src="https://img.shields.io/badge/Java-25-red" alt="Java"></a>
   <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.4.0-purple" alt="Kotlin"></a>
   <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.5.1-02303A" alt="Gradle"></a>
+  <a href="https://fabricmc.net"><img src="https://img.shields.io/badge/Loom-1.16.3-ECD2A0" alt="Fabric Loom"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
   <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.6.3-orange" alt="Version"></a>
 </p>
