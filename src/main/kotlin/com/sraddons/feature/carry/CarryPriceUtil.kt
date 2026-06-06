@@ -42,7 +42,8 @@ object CarryPriceUtil {
         val whole = coins / divisor
         val remainder = coins % divisor
         if (remainder == 0L) return "${whole}$suffix"
-        return "${String.format("%.1f", coins.toDouble() / divisor)}$suffix"
+        val formatted = String.format("%.1f", coins.toDouble() / divisor)
+        return "$formatted$suffix"
     }
 
     fun effectivePrice(type: CarryType, client: CarryClient): Long {

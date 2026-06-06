@@ -78,11 +78,11 @@ class SRAddonsMod : ClientModInitializer {
             .withClickEvent(ClickEvent.OpenUrl(URI.create(result.downloadUrl)))
 
         mc.execute {
-            mc.gui?.chat?.addMessage(
+            mc.gui.chat.addMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.update.available", result.latestVersion, Constants.MOD_VERSION).withColor(0x55FF55))
             )
-            mc.gui?.chat?.addMessage(
+            mc.gui.chat.addMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.update.click").withColor(0xFFFFFF))
                     .append(Component.translatable("sraddons.command.update.here").withColor(0x55FFFF).withStyle(clickStyle))

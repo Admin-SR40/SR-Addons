@@ -59,15 +59,17 @@ object PartyManagementCommands {
                 builder.then(Command.argument("player", StringArgumentType.word())
                     .suggests(suggestMembers)
                     .executes { ctx ->
-                        if (!SRConfig.isCommandEnabled("transfer")) { respondDisabled("transfer") }
-                        else if (!PartyUtils.isInParty) {
-                            respond(formatResponse(label("error"), error("not_in_party")))
-                        } else if (PartyUtils.isLeader()) {
-                            val input = StringArgumentType.getString(ctx, "player")
-                            val target = PartyUtils.findMember(input)
-                            sendCommand("p transfer $target")
-                            respond(formatResponse(label("transfer"), Component.translatable("sraddons.pc.transfer.success", Component.literal(target)).withColor(0x55FF55)))
-                        } else { respond(formatResponse(label("error"), error("not_leader"))) }
+                        when {
+                            !SRConfig.isCommandEnabled("transfer") -> respondDisabled("transfer")
+                            !PartyUtils.isInParty -> respond(formatResponse(label("error"), error("not_in_party")))
+                            PartyUtils.isLeader() -> {
+                                val input = StringArgumentType.getString(ctx, "player")
+                                val target = PartyUtils.findMember(input)
+                                sendCommand("p transfer $target")
+                                respond(formatResponse(label("transfer"), Component.translatable("sraddons.pc.transfer.success", Component.literal(target)).withColor(0x55FF55)))
+                            }
+                            else -> respond(formatResponse(label("error"), error("not_leader")))
+                        }
                         Command.SINGLE_SUCCESS
                     })
                 builder.executes {

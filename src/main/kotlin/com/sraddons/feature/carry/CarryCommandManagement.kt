@@ -48,7 +48,7 @@ internal object CarryCommandManagement {
                             val client = context.source.lookupClient(playerName) ?: return@executes 1
                             val actualRemove = amount.coerceAtMost(client.amount)
                             client.amount -= actualRemove
-                            if (client.completed > client.amount) client.completed = client.amount
+                            client.completed = client.completed.coerceAtMost(client.amount)
                             CarryState.saveData()
                             context.source.feedback(Component.translatable("sraddons.carry.amount_removed",
                                 Component.literal(actualRemove.toString()).withColor(0xFFAA00),

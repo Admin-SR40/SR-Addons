@@ -77,15 +77,18 @@ object StarredMobRenderer {
         val starredArmorStands = mutableListOf<ArmorStand>()
 
         for (entity in entities) {
-            if (entity is ArmorStand) {
-                val name = entity.name.string
-                if (name.contains(STAR_SYMBOL) && !isDamageNumber(name)) {
-                    starredArmorStands.add(entity)
+            when (entity) {
+                is ArmorStand -> {
+                    val name = entity.name.string
+                    if (name.contains(STAR_SYMBOL) && !isDamageNumber(name)) {
+                        starredArmorStands.add(entity)
+                    }
                 }
-            } else if (entity is LivingEntity) {
-                val name = entity.customName?.string ?: entity.name.string
-                if (name.contains(STAR_SYMBOL)) {
-                    result.add(entity)
+                is LivingEntity -> {
+                    val name = entity.customName?.string ?: entity.name.string
+                    if (name.contains(STAR_SYMBOL)) {
+                        result.add(entity)
+                    }
                 }
             }
         }

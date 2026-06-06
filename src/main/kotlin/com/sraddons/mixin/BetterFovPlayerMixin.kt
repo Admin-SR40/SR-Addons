@@ -21,6 +21,7 @@ abstract class BetterFovPlayerMixin {
         ),
         index = 2
     )
+    @Suppress("CAST_NEVER_SUCCEEDS")
     private fun modifyFovModifierArg(f: Float): Float {
         if (!SRConfig.settings.general.betterFov) return f
         val player = this as AbstractClientPlayer

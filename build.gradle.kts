@@ -1,11 +1,11 @@
 plugins {
     id("fabric-loom") version "1.14-SNAPSHOT"
-    kotlin("jvm") version "2.2.0"
+    kotlin("jvm") version "2.3.0"
     `maven-publish`
 }
 
 group = "com.sraddons"
-version = "1.6.2"
+version = "1.6.3"
 
 repositories {
     mavenCentral()
@@ -26,7 +26,7 @@ dependencies {
     minecraft("com.mojang:minecraft:1.21.11")
     mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:0.16.10")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.1+kotlin.2.1.10")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.8+kotlin.2.3.0")
     modImplementation("net.fabricmc.fabric-api:fabric-api:0.141.3+1.21.11")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
@@ -62,19 +62,19 @@ tasks {
 
     compileKotlin {
         compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
         }
     }
 
     compileJava {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
+        sourceCompatibility = "25"
+        targetCompatibility = "25"
         options.encoding = "UTF-8"
     }
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }

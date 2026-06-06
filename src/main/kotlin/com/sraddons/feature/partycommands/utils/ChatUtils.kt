@@ -11,13 +11,13 @@ val mc: Minecraft
 fun modMessage(message: Component) {
     mc.execute {
         val prefix = Constants.makePrefix()
-        mc.gui?.chat?.addMessage(prefix.copy().append(message))
+        mc.gui.chat.addMessage(prefix.copy().append(message))
     }
 }
 
 fun rawMessage(message: Component) {
     mc.execute {
-        mc.gui?.chat?.addMessage(message)
+        mc.gui.chat.addMessage(message)
     }
 }
 
@@ -41,7 +41,8 @@ fun sendCommand(command: String) {
 
 fun getPositionString(): String {
     val player = mc.player ?: return "\u672a\u77e5\u4f4d\u7f6e"
-    return "x: ${player.blockPosition().x}, y: ${player.blockPosition().y}, z: ${player.blockPosition().z}"
+    val pos = player.blockPosition()
+    return "x: ${pos.x}, y: ${pos.y}, z: ${pos.z}"
 }
 
 fun Double.toFixed(decimals: Int = 1): String = String.format("%.${decimals}f", this)

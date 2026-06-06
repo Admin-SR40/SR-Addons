@@ -65,24 +65,27 @@ object CarryHighlightRenderer {
             if (checkClient || checkBoss || checkMiniboss) {
                 val minibossNames = CarryState.minibossNames
                 for (entity in entities) {
-                    if (entity is Player && checkClient) {
-                        val nameLower = entity.name.string.lowercase()
-                        if (CarryState.clients.containsKey(nameLower)) {
-                            clientPlayers.add(entity)
-                        }
-                    } else if (entity is ArmorStand) {
-                        val name = entity.name.string
-                        if (checkBoss) {
-                            val idx = name.indexOf(BOSS_TAG)
-                            if (idx >= 0) {
-                                val playerNameLower = name.substring(idx + BOSS_TAG.length).trim().lowercase()
-                                if (CarryState.clients.containsKey(playerNameLower)) {
-                                    bossArmorStands.add(entity)
-                                }
+                    when (entity) {
+                        is Player if checkClient -> {
+                            val nameLower = entity.name.string.lowercase()
+                            if (CarryState.clients.containsKey(nameLower)) {
+                                clientPlayers.add(entity)
                             }
                         }
-                        if (checkMiniboss && minibossNames.any { name.contains(it, ignoreCase = true) }) {
-                            minibossArmorStands.add(entity)
+                        is ArmorStand -> {
+                            val name = entity.name.string
+                            if (checkBoss) {
+                                val idx = name.indexOf(BOSS_TAG)
+                                if (idx >= 0) {
+                                    val playerNameLower = name.substring(idx + BOSS_TAG.length).trim().lowercase()
+                                    if (CarryState.clients.containsKey(playerNameLower)) {
+                                        bossArmorStands.add(entity)
+                                    }
+                                }
+                            }
+                            if (checkMiniboss && minibossNames.any { name.contains(it, ignoreCase = true) }) {
+                                minibossArmorStands.add(entity)
+                            }
                         }
                     }
                 }
