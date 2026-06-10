@@ -1,6 +1,7 @@
 package com.sraddons.feature.helper
 
 import com.sraddons.config.SRConfig
+import com.sraddons.feature.partycommands.utils.COLOR_CODE_REGEX
 import com.sraddons.util.GradientText
 import com.sraddons.util.TitleUtil
 import net.minecraft.network.chat.Component
@@ -10,7 +11,6 @@ import net.minecraft.network.chat.Style
 
 object TextReplacer {
 
-    private val colorCodeRegex = Regex("§[0-9a-fk-or]")
     private val gradientPrefix = ":g:"
 
     val defaults = linkedMapOf(
@@ -76,6 +76,7 @@ object TextReplacer {
 
     fun replace(text: String): String {
         if (!SRConfig.settings.general.replaceTextsEnabled || patterns.isEmpty()) return text
+        if (isModMessage(text)) return text
 
         val stripped = stripColorCodes(text)
         var result = stripped
@@ -98,6 +99,8 @@ object TextReplacer {
         if (chars.isEmpty()) return seq
 
         val clean = buildString { chars.forEach { appendCodePoint(it) } }
+
+        if (isModMessage(clean)) return seq
 
         val matches = findMatches(clean)
         if (matches.isEmpty()) return seq
@@ -196,9 +199,12 @@ object TextReplacer {
         } else {
             value
         }
-        return TitleUtil.parseColorCodes(flat).replace(colorCodeRegex, "")
+        return TitleUtil.parseColorCodes(flat).replace(COLOR_CODE_REGEX, "")
     }
 
+    private fun isModMessage(text: String): Boolean =
+        text.contains("[SR-Addons]") || text.contains("[ReplaceTexts]")
+
     private fun stripColorCodes(text: String): String =
-        text.replace(colorCodeRegex, "")
+        text.replace(COLOR_CODE_REGEX, "")
 }

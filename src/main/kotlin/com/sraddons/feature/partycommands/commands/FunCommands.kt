@@ -120,7 +120,6 @@ object FunCommands {
         })
     }
 
-    private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
     private fun buildRandomResult(result: Int, min: Int, max: Int): Component {
         return Component.translatable("sraddons.pc.fun.random.result",
             Component.literal(result.toString()).withColor(0xFFFF55),

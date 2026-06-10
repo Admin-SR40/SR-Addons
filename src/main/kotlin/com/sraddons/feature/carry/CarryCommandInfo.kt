@@ -33,7 +33,7 @@ internal object CarryCommandInfo {
                 context.source.feedback(Component.translatable("sraddons.carry.client_zero").withColor(0xFFFF55))
             } else {
                 context.source.feedback(Component.translatable("sraddons.carry.client_count",
-                    Component.literal(CarryState.clients.size.toString()).withColor(0xFFFFFF).withColor(0xFFFFFF)))
+                    Component.literal(CarryState.clients.size.toString()).withColor(0xFFFFFF)))
                 CarryState.clients.values.forEach { client ->
                     context.source.sendFeedback(
                         Component.translatable("sraddons.carry.client_list_entry",
@@ -107,12 +107,12 @@ internal object CarryCommandInfo {
                 Component.literal(client.amount.toString()).withColor(0x55FFFF),
                 Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
                 Component.literal(type.bulkThreshold.toString()).withColor(0xFFFFFF),
-                Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00).withColor(0xFFFFFF)))
+                Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFFFFF)))
         } else {
             source.feedback(Component.translatable("sraddons.carry.calc_price.standard",
                 Component.literal(client.amount.toString()).withColor(0x55FFFF),
                 Component.literal(CarryPriceUtil.formatPrice(unitPrice)).withColor(0xFFAA00),
-                Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFAA00).withColor(0xFFFFFF)))
+                Component.literal(CarryPriceUtil.formatPrice(total)).withColor(0xFFFFFF)))
         }
     }
 }

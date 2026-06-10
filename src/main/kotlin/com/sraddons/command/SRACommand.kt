@@ -257,7 +257,7 @@ object SRACommand {
                                 )
                                 customs.entries.forEachIndexed { i, (k, v) ->
                                     context.source.sendFeedback(
-                                        Component.literal("§7${i + 1}. §f$k §8→ §f$v")
+                                        prefix.copy().append(Component.literal("§7${i + 1}. §f$k §8→ §f$v"))
                                     )
                                 }
                             }
@@ -419,7 +419,7 @@ object SRACommand {
                                 else -> "contains"
                             }
                             context.source.sendFeedback(
-                                Component.literal("§7${i + 1}. §f\"$kw\" §8→ §f\"$sub\" §7(${cd}s, $flags)")
+                                prefix.copy().append(Component.literal("§7${i + 1}. §f\"$kw\" §8→ §f\"$sub\" §7(${cd}s, $flags)"))
                             )
                         }
                     }

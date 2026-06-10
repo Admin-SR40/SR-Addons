@@ -47,7 +47,7 @@ fun getPositionString(): String {
 
 fun Double.toFixed(decimals: Int = 1): String = String.format("%.${decimals}f", this)
 
-private val COLOR_CODE_REGEX = Regex("\u00a7[0-9a-fk-or]")
+val COLOR_CODE_REGEX = Regex("\u00a7[0-9a-fk-or]")
 
 val String.noControlCodes: String
     get() = this.replace(COLOR_CODE_REGEX, "")
@@ -62,14 +62,18 @@ fun respond(component: Component) {
 }
 
 fun respondDisabled(command: String) {
-    respond(formatResponse(
-        Component.translatable("sraddons.pc.label.error"),
-        Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
-    ))
-    if (!SRConfig.settings.partyCommands.showResponseLocally && !SRConfig.settings.partyCommands.respondInPartyChat) {
+    val hasResponsePath = SRConfig.settings.partyCommands.showResponseLocally || SRConfig.settings.partyCommands.respondInPartyChat
+    if (hasResponsePath) {
+        respond(formatResponse(
+            Component.translatable("sraddons.pc.label.error"),
+            Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
+        ))
+    } else {
         modMessage(formatResponse(
             Component.translatable("sraddons.pc.label.error"),
             Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
         ))
     }
 }
+
+fun label(key: String) = Component.translatable("sraddons.pc.label.$key")

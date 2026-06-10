@@ -19,22 +19,19 @@ fun FabricClientCommandSource.requireEnabled(): Boolean {
 
 fun FabricClientCommandSource.lookupClient(name: String, saveUndo: Boolean = false): CarryClient? {
     if (saveUndo) CarryState.saveUndo()
-    val client = CarryState.clients[name.lowercase()]
-    if (client == null) {
+    return CarryState.clients[name.lowercase()] ?: run {
         feedback(Component.translatable("sraddons.carry.client_not_found",
             Component.literal(name).withColor(0xFF55FF)).withColor(0xFF5555))
+        null
     }
-    return client
 }
 
-fun FabricClientCommandSource.lookupType(name: String): CarryType? {
-    val type = CarryState.types[name.lowercase()]
-    if (type == null) {
+fun FabricClientCommandSource.lookupType(name: String): CarryType? =
+    CarryState.types[name.lowercase()] ?: run {
         feedback(Component.translatable("sraddons.carry.type_not_found",
             Component.literal(name).withColor(0x55FFFF)).withColor(0xFF5555))
+        null
     }
-    return type
-}
 
 inline fun FabricClientCommandSource.withSingleClient(action: (CarryClient) -> Unit) {
     val count = CarryState.clients.size

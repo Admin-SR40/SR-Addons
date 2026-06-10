@@ -8,8 +8,6 @@ import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.network.chat.Component
 
 object UtilityCommands {
-    private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
-
     fun register() {
         Commands.add(object : Command("forward", "Toggle party chat forwarding") {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {

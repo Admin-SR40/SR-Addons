@@ -14,7 +14,6 @@ object PartyManagementCommands {
     private val mc = Minecraft.getInstance()
     private const val KICK_DELAY_MS = 500L
 
-    private fun label(key: String) = Component.translatable("sraddons.pc.label.$key")
     private fun error(key: String, vararg args: Any) = Component.translatable("sraddons.pc.error.$key", *args).withColor(0xFF5555)
 
     private val suggestMembers = SuggestionProvider<SharedSuggestionProvider> { _, builder ->

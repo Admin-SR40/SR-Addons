@@ -31,7 +31,6 @@ object ChatListener {
     private val kuudraJoin = Regex($$"^Party Finder > $RANK_AND_NAME joined the group!")
     private val partyFinderQueued = Regex("^Party Finder > Your party has been queued in the party finder!\$")
 
-    private val colorCodeRegex = Regex("§[0-9a-fk-or]")
     private val rankStripRegex = Regex("\\[.+?]\\s*")
     private val partySenderRegex = Regex("^Party > (?:\\[.+?] )?(.+?):")
     private val cancelPatterns = listOf(
@@ -131,7 +130,7 @@ object ChatListener {
 
     private fun handleModCommand(message: String) {
         if (!SRConfig.settings.partyCommands.mod) return
-        val cleanMessage = message.replace(colorCodeRegex, "")
+        val cleanMessage = message.replace(COLOR_CODE_REGEX, "")
         if (!cleanMessage.startsWith("Party >")) return
         if (!cleanMessage.contains("!mod")) return
 
@@ -152,7 +151,7 @@ object ChatListener {
     private fun handleCancelCommand(message: String) {
         if (!message.contains("!cancel")) return
         val myName = mc.player?.name?.string ?: return
-        val cleanMessage = message.replace(colorCodeRegex, "")
+        val cleanMessage = message.replace(COLOR_CODE_REGEX, "")
         for (pattern in cancelPatterns) {
             val match = pattern.find(cleanMessage) ?: continue
             val senderRaw = match.groupValues[1].trim()
