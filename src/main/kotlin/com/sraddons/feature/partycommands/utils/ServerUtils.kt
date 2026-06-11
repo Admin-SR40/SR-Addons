@@ -49,7 +49,7 @@ object ServerUtils {
                         synchronized(this) {
                             tpsHistory.add(tps)
                             if (tpsHistory.size > 10) {
-                                tpsHistory.removeAt(0)
+                                tpsHistory.removeFirst()
                             }
                         }
                     }

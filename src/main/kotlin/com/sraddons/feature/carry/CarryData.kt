@@ -12,6 +12,7 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 data class CarryType(
     val name: String,
@@ -42,6 +43,7 @@ private data class CarryDataFile(
 
 object CarryState {
     private val LOGGER = LogManager.getLogger("SR-Addons-Carry")
+    private val SAVE_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor()
     private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
     private val CONFIG_DIR = FabricLoader.getInstance().configDir.toFile()
     private val HISTORY_FILE = File(CONFIG_DIR, "srac-history.json")
@@ -72,7 +74,7 @@ object CarryState {
     fun saveHistory() {
         val snapshot: CarryStatus
         synchronized(this) { snapshot = status.copy() }
-        java.util.concurrent.CompletableFuture.runAsync {
+        java.util.concurrent.CompletableFuture.runAsync({
             val tmpFile = File(HISTORY_FILE.parentFile, "${HISTORY_FILE.name}.tmp")
             try {
                 OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
@@ -85,7 +87,7 @@ object CarryState {
                 LOGGER.error("Failed to save carry history", e)
                 tmpFile.delete()
             }
-        }
+        }, SAVE_EXECUTOR)
     }
 
     fun saveData() {
@@ -97,7 +99,7 @@ object CarryState {
                 minibossNames = minibossNames.toList()
             )
         }
-        java.util.concurrent.CompletableFuture.runAsync {
+        java.util.concurrent.CompletableFuture.runAsync({
             val tmpFile = File(DATA_FILE.parentFile, "${DATA_FILE.name}.tmp")
             try {
                 OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
@@ -110,7 +112,7 @@ object CarryState {
                 LOGGER.error("Failed to save carry data", e)
                 tmpFile.delete()
             }
-        }
+        }, SAVE_EXECUTOR)
     }
 
     fun loadData() {

@@ -33,22 +33,26 @@ class SRAddonsMod : ClientModInitializer {
     private var notificationShown = false
     private val logger = org.apache.logging.log4j.LogManager.getLogger("SR-Addons")
 
+    private fun safeInit(name: String, block: () -> Unit) {
+        try { block() } catch (e: Exception) { logger.error("Failed to init $name", e) }
+    }
+
     override fun onInitializeClient() {
-        try { SRConfig.load() } catch (e: Exception) { logger.error("Failed to load config", e) }
-        try { CarryState.loadHistory() } catch (e: Exception) { logger.error("Failed to load carry history", e) }
-        try { CarryState.loadData() } catch (e: Exception) { logger.error("Failed to load carry data", e) }
-        try { SRACommand.register() } catch (e: Exception) { logger.error("Failed to register /sra commands", e) }
-        try { CarryCommand.register() } catch (e: Exception) { logger.error("Failed to register /cm commands", e) }
-        try { CarryHighlightRenderer.init() } catch (e: Exception) { logger.error("Failed to init carry renderer", e) }
-        try { StarredMobRenderer.init() } catch (e: Exception) { logger.error("Failed to init starred mob renderer", e) }
-        try { PartyCommandHandler.init() } catch (e: Exception) { logger.error("Failed to init party commands", e) }
-        try { ChatListener.init() } catch (e: Exception) { logger.error("Failed to init chat listener", e) }
-        try { AutoPartyListUpdater.init() } catch (e: Exception) { logger.error("Failed to init party list updater", e) }
-        try { CommandKeyBinding.init() } catch (e: Exception) { logger.error("Failed to init key bindings", e) }
-        try { RagnarockNotifier.init() } catch (e: Exception) { logger.error("Failed to init ragnarock notifier", e) }
-        try { PingTpsAlertNotifier.init() } catch (e: Exception) { logger.error("Failed to init alert notifier", e) }
-        try { TextReplacer.init() } catch (e: Exception) { logger.error("Failed to init text replacer", e) }
-        try { ChatKeywordAlert.init() } catch (e: Exception) { logger.error("Failed to init chat alert", e) }
+        safeInit("config") { SRConfig.load() }
+        safeInit("carry history") { CarryState.loadHistory() }
+        safeInit("carry data") { CarryState.loadData() }
+        safeInit("/sra commands") { SRACommand.register() }
+        safeInit("/cm commands") { CarryCommand.register() }
+        safeInit("carry renderer") { CarryHighlightRenderer.init() }
+        safeInit("starred mob renderer") { StarredMobRenderer.init() }
+        safeInit("party commands") { PartyCommandHandler.init() }
+        safeInit("chat listener") { ChatListener.init() }
+        safeInit("party list updater") { AutoPartyListUpdater.init() }
+        safeInit("key bindings") { CommandKeyBinding.init() }
+        safeInit("ragnarock notifier") { RagnarockNotifier.init() }
+        safeInit("alert notifier") { PingTpsAlertNotifier.init() }
+        safeInit("text replacer") { TextReplacer.init() }
+        safeInit("chat alert") { ChatKeywordAlert.init() }
 
         if (SRConfig.settings.general.autoCheckUpdates) {
             startAutoUpdateCheck()

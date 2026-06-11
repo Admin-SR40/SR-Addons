@@ -27,27 +27,27 @@ object CalcUtil {
                     while (ops.isNotEmpty() && ops.last() != "(") {
                         val t = priority[ops.last()] ?: break
                         val c = priority[s] ?: break
-                        if (t > c || (t == c && s != "^")) out += ops.removeAt(ops.lastIndex)
+                        if (t > c || (t == c && s != "^")) out += ops.removeLast()
                         else break
                     }
                     ops += s
                 }
                 s == "(" -> ops += s
                 s == ")" -> {
-                    while (ops.isNotEmpty() && ops.last() != "(") out += ops.removeAt(ops.lastIndex)
-                    if (ops.isNotEmpty() && ops.last() == "(") ops.removeAt(ops.lastIndex)
+                    while (ops.isNotEmpty() && ops.last() != "(") out += ops.removeLast()
+                    if (ops.isNotEmpty() && ops.last() == "(") ops.removeLast()
                 }
             }
         }
 
-        while (ops.isNotEmpty()) out += ops.removeAt(ops.lastIndex)
+        while (ops.isNotEmpty()) out += ops.removeLast()
 
         val stack = mutableListOf<Double>()
         for (o in out) {
             o.toDoubleOrNull()?.let { stack += it; continue }
             if (o in priority) {
-                val b = stack.removeAt(stack.lastIndex)
-                val a = stack.removeAt(stack.lastIndex)
+                val b = stack.removeLast()
+                val a = stack.removeLast()
                 stack += when (o) {
                     "+" -> a + b
                     "-" -> a - b

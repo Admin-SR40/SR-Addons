@@ -240,7 +240,7 @@ object PartyListHandler {
         }.toMutableList()
 
         if (!isLeader && myName.isNotEmpty()) {
-            otherMembers.add(0, "§d${Component.translatable("sraddons.pc.party_list.you").string}")
+            otherMembers.addFirst("§d${Component.translatable("sraddons.pc.party_list.you").string}")
         }
 
         val totalMembers = otherMembers.size
