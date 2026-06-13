@@ -49,13 +49,20 @@ object SRConfig {
 
     fun isCommandEnabled(cmd: String): Boolean = cmd !in settings.partyCommands.disabledCommands
 
+    interface HighlightColorConfig {
+        val colorRed: Int
+        val colorGreen: Int
+        val colorBlue: Int
+        val colorAlpha: Int
+    }
+
     data class CarryHighlightConfig(
         var enabled: Boolean = true,
-        var colorRed: Int = 255,
-        var colorGreen: Int = 255,
-        var colorBlue: Int = 0,
-        var colorAlpha: Int = 200
-    )
+        override var colorRed: Int = 255,
+        override var colorGreen: Int = 255,
+        override var colorBlue: Int = 0,
+        override var colorAlpha: Int = 200
+    ) : HighlightColorConfig
 
     data class CarryConfigData(
         var enabled: Boolean = true,
@@ -108,14 +115,14 @@ object SRConfig {
 
     data class StarredMobConfigData(
         var enabled: Boolean = true,
-        var colorRed: Int = 255,
-        var colorGreen: Int = 255,
-        var colorBlue: Int = 0,
-        var colorAlpha: Int = 200,
+        override var colorRed: Int = 255,
+        override var colorGreen: Int = 255,
+        override var colorBlue: Int = 0,
+        override var colorAlpha: Int = 200,
         var renderMode: String = "BOTH",
         var lineWidth: Int = 3,
         var maxDistance: Int = 64
-    )
+    ) : HighlightColorConfig
 
     data class ChatAlertConfigData(
         var enabled: Boolean = true,
@@ -209,22 +216,12 @@ object SRConfig {
     }
 }
 
-fun SRConfig.CarryHighlightConfig.toColor() = java.awt.Color(
+fun SRConfig.HighlightColorConfig.toColor() = java.awt.Color(
     colorRed.coerceIn(0, 255), colorGreen.coerceIn(0, 255),
     colorBlue.coerceIn(0, 255), colorAlpha.coerceIn(0, 255)
 )
 
-fun SRConfig.CarryHighlightConfig.toARGB(): Int = net.minecraft.util.ARGB.color(
-    colorAlpha.coerceIn(0, 255), colorRed.coerceIn(0, 255),
-    colorGreen.coerceIn(0, 255), colorBlue.coerceIn(0, 255)
-)
-
-fun SRConfig.StarredMobConfigData.toColor() = java.awt.Color(
-    colorRed.coerceIn(0, 255), colorGreen.coerceIn(0, 255),
-    colorBlue.coerceIn(0, 255), colorAlpha.coerceIn(0, 255)
-)
-
-fun SRConfig.StarredMobConfigData.toARGB(): Int = net.minecraft.util.ARGB.color(
+fun SRConfig.HighlightColorConfig.toARGB(): Int = net.minecraft.util.ARGB.color(
     colorAlpha.coerceIn(0, 255), colorRed.coerceIn(0, 255),
     colorGreen.coerceIn(0, 255), colorBlue.coerceIn(0, 255)
 )

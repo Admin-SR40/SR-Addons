@@ -24,12 +24,15 @@ object TextReplacer {
     fun getCustoms(): Map<String, String> = customs.toMap()
 
     val activePatterns: List<Pair<String, String>>
-        get() = patterns.toList()
+        get() = patternSet.patterns.toList()
+
+    private data class PatternSet(
+        val patterns: List<Pair<String, String>>,
+        val compiled: List<Pair<Regex, String>>
+    )
 
     @Volatile
-    private var patterns: List<Pair<String, String>> = emptyList()
-    @Volatile
-    private var compiledPatterns: List<Pair<Regex, String>> = emptyList()
+    private var patternSet = PatternSet(emptyList(), emptyList())
 
     val gradientNames = listOf(
         "cyanToLightBlue", "goldToYellow", "aquaToGreen", "redToOrange", "purpleToPink"
@@ -54,8 +57,7 @@ object TextReplacer {
 
         val newCompiled = newPatterns.map { (k, v) -> Regex(Regex.escape(k)) to v }
 
-        patterns = newPatterns
-        compiledPatterns = newCompiled
+        patternSet = PatternSet(newPatterns, newCompiled)
     }
 
     fun add(key: String, value: String) {
@@ -75,13 +77,13 @@ object TextReplacer {
     }
 
     fun replace(text: String): String {
-        if (!SRConfig.settings.general.replaceTextsEnabled || patterns.isEmpty()) return text
+        if (!SRConfig.settings.general.replaceTextsEnabled || patternSet.patterns.isEmpty()) return text
         if (isModMessage(text)) return text
 
         val stripped = stripColorCodes(text)
         var result = stripped
 
-        for ((regex, value) in compiledPatterns) {
+        for ((regex, value) in patternSet.compiled) {
             val plainReplacement = stripGradientAndColors(value)
             result = result.replace(regex, TitleUtil.parseColorCodes(plainReplacement) + "§r")
         }
@@ -90,7 +92,7 @@ object TextReplacer {
     }
 
     fun replaceFormattedSeq(seq: FormattedCharSequence): FormattedCharSequence {
-        if (!SRConfig.settings.general.replaceTextsEnabled || patterns.isEmpty()) return seq
+        if (!SRConfig.settings.general.replaceTextsEnabled || patternSet.patterns.isEmpty()) return seq
 
         val chars = mutableListOf<Int>()
         val styles = mutableListOf<Style>()
@@ -168,7 +170,7 @@ object TextReplacer {
         val matches = mutableListOf<Triple<Int, Int, String>>()
         val occupied = BooleanArray(clean.length)
 
-        for ((key, value) in patterns) {
+        for ((key, value) in patternSet.patterns) {
             var searchFrom = 0
             while (true) {
                 val idx = clean.indexOf(key, searchFrom)

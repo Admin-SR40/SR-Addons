@@ -16,9 +16,8 @@ import com.sraddons.feature.helper.TextReplacer
 import com.sraddons.feature.starredmob.renderer.StarredMobRenderer
 import com.sraddons.update.UpdateChecker
 import com.sraddons.util.Constants
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.network.chat.ClickEvent
@@ -64,8 +63,10 @@ class SRAddonsMod : ClientModInitializer {
     }
 
     private fun startAutoUpdateCheck() {
-        CoroutineScope(Dispatchers.IO).launch {
-            updateResult = UpdateChecker.check()
+        Thread.startVirtualThread {
+            runBlocking(Dispatchers.IO) {
+                updateResult = UpdateChecker.check()
+            }
         }
     }
 
