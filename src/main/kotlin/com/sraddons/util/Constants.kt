@@ -10,7 +10,7 @@ object Constants {
     val MOD_VERSION: String by lazy {
         FabricLoader.getInstance().getModContainer(MOD_ID)
             .map { it.metadata.version.friendlyString }
-            .orElse("1.6.6")
+            .orElse("1.6.7")
     }
 
     fun makePrefix(): Component {
