@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable
 abstract class TextReplaceMixin {
 
     @ModifyVariable(
-        method = ["prepareText(Lnet/minecraft/util/FormattedCharSequence;FFIZZI)Lnet/minecraft/client/gui/Font\${'\$'}PreparedText;"],
+        method = ["prepareText(Lnet/minecraft/util/FormattedCharSequence;FFIZZI)Lnet/minecraft/client/gui/Font${'$'}PreparedText;"],
         at = At("HEAD"),
         argsOnly = true
     )
