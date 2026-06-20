@@ -17,8 +17,8 @@ object CalcUtil {
     fun evaluate(expression: String): Double {
         val expanded = expandSuffixes(expression)
         val tokens = tokenize(expanded)
-        val out = mutableListOf<String>()
-        val ops = mutableListOf<String>()
+        val out = ArrayDeque<String>()
+        val ops = ArrayDeque<String>()
 
         for (s in tokens) {
             when {
@@ -42,12 +42,12 @@ object CalcUtil {
 
         while (ops.isNotEmpty()) out += ops.removeLast()
 
-        val stack = mutableListOf<Double>()
+        val stack = ArrayDeque<Double>()
         for (o in out) {
             o.toDoubleOrNull()?.let { stack += it; continue }
             if (o in priority) {
-                val b = stack.removeLast()
-                val a = stack.removeLast()
+                val b = stack.removeLastOrNull() ?: return Double.NaN
+                val a = stack.removeLastOrNull() ?: return Double.NaN
                 stack += when (o) {
                     "+" -> a + b
                     "-" -> a - b

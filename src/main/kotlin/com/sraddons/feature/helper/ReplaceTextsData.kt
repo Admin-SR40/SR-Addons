@@ -1,15 +1,15 @@
 package com.sraddons.feature.helper
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.sraddons.util.GsonProvider
+import com.sraddons.util.saveJsonAtomic
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import java.io.File
 
 object ReplaceTextsData {
     private val LOGGER = LogManager.getLogger("SR-Addons-ReplaceTexts")
-    private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+    private val GSON = GsonProvider.PRETTY
     private val FILE = File(
         FabricLoader.getInstance().configDir.toFile(),
         "sraddons-replace-texts.json"
@@ -27,10 +27,6 @@ object ReplaceTextsData {
     }
 
     fun save(data: Map<String, String>) {
-        try {
-            FILE.writeText(GSON.toJson(data))
-        } catch (e: Exception) {
-            LOGGER.error("Failed to save replace-texts data", e)
-        }
+        saveJsonAtomic(FILE, GSON, data, LOGGER)
     }
 }

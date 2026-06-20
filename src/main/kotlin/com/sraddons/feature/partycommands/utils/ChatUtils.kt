@@ -11,13 +11,13 @@ val mc: Minecraft
 fun modMessage(message: Component) {
     mc.execute {
         val prefix = Constants.makePrefix()
-        mc.gui.chat.addMessage(prefix.copy().append(message))
+        mc.gui.chat.addClientSystemMessage(prefix.copy().append(message))
     }
 }
 
 fun rawMessage(message: Component) {
     mc.execute {
-        mc.gui.chat.addMessage(message)
+        mc.gui.chat.addClientSystemMessage(message)
     }
 }
 

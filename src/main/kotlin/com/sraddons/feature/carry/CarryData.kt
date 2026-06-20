@@ -1,15 +1,13 @@
 package com.sraddons.feature.carry
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.sraddons.config.SRConfig
+import com.sraddons.util.GsonProvider
+import com.sraddons.util.saveJsonAtomic
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.InputStreamReader
-import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -44,7 +42,7 @@ private data class CarryDataFile(
 object CarryState {
     private val LOGGER = LogManager.getLogger("SR-Addons-Carry")
     private val SAVE_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor()
-    private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+    private val GSON = GsonProvider.PRETTY
     private val CONFIG_DIR = FabricLoader.getInstance().configDir.toFile()
     private val HISTORY_FILE = File(CONFIG_DIR, "srac-history.json")
     private val DATA_FILE = File(CONFIG_DIR, "srac-data.json")
@@ -75,18 +73,7 @@ object CarryState {
         val snapshot: CarryStatus
         synchronized(this) { snapshot = status.copy() }
         java.util.concurrent.CompletableFuture.runAsync({
-            val tmpFile = File(HISTORY_FILE.parentFile, "${HISTORY_FILE.name}.tmp")
-            try {
-                OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
-                    GSON.toJson(snapshot, writer)
-                }
-                if (!tmpFile.renameTo(HISTORY_FILE)) {
-                    LOGGER.warn("Failed to rename history tmp file")
-                }
-            } catch (e: Exception) {
-                LOGGER.error("Failed to save carry history", e)
-                tmpFile.delete()
-            }
+            saveJsonAtomic(HISTORY_FILE, GSON, snapshot, LOGGER)
         }, SAVE_EXECUTOR)
     }
 
@@ -100,18 +87,7 @@ object CarryState {
             )
         }
         java.util.concurrent.CompletableFuture.runAsync({
-            val tmpFile = File(DATA_FILE.parentFile, "${DATA_FILE.name}.tmp")
-            try {
-                OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
-                    GSON.toJson(snapshot, writer)
-                }
-                if (!tmpFile.renameTo(DATA_FILE)) {
-                    LOGGER.warn("Failed to rename carry data tmp file")
-                }
-            } catch (e: Exception) {
-                LOGGER.error("Failed to save carry data", e)
-                tmpFile.delete()
-            }
+            saveJsonAtomic(DATA_FILE, GSON, snapshot, LOGGER)
         }, SAVE_EXECUTOR)
     }
 

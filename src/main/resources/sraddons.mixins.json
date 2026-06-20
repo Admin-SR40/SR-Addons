@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "com.sraddons.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "HiddenEntityFireMixin",
     "ChatMixin",
@@ -13,7 +13,8 @@
     "TextReplaceMixin",
     "BetterFovCameraMixin",
     "BetterFovPlayerMixin",
-    "FullbrightMixin"
+    "FullbrightMixin",
+    "YACLListEntryFocusMixin"
   ],
   "injectors": {
     "defaultRequire": 1

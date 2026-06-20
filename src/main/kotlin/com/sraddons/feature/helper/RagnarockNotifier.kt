@@ -11,6 +11,9 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.network.chat.Component
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.Identifier
+import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.CustomData
@@ -18,8 +21,16 @@ import net.minecraft.world.item.component.ItemLore
 
 object RagnarockNotifier {
     private val config get() = SRConfig.settings.ragnarock
-    private val wolfDeathSounds by lazy {
-        SoundEvents.WOLF_SOUNDS.entries.map { it.value.deathSound().value().location }.toSet()
+    private val wolfDeathSoundsCache = mutableSetOf<Identifier>()
+
+    private fun getWolfDeathSounds(): Set<Identifier> {
+        if (wolfDeathSoundsCache.isNotEmpty()) return wolfDeathSoundsCache
+        val level = Minecraft.getInstance().level ?: return emptySet()
+        val registry = level.registryAccess().lookupOrThrow(Registries.WOLF_SOUND_VARIANT)
+        wolfDeathSoundsCache.addAll(
+            registry.entrySet().map { it.value.adultSounds().deathSound().value().location }
+        )
+        return wolfDeathSoundsCache
     }
 
     private val cancelRegex = Regex("Ragnarock was cancelled due to (?:being hit|taking damage)!")
@@ -63,7 +74,7 @@ object RagnarockNotifier {
         val mainHand = player.mainHandItem
         if (mainHand.itemId != RAGNAROCK_AXE_ID) return
 
-        val isWolfDeath = packet.sound.value().location in wolfDeathSounds
+        val isWolfDeath = packet.sound.value().location in getWolfDeathSounds()
         if (!isWolfDeath) return
 
         lastCastTime = now

@@ -4,7 +4,7 @@ import com.sraddons.config.SRConfig
 import com.sraddons.config.toARGB
 import com.sraddons.render.HighlightUtil
 import com.sraddons.util.TitleUtil
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.network.chat.Component
@@ -14,18 +14,15 @@ import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.AABB
 import org.apache.logging.log4j.LogManager
-import java.util.concurrent.ConcurrentHashMap
+import java.util.LinkedHashSet
+import java.util.SequencedSet
 
 object CarryHighlightRenderer {
 
     private val LOGGER = LogManager.getLogger("SR-Addons-CarryHL")
     private const val BOSS_TAG = "Spawned by:"
-    private const val BOSS_UUID_PRUNE_INTERVAL = 1200 // 60 seconds at 20 TPS
     private val seenBossUUIDs = HashSet<java.util.UUID>()
     private var ticksSinceBossPrune = 0
-
-    // Hypixel SkyBlock Slayer miniboss name tags, driven by config.
-    // Set-based lookup provides O(1) contains() for entity matching in the render loop.
 
     private val clientFilled: RenderType by lazy { HighlightUtil.createFilledType("carry_client") }
     private val clientLines: RenderType by lazy { HighlightUtil.createLinesType("carry_client") }
@@ -37,7 +34,7 @@ object CarryHighlightRenderer {
     private val minibossLines: RenderType by lazy { HighlightUtil.createLinesType("carry_miniboss") }
 
     fun init() {
-        WorldRenderEvents.END_MAIN.register { context ->
+        LevelRenderEvents.END_MAIN.register { context ->
             if (!SRConfig.settings.carry.enabled) return@register
 
             val cfg = SRConfig.settings.carry
@@ -52,7 +49,6 @@ object CarryHighlightRenderer {
 
             val entities = world.entitiesForRendering()
 
-            // Single-pass entity classification
             val clientPlayers = mutableListOf<LivingEntity>()
             val bossArmorStands = mutableListOf<ArmorStand>()
             val minibossArmorStands = mutableListOf<ArmorStand>()
@@ -96,7 +92,6 @@ object CarryHighlightRenderer {
                 resolveMinibosses(minibossArmorStands, entities, clientPlayers, cfg.minibossMaxDistance.coerceIn(4, 32))
             else emptyList()
 
-            // Boss spawn notification — incremental tracking
             if (bossEnabled && cfg.bossSpawnNotification) {
                 for (stand in bossArmorStands) {
                     if (seenBossUUIDs.add(stand.uuid)) {
@@ -105,7 +100,7 @@ object CarryHighlightRenderer {
                     }
                 }
                 ticksSinceBossPrune++
-                if (ticksSinceBossPrune >= BOSS_UUID_PRUNE_INTERVAL) {
+                if (ticksSinceBossPrune >= cfg.bossUuidPruneInterval) {
                     ticksSinceBossPrune = 0
                     val currentIds = bossArmorStands.mapTo(HashSet()) { it.uuid }
                     seenBossUUIDs.retainAll(currentIds)
@@ -121,7 +116,7 @@ object CarryHighlightRenderer {
 
             val camera = mc.gameRenderer.mainCamera
             val cameraPos = camera.position()
-            val poseStack = context.matrices()
+            val poseStack = context.poseStack()
 
             poseStack.pushPose()
             poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
@@ -162,7 +157,7 @@ object CarryHighlightRenderer {
     }
 
     private fun findBossMobs(bossArmorStands: List<ArmorStand>, entities: Iterable<Entity>): List<LivingEntity> {
-        val result = LinkedHashSet<LivingEntity>()
+        val result: SequencedSet<LivingEntity> = LinkedHashSet()
         for (armorStand in bossArmorStands) {
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
             if (target != null) result.add(target)
@@ -181,7 +176,7 @@ object CarryHighlightRenderer {
         maxDistance: Int
     ): List<LivingEntity> {
         val maxDistSq = (maxDistance * maxDistance).toDouble()
-        val result = LinkedHashSet<LivingEntity>()
+        val result: SequencedSet<LivingEntity> = LinkedHashSet()
         for (armorStand in minibossArmorStands) {
             val nearAnyClient = clientPlayers.any { armorStand.distanceToSqr(it) <= maxDistSq }
             if (!nearAnyClient) continue

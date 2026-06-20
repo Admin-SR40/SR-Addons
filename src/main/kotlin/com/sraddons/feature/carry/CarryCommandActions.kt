@@ -4,20 +4,20 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.sraddons.feature.carry.CarryCommand.suggestClients
 import com.sraddons.feature.partycommands.utils.sendPartyChat
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.network.chat.Component
 
 internal object CarryCommandActions {
 
-    fun doneNode() = ClientCommandManager.literal("done")
+    fun doneNode() = ClientCommands.literal("done")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             doneWithDefaultAmount(context.source, 1)
             1
         }
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1
@@ -27,7 +27,7 @@ internal object CarryCommandActions {
                     1
                 }
                 .then(
-                    ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
+                    ClientCommands.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
                             if (!context.source.requireEnabled()) return@executes 1
                             val playerName = StringArgumentType.getString(context, "playerName")
@@ -39,9 +39,9 @@ internal object CarryCommandActions {
                 )
         )
 
-    fun refundNode() = ClientCommandManager.literal("refund")
+    fun refundNode() = ClientCommands.literal("refund")
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1
@@ -83,7 +83,7 @@ internal object CarryCommandActions {
                 }
         )
 
-    fun undoNode() = ClientCommandManager.literal("undo")
+    fun undoNode() = ClientCommands.literal("undo")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             if (CarryState.undo()) {
@@ -94,7 +94,7 @@ internal object CarryCommandActions {
             1
         }
 
-    fun clearClientNode() = ClientCommandManager.literal("clear-client")
+    fun clearClientNode() = ClientCommands.literal("clear-client")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             CarryState.saveUndo()
@@ -104,7 +104,7 @@ internal object CarryCommandActions {
             1
         }
 
-    fun clearHistoryNode() = ClientCommandManager.literal("clear-history")
+    fun clearHistoryNode() = ClientCommands.literal("clear-history")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             CarryState.saveUndo()

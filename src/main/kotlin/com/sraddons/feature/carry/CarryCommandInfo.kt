@@ -2,20 +2,20 @@ package com.sraddons.feature.carry
 
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.sraddons.feature.carry.CarryCommand.suggestClients
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.network.chat.Component
 
 internal object CarryCommandInfo {
 
-    fun calcPriceNode() = ClientCommandManager.literal("calc-price")
+    fun calcPriceNode() = ClientCommands.literal("calc-price")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             calcPriceWithDefault(context.source)
             1
         }
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1
@@ -26,7 +26,7 @@ internal object CarryCommandInfo {
                 }
         )
 
-    fun listClientNode() = ClientCommandManager.literal("list-client")
+    fun listClientNode() = ClientCommands.literal("list-client")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             if (CarryState.clients.isEmpty()) {
@@ -47,7 +47,7 @@ internal object CarryCommandInfo {
             1
         }
 
-    fun listTypeNode() = ClientCommandManager.literal("list-type")
+    fun listTypeNode() = ClientCommands.literal("list-type")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             if (CarryState.types.isEmpty()) {
@@ -67,7 +67,7 @@ internal object CarryCommandInfo {
             1
         }
 
-    fun statusNode() = ClientCommandManager.literal("status")
+    fun statusNode() = ClientCommands.literal("status")
         .executes { context ->
             if (!context.source.requireEnabled()) return@executes 1
             val s = CarryState.status

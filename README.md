@@ -9,7 +9,7 @@
   <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.5.1-02303A" alt="Gradle"></a>
   <a href="https://fabricmc.net"><img src="https://img.shields.io/badge/Loom-1.16.3-ECD2A0" alt="Fabric Loom"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
-  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.6.7-orange" alt="Version"></a>
+  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.7.2-orange" alt="Version"></a>
 </p>
 
 ---
@@ -22,7 +22,7 @@
 4. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 5. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 6. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-7. Download `SR-Addons-1.6.7.jar` and place it in `.minecraft/mods/`
+7. Download `SR-Addons-1.7.2.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -257,7 +257,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 25  
-**Output:** `build/libs/SR-Addons-1.6.7.jar`
+**Output:** `build/libs/SR-Addons-1.7.2.jar`
 
 ---
 

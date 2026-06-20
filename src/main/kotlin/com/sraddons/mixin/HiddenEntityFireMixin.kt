@@ -2,8 +2,8 @@ package com.sraddons.mixin
 
 import com.sraddons.config.SRConfig
 import net.minecraft.client.renderer.entity.LivingEntityRenderer
-import net.minecraft.client.renderer.entity.state.EntityRenderState
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState
+import net.minecraft.client.renderer.state.level.CameraRenderState
 import org.spongepowered.asm.mixin.Mixin
 import org.spongepowered.asm.mixin.injection.At
 import org.spongepowered.asm.mixin.injection.Inject
@@ -17,11 +17,11 @@ abstract class HiddenEntityFireMixin {
         state: LivingEntityRenderState,
         matrices: com.mojang.blaze3d.vertex.PoseStack,
         collector: net.minecraft.client.renderer.SubmitNodeCollector,
-        cameraState: net.minecraft.client.renderer.state.CameraRenderState,
+        cameraState: CameraRenderState,
         ci: CallbackInfo
     ) {
         if (SRConfig.settings.general.hideEntityFire) {
-            (state as EntityRenderState).displayFireAnimation = false
+            state.displayFireAnimation = false
         }
     }
 }

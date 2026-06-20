@@ -5,17 +5,17 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.sraddons.feature.carry.CarryCommand.suggestClients
 import com.sraddons.feature.carry.CarryCommand.suggestTypes
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.minecraft.network.chat.Component
 
 internal object CarryCommandManagement {
 
-    fun addAmountNode() = ClientCommandManager.literal("add-amount")
+    fun addAmountNode() = ClientCommands.literal("add-amount")
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .then(
-                    ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
+                    ClientCommands.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
                             if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
@@ -34,12 +34,12 @@ internal object CarryCommandManagement {
                 )
         )
 
-    fun removeAmountNode() = ClientCommandManager.literal("remove-amount")
+    fun removeAmountNode() = ClientCommands.literal("remove-amount")
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .then(
-                    ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
+                    ClientCommands.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
                             if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
@@ -60,12 +60,12 @@ internal object CarryCommandManagement {
                 )
         )
 
-    fun setAmountNode() = ClientCommandManager.literal("set-amount")
+    fun setAmountNode() = ClientCommands.literal("set-amount")
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .then(
-                    ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
+                    ClientCommands.argument("amount", IntegerArgumentType.integer(1))
                         .executes { context ->
                             if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
@@ -83,7 +83,7 @@ internal object CarryCommandManagement {
                             1
                         }
                         .then(
-                            ClientCommandManager.argument("useBulk", BoolArgumentType.bool())
+                            ClientCommands.argument("useBulk", BoolArgumentType.bool())
                                 .executes { context ->
                                     if (!context.source.requireEnabled()) return@executes 1
                                     CarryState.saveUndo()
@@ -106,9 +106,9 @@ internal object CarryCommandManagement {
                 )
         )
 
-    fun removeClientNode() = ClientCommandManager.literal("remove-client")
+    fun removeClientNode() = ClientCommands.literal("remove-client")
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .suggests(suggestClients)
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1
@@ -127,9 +127,9 @@ internal object CarryCommandManagement {
                 }
         )
 
-    fun removeTypeNode() = ClientCommandManager.literal("remove-type")
+    fun removeTypeNode() = ClientCommands.literal("remove-type")
         .then(
-            ClientCommandManager.argument("typeName", StringArgumentType.word())
+            ClientCommands.argument("typeName", StringArgumentType.word())
                 .suggests(suggestTypes)
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1

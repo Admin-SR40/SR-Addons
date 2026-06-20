@@ -1,48 +1,34 @@
 plugins {
-    id("fabric-loom") version "1.16.3"
+    id("net.fabricmc.fabric-loom") version "1.17.11"
     kotlin("jvm") version "2.4.0"
-    `maven-publish`
 }
 
 group = "com.sraddons"
-version = "1.6.7"
+version = "1.7.2"
 
 repositories {
     mavenCentral()
     maven("https://maven.isxander.dev/releases/") {
         name = "Xander Maven"
     }
-    maven("https://jitpack.io") {
-        content {
-            excludeGroup("dev.isxander")
-            excludeGroup("dev.isxander.yacl")
-        }
-    }
     maven("https://maven.terraformersmc.com/")
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.21.11")
-    mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:0.16.10")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.12+kotlin.2.4.0")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:0.141.3+1.21.11")
+    minecraft("com.mojang:minecraft:26.1.2")
+    implementation("net.fabricmc:fabric-loader:0.19.2")
+    implementation("net.fabricmc:fabric-language-kotlin:1.13.12+kotlin.2.4.0")
+    implementation("net.fabricmc.fabric-api:fabric-api:0.149.1+26.1.2")
 
     // YACL - Yet Another Config Lib
-    modImplementation("dev.isxander:yet-another-config-lib:3.8.2+1.21.11-fabric")
+    implementation("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric")
 
     // ModMenu
-    modCompileOnly("com.terraformersmc:modmenu:11.0.4")
+    compileOnly("com.terraformersmc:modmenu:18.0.0-beta.1")
 }
 
 loom {
     runConfigs.named("client") {
-        isIdeConfigGenerated = true
-        vmArgs.addAll(
-            arrayOf(
-                "-Dmixin.debug.export=true"
-            )
-        )
     }
 }
 

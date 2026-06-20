@@ -3,7 +3,7 @@ package com.sraddons.feature.starredmob.renderer
 import com.sraddons.config.SRConfig
 import com.sraddons.config.toARGB
 import com.sraddons.render.HighlightUtil
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.world.entity.Entity
@@ -11,17 +11,19 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.phys.AABB
 import org.apache.logging.log4j.LogManager
+import java.util.LinkedHashSet
+import java.util.SequencedSet
 
 object StarredMobRenderer {
 
     private val LOGGER = LogManager.getLogger("SR-Addons-StarredMob")
-    private const val STAR_SYMBOL = "\u272f"
+    private const val STAR_SYMBOL = "✯"
 
     private val filledType: RenderType by lazy { HighlightUtil.createFilledType("starredmob") }
     private val linesType: RenderType by lazy { HighlightUtil.createLinesType("starredmob") }
 
     fun init() {
-        WorldRenderEvents.END_MAIN.register { context ->
+        LevelRenderEvents.END_MAIN.register { context ->
             if (!SRConfig.settings.starredMob.enabled) return@register
 
             val mc = Minecraft.getInstance()
@@ -46,7 +48,7 @@ object StarredMobRenderer {
 
             val camera = mc.gameRenderer.mainCamera
             val cameraPos = camera.position()
-            val poseStack = context.matrices()
+            val poseStack = context.poseStack()
 
             poseStack.pushPose()
             poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
@@ -73,7 +75,7 @@ object StarredMobRenderer {
     }
 
     private fun findStarredMobs(entities: Iterable<Entity>): List<LivingEntity> {
-        val result = LinkedHashSet<LivingEntity>()
+        val result: SequencedSet<LivingEntity> = LinkedHashSet()
         val starredArmorStands = mutableListOf<ArmorStand>()
 
         for (entity in entities) {

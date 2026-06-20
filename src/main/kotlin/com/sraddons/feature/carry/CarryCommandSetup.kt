@@ -4,15 +4,15 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.sraddons.feature.carry.CarryCommand.suggestClients
 import com.sraddons.feature.carry.CarryCommand.suggestTypes
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.network.chat.Component
 
 internal object CarryCommandSetup {
 
-    fun addTypeNode() = ClientCommandManager.literal("add-type")
+    fun addTypeNode() = ClientCommands.literal("add-type")
         .then(
-            ClientCommandManager.argument("typeName", StringArgumentType.word())
+            ClientCommands.argument("typeName", StringArgumentType.word())
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1
                     CarryState.saveUndo()
@@ -31,14 +31,14 @@ internal object CarryCommandSetup {
                 }
         )
 
-    fun addClientNode() = ClientCommandManager.literal("add-client")
+    fun addClientNode() = ClientCommands.literal("add-client")
         .then(
-            ClientCommandManager.argument("playerName", StringArgumentType.word())
+            ClientCommands.argument("playerName", StringArgumentType.word())
                 .then(
-                    ClientCommandManager.argument("typeName", StringArgumentType.word())
+                    ClientCommands.argument("typeName", StringArgumentType.word())
                         .suggests(suggestTypes)
                         .then(
-                            ClientCommandManager.argument("amount", IntegerArgumentType.integer(1))
+                            ClientCommands.argument("amount", IntegerArgumentType.integer(1))
                                 .executes { context ->
                                     if (!context.source.requireEnabled()) return@executes 1
                                     CarryState.saveUndo()
@@ -72,12 +72,12 @@ internal object CarryCommandSetup {
                 )
         )
 
-    fun setPriceNode() = ClientCommandManager.literal("set-price")
+    fun setPriceNode() = ClientCommands.literal("set-price")
         .then(
-            ClientCommandManager.argument("typeName", StringArgumentType.word())
+            ClientCommands.argument("typeName", StringArgumentType.word())
                 .suggests(suggestTypes)
                 .then(
-                    ClientCommandManager.argument("price", StringArgumentType.string())
+                    ClientCommands.argument("price", StringArgumentType.string())
                         .executes { context ->
                             if (!context.source.requireEnabled()) return@executes 1
                             CarryState.saveUndo()
@@ -99,14 +99,14 @@ internal object CarryCommandSetup {
                 )
         )
 
-    fun setBulkPriceNode() = ClientCommandManager.literal("set-bulk-price")
+    fun setBulkPriceNode() = ClientCommands.literal("set-bulk-price")
         .then(
-            ClientCommandManager.argument("typeName", StringArgumentType.word())
+            ClientCommands.argument("typeName", StringArgumentType.word())
                 .suggests(suggestTypes)
                 .then(
-                    ClientCommandManager.argument("bulkPrice", StringArgumentType.string())
+                    ClientCommands.argument("bulkPrice", StringArgumentType.string())
                         .then(
-                            ClientCommandManager.argument("threshold", IntegerArgumentType.integer(1))
+                            ClientCommands.argument("threshold", IntegerArgumentType.integer(1))
                                 .executes { context ->
                                     if (!context.source.requireEnabled()) return@executes 1
                                     CarryState.saveUndo()

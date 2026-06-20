@@ -7,30 +7,57 @@ import net.minecraft.network.chat.Component
 
 object ChatListener {
 
-    private const val MOD_REPLY_DELAY_MS = 500L
-    private const val GITHUB_REPLY_DELAY_MS = 800L
+    // ── Regex constants ──────────────────────────────────────────────
+    // RANK: optional bracket rank like [MVP++], [ADMIN], etc.
+    // NAME: player name (alphanumeric + underscore, 1-16 chars)
+    private const val RANK = "(?:\\[[^]]+\\] )?"
+    private const val NAME = "(\\w{1,16})"
+    private const val RN = "$RANK$NAME"   // captures name in group 1, full match includes rank
 
-    private const val RANK_AND_NAME = "((?:\\[[^]]*?])? ?)?(\\w{1,16})"
+    // ── Party join / leave ───────────────────────────────────────────
+    private val invitedPattern = Regex("^${RN} invited ${RN} to the party! They have 60 seconds to accept\\.\$")
+    private val joinedPartyPattern = Regex("^${RN} joined the party\\.\$")
+    private val joinedSelfPattern = Regex("^You have joined ${RN}'s party!\$")
+    private val partyingWithPattern = Regex("^You'll be partying with: (.+)\$")
+    private val leftPartyPattern = Regex("^${RN} has left the party\\.\$")
+    private val leftSelfPattern = Regex("^You left the party\\.\$")
 
-    private val joinedSelf = Regex($$"^You have joined $RANK_AND_NAME's? party!$")
-    private val joinedOther = Regex($$"^$RANK_AND_NAME joined the party\\.$")
-    private val joinedLobby = Regex($$"^$RANK_AND_NAME joined the lobby!$")
-    private val leftParty = Regex($$"^$RANK_AND_NAME has left the party\\.$")
-    private val kickedParty = Regex($$"^$RANK_AND_NAME has been removed from the party\\.$")
-    private val kickedOffline = Regex($$"^Kicked $RANK_AND_NAME because they were offline\\.$")
-    private val kickedDisconnected = Regex($$"^$RANK_AND_NAME was removed from your party because they disconnected\\.$")
-    private val transferLeave = Regex($$"^The party was transferred to $RANK_AND_NAME because $RANK_AND_NAME left$")
-    private val transferBy = Regex($$"^The party was transferred to $RANK_AND_NAME by $RANK_AND_NAME$")
-    private val partyInvite = Regex($$"^$RANK_AND_NAME invited $RANK_AND_NAME to the party! They have 60 seconds to accept.$")
-    private val leaderDisconnected = Regex($$"^The party leader, $RANK_AND_NAME has disconnected, they have 5 minutes to rejoin before the party is disbanded\\.$")
-    private val leaderRejoined = Regex($$"^The party leader $RANK_AND_NAME has rejoined\\.$")
-    private val memberDisconnected = Regex($$"^$RANK_AND_NAME has disconnected, they have 5 minutes to rejoin before they are removed from the party\\.$")
-    private val memberRejoined = Regex($$"^$RANK_AND_NAME has rejoined\\.$")
-    private val membersList = Regex("^Party (Leader|Moderators|Members): (.+)\$")
-    private val dungeonJoin = Regex("^Party Finder > (\\w{1,16}) joined the dungeon group! ")
-    private val kuudraJoin = Regex($$"^Party Finder > $RANK_AND_NAME joined the group!")
-    private val partyFinderQueued = Regex("^Party Finder > Your party has been queued in the party finder!\$")
+    // ── Disband ──────────────────────────────────────────────────────
+    private val disbandByPattern = Regex("^${RN} has disbanded the party!\$")
+    private val disbandEmptyPattern = Regex("^The party was disbanded because all invites expired and the party was empty\\.\$")
+    private val disbandLeaderOfflinePattern = Regex("^The party was disbanded because the party leader disconnected\\.\$")
+    private val notInPartyPattern = Regex("^You are not currently in a party\\.\$")
 
+    // ── Transfer / Promote ───────────────────────────────────────────
+    private val transferByPattern = Regex("^The party was transferred to ${RN} by ${RN}\$")
+    private val transferLeavePattern = Regex("^The party was transferred to ${RN} because ${RN} left\$")
+    private val promotedToLeaderPattern = Regex("^${RN} has promoted ${RN} to Party Leader\$")
+    private val promotedToModPattern = Regex("^${RN} is now a Party Moderator\$")
+
+    // ── Kick ─────────────────────────────────────────────────────────
+    private val kickedPattern = Regex("^${RN} has been removed from the party\\.\$")
+    private val kickedSelfPattern = Regex("^You have been kicked from the party by ${RN}\\.?\$")
+    private val kickedOfflinePattern = Regex("^Kicked ${RN} because they were offline\\.\$")
+    private val kickedDisconnectedPattern = Regex("^${RN} was removed from your party because they disconnected\\.\$")
+
+    // ── Disconnect / Reconnect ───────────────────────────────────────
+    private val leaderDisconnectedPattern = Regex("^The party leader, ${RN} has disconnected, they have 5 minutes to rejoin before the party is disbanded\\.\$")
+    private val leaderReconnectedPattern = Regex("^The party leader ${RN} has rejoined\\.\$")
+    private val memberDisconnectedPattern = Regex("^${RN} has disconnected, they have 5 minutes to rejoin before they are removed from the party\\.\$")
+    private val memberReconnectedPattern = Regex("^${RN} has rejoined\\.\$")
+
+    // ── Party Finder ─────────────────────────────────────────────────
+    private val pfQueuedPattern = Regex("^Party Finder > Your party has been queued in the (?:dungeon|party) finder!\$")
+    private val pfJoinedPattern = Regex("^Party Finder > (\\w{1,16}) joined the (?:dungeon|kuudra) group!.*\$")
+    private val pfRemovedPattern = Regex("^Party Finder > Your group has been removed from the party finder!\$")
+
+    // ── Lobby join (triggers auto-update) ────────────────────────────
+    private val joinedLobbyPattern = Regex("^${RN} joined the lobby!\$")
+
+    // ── Guild invite ─────────────────────────────────────────────────
+    private val guildInvitePattern = Regex("^Invited (\\d+) to your party!\$")
+
+    // ── Other utilities ──────────────────────────────────────────────
     private val rankStripRegex = Regex("\\[.+?]\\s*")
     private val partySenderRegex = Regex("^Party > (?:\\[.+?] )?(.+?):")
     private val cancelPatterns = listOf(
@@ -40,71 +67,27 @@ object ChatListener {
         Regex("^(?:\\[.+?] )?(.+?):")
     )
 
-    private val disbandPatterns = listOf(
-        Regex($$"^$RANK_AND_NAME has disbanded the party!$"),
-        Regex($$"^You have been kicked from the party by $RANK_AND_NAME$"),
-        Regex("^The party was disbanded because all invites expired and the party was empty.\$"),
-        Regex("^The party was disbanded because the party leader disconnected.\$"),
-        Regex("^You left the party.\$"),
-        Regex("^You are not currently in a party.\$")
-    )
-
     fun init() {
         ClientReceiveMessageEvents.GAME.register { message: Component, _: Boolean ->
             handleMessage(message.string)
         }
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    // Message dispatcher
+    // ══════════════════════════════════════════════════════════════════
     private fun handleMessage(message: String) {
-        joinedOther.find(message)?.let { PartyUtils.addMember(it.groupValues[2]); return }
-        joinedSelf.find(message)?.let {
-            PartyUtils.addMember(it.groupValues[2])
-            PartyUtils.partyLeader = it.groupValues[2]
-            PartyUtils.addMember(mc.player?.name?.string ?: return)
-            return
-        }
-        joinedLobby.find(message)?.let {
-            val playerName = it.groupValues[2]
-            val myName = mc.player?.name?.string
-            if (myName != null && playerName.equals(myName, ignoreCase = true)) {
-                AutoPartyListUpdater.refresh()
-            }
-            return
-        }
-        leftParty.find(message)?.let { PartyUtils.removeMember(it.groupValues[2]); return }
-        kickedParty.find(message)?.let { PartyUtils.removeMember(it.groupValues[2]); return }
-        kickedOffline.find(message)?.let { PartyUtils.removeMemberWithOffline(it.groupValues[2]); return }
-        kickedDisconnected.find(message)?.let { PartyUtils.removeMemberWithOffline(it.groupValues[2]); return }
-        leaderDisconnected.find(message)?.let { PartyUtils.markOffline(it.groupValues[2]); return }
-        leaderRejoined.find(message)?.let { PartyUtils.markOnline(it.groupValues[2]); return }
-        transferBy.find(message)?.let {
-            PartyUtils.addMember(it.groupValues[2])
-            PartyUtils.addMember(it.groupValues[4])
-            PartyUtils.partyLeader = it.groupValues[2]
-            return
-        }
-        transferLeave.find(message)?.let {
-            PartyUtils.addMember(it.groupValues[2])
-            PartyUtils.partyLeader = it.groupValues[2]
-            PartyUtils.removeMember(it.groupValues[4])
-            return
-        }
-        leaderDisconnected.find(message)?.let { PartyUtils.partyLeader = it.groupValues[2]; return }
-        leaderRejoined.find(message)?.let {
-            PartyUtils.markOnline(it.groupValues[2])
-            PartyUtils.partyLeader = it.groupValues[2]
-            return
-        }
-        memberDisconnected.find(message)?.let { PartyUtils.markOffline(it.groupValues[2]); return }
-        memberRejoined.find(message)?.let { PartyUtils.markOnline(it.groupValues[2]); return }
-        partyInvite.find(message)?.let {
-            val inviter = it.groupValues[2]
-            val invited = it.groupValues[4]
-            val myName = mc.player?.name?.string
+        val clean = message.replace(COLOR_CODE_REGEX, "")
+
+        // ── Join / Leave ─────────────────────────────────────────
+        invitedPattern.find(clean)?.let { m ->
+            val inviter = m.groupValues[1]
+            val invited = m.groupValues[2]
+            val myName = mc.player?.name?.string ?: return
             if (!PartyUtils.isInParty) {
                 PartyUtils.addMember(inviter)
                 PartyUtils.partyLeader = inviter
-                if (myName != null && inviter.equals(myName, ignoreCase = true)) {
+                if (inviter.equals(myName, ignoreCase = true)) {
                     PartyUtils.addMember(myName)
                 }
             } else {
@@ -112,22 +95,153 @@ object ChatListener {
             }
             return
         }
-        for (pattern in disbandPatterns) {
-            if (pattern.containsMatchIn(message)) { PartyUtils.disband(); return }
+        joinedPartyPattern.find(clean)?.let {
+            PartyUtils.addMember(it.groupValues[1])
+            return
         }
-        dungeonJoin.find(message)?.let { PartyUtils.addMember(it.groupValues[1]); return }
-        kuudraJoin.find(message)?.let { PartyUtils.addMember(it.groupValues[2]); return }
-        partyFinderQueued.find(message)?.let {
+        joinedSelfPattern.find(clean)?.let {
+            val leaderName = it.groupValues[1]
+            PartyUtils.partyLeader = leaderName
+            PartyUtils.addMember(leaderName)
+            PartyUtils.addMember(mc.player?.name?.string ?: return)
+            return
+        }
+        partyingWithPattern.find(clean)?.let { m ->
+            m.groupValues[1].split(",").forEach { raw ->
+                val name = raw.replace(rankStripRegex, "").trim()
+                if (name.isNotEmpty()) PartyUtils.addMember(name)
+            }
+            return
+        }
+        leftPartyPattern.find(clean)?.let {
+            PartyUtils.removeMember(it.groupValues[1])
+            return
+        }
+        leftSelfPattern.find(clean)?.let {
+            PartyUtils.disband()
+            return
+        }
+
+        // ── Disband ──────────────────────────────────────────────
+        disbandByPattern.find(clean)?.let {
+            PartyUtils.disband()
+            return
+        }
+        if (disbandEmptyPattern.containsMatchIn(clean) ||
+            disbandLeaderOfflinePattern.containsMatchIn(clean) ||
+            notInPartyPattern.containsMatchIn(clean)
+        ) {
+            PartyUtils.disband()
+            return
+        }
+
+        // ── Transfer / Promote ───────────────────────────────────
+        transferByPattern.find(clean)?.let { m ->
+            val newLeader = m.groupValues[1]
+            val oldLeader = m.groupValues[2]
+            PartyUtils.partyLeader = newLeader
+            PartyUtils.addMember(newLeader)
+            PartyUtils.addMember(oldLeader)
+            return
+        }
+        transferLeavePattern.find(clean)?.let { m ->
+            val newLeader = m.groupValues[1]
+            val leaver = m.groupValues[2]
+            PartyUtils.partyLeader = newLeader
+            PartyUtils.addMember(newLeader)
+            PartyUtils.removeMember(leaver)
+            return
+        }
+        promotedToLeaderPattern.find(clean)?.let { m ->
+            val newLeader = m.groupValues[2]
+            PartyUtils.partyLeader = newLeader
+            PartyUtils.addMember(newLeader)
+            return
+        }
+        promotedToModPattern.find(clean)?.let { m ->
+            PartyUtils.addMember(m.groupValues[1])
+            return
+        }
+
+        // ── Kick ─────────────────────────────────────────────────
+        kickedPattern.find(clean)?.let {
+            PartyUtils.removeMember(it.groupValues[1])
+            return
+        }
+        kickedSelfPattern.find(clean)?.let {
+            PartyUtils.disband()
+            return
+        }
+        kickedOfflinePattern.find(clean)?.let {
+            PartyUtils.removeMemberWithOffline(it.groupValues[1])
+            return
+        }
+        kickedDisconnectedPattern.find(clean)?.let {
+            PartyUtils.removeMemberWithOffline(it.groupValues[1])
+            return
+        }
+
+        // ── Disconnect / Reconnect ───────────────────────────────
+        leaderDisconnectedPattern.find(clean)?.let { m ->
+            PartyUtils.markOffline(m.groupValues[1])
+            PartyUtils.partyLeader = m.groupValues[1]
+            return
+        }
+        leaderReconnectedPattern.find(clean)?.let { m ->
+            PartyUtils.markOnline(m.groupValues[1])
+            PartyUtils.partyLeader = m.groupValues[1]
+            return
+        }
+        memberDisconnectedPattern.find(clean)?.let {
+            PartyUtils.markOffline(it.groupValues[1])
+            return
+        }
+        memberReconnectedPattern.find(clean)?.let {
+            PartyUtils.markOnline(it.groupValues[1])
+            return
+        }
+
+        // ── Party Finder ─────────────────────────────────────────
+        pfQueuedPattern.find(clean)?.let {
             if (!PartyUtils.isInParty) {
                 PartyUtils.isInParty = true
                 AutoPartyListUpdater.refresh()
             }
             return
         }
-        handleCancelCommand(message)
+        pfJoinedPattern.find(clean)?.let {
+            PartyUtils.addMember(it.groupValues[1])
+            return
+        }
+        pfRemovedPattern.find(clean)?.let {
+            // Party Finder removal — no state change needed
+            return
+        }
+
+        // ── Lobby join → refresh party list ──────────────────────
+        joinedLobbyPattern.find(clean)?.let { m ->
+            val name = m.groupValues[1]
+            val myName = mc.player?.name?.string
+            if (myName != null && name.equals(myName, ignoreCase = true)) {
+                AutoPartyListUpdater.refresh()
+            }
+            return
+        }
+
+        // ── Guild invite → refresh party list ────────────────────
+        guildInvitePattern.find(clean)?.let {
+            AutoPartyListUpdater.refresh()
+            return
+        }
+
+        // ── Auto-reply & cancel ──────────────────────────────────
+        handleCancelCommand(clean)
         handleModCommand(message)
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    // Auto-reply: !mod
+    // ══════════════════════════════════════════════════════════════════
     private fun handleModCommand(message: String) {
         if (!SRConfig.settings.partyCommands.mod) return
         val cleanMessage = message.replace(COLOR_CODE_REGEX, "")
@@ -140,18 +254,20 @@ object ChatListener {
         val myName = mc.player?.name?.string ?: return
         if (senderClean.equals(myName, ignoreCase = true)) return
 
-        Scheduler.schedule(MOD_REPLY_DELAY_MS) {
+        Scheduler.schedule(SRConfig.settings.partyCommands.autoReplyModDelayMs.toLong()) {
             mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.mod").string) }
         }
-        Scheduler.schedule(GITHUB_REPLY_DELAY_MS) {
+        Scheduler.schedule(SRConfig.settings.partyCommands.autoReplyGithubDelayMs.toLong()) {
             mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.github").string) }
         }
     }
 
-    private fun handleCancelCommand(message: String) {
-        if (!message.contains("!cancel")) return
+    // ══════════════════════════════════════════════════════════════════
+    // Cancel countdown from party chat
+    // ══════════════════════════════════════════════════════════════════
+    private fun handleCancelCommand(cleanMessage: String) {
+        if (!cleanMessage.contains("!cancel")) return
         val myName = mc.player?.name?.string ?: return
-        val cleanMessage = message.replace(COLOR_CODE_REGEX, "")
         for (pattern in cancelPatterns) {
             val match = pattern.find(cleanMessage) ?: continue
             val senderRaw = match.groupValues[1].trim()

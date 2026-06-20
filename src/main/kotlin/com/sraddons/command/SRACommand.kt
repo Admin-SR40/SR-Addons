@@ -6,18 +6,18 @@ import com.sraddons.gui.SRConfigGui
 import com.sraddons.update.UpdateChecker
 import com.sraddons.util.CalcUtil
 import com.sraddons.util.Constants
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
-import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Style
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import kotlinx.coroutines.CoroutineScope
-import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.apache.logging.log4j.LogManager
+import java.net.URI
 
 object SRACommand {
 
@@ -25,10 +25,10 @@ object SRACommand {
 
     fun register() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            val root = ClientCommandManager.literal("sra")
+            val root = ClientCommands.literal("sra")
 
             // /sra reload
-            val reloadNode = ClientCommandManager.literal("reload")
+            val reloadNode = ClientCommands.literal("reload")
                 .executes { context ->
                     SRConfig.load()
                     try {
@@ -44,11 +44,11 @@ object SRACommand {
                 }
 
             // /sra config / /sra gui
-            val configNode = ClientCommandManager.literal("config").executes(::openGuiCommand)
-            val guiNode = ClientCommandManager.literal("gui").executes(::openGuiCommand)
+            val configNode = ClientCommands.literal("config").executes(::openGuiCommand)
+            val guiNode = ClientCommands.literal("gui").executes(::openGuiCommand)
 
             // /sra version
-            val versionNode = ClientCommandManager.literal("version")
+            val versionNode = ClientCommands.literal("version")
                 .executes { context ->
                     val prefix = Constants.makePrefix()
                     context.source.sendFeedback(
@@ -62,8 +62,8 @@ object SRACommand {
                     1
                 }
 
-            // /sra update -- disabled in DEBUG version
-            val updateNode = ClientCommandManager.literal("update")
+            // /sra update
+            val updateNode = ClientCommands.literal("update")
                 .executes { context ->
                     val prefix = Constants.makePrefix()
                     context.source.sendFeedback(
@@ -107,9 +107,9 @@ object SRACommand {
                 }
 
             // /sra calc <expression>
-            val calcNode = ClientCommandManager.literal("calc")
+            val calcNode = ClientCommands.literal("calc")
                 .then(
-                    ClientCommandManager.argument("expression", StringArgumentType.greedyString())
+                    ClientCommands.argument("expression", StringArgumentType.greedyString())
                         .executes { context ->
                             val expr = StringArgumentType.getString(context, "expression")
                             executeCalc(context.source, expr)
@@ -149,57 +149,54 @@ object SRACommand {
                         .append(Component.translatable("sraddons.command.help.calc_desc"))
                 )
                 context.source.sendFeedback(
-                    Component.literal("§7/sra replaceTexts add \"word\" \"replacement\" §8- §f")
-                        .append(Component.literal("Add text replacement"))
+                    Component.translatable("sraddons.command.help.replace_texts_add")
                 )
                 context.source.sendFeedback(
-                    Component.literal("§7/sra replaceTexts remove \"word\" §8- §f")
-                        .append(Component.literal("Remove text replacement"))
+                    Component.translatable("sraddons.command.help.replace_texts_remove")
                 )
                 context.source.sendFeedback(
-                    Component.literal("§7/sra replaceTexts list §8- §f")
-                        .append(Component.literal("List custom replacements"))
+                    Component.translatable("sraddons.command.help.replace_texts_list")
                 )
                 1
             }
 
             // /sra replaceTexts
-            val rtNode = ClientCommandManager.literal("replaceTexts")
+            val rtNode = ClientCommands.literal("replaceTexts")
                 .executes { context ->
                     val prefix = Constants.makePrefix()
                     context.source.sendFeedback(
                         prefix.copy()
-                            .append(Component.literal("Replace Texts Commands:").withColor(0x55FFFF))
+                            .append(Component.translatable("sraddons.command.rt.title").withColor(0x55FFFF))
                     )
                     context.source.sendFeedback(
-                        Component.literal("§7/sra replaceTexts add \"word\" \"replacement\" §8- §fAdd a replacement")
+                        Component.translatable("sraddons.command.help.replace_texts_add")
                     )
                     context.source.sendFeedback(
-                        Component.literal("§7/sra replaceTexts remove \"word\" §8- §fRemove a replacement")
+                        Component.translatable("sraddons.command.help.replace_texts_remove")
                     )
                     context.source.sendFeedback(
-                        Component.literal("§7/sra replaceTexts list §8- §fList custom replacements")
+                        Component.translatable("sraddons.command.help.replace_texts_list")
                     )
                     context.source.sendFeedback(
                         Component.literal("")
                     )
                     context.source.sendFeedback(
-                        Component.literal("§7Replacement formats:").withColor(0x55FFFF)
+                        Component.translatable("sraddons.command.rt.formats").withColor(0x55FFFF)
                     )
                     context.source.sendFeedback(
-                        Component.literal("  §7& codes: §f&cRed &lBold &nUnderline §8+ §7§r")
+                        Component.translatable("sraddons.command.rt.formats.codes")
                     )
                     context.source.sendFeedback(
-                        Component.literal("  §7Gradient: §f:g:<name>:<text> §7§o(available: cyanToLightBlue, goldToYellow, aquaToGreen, redToOrange, purpleToPink)")
+                        Component.translatable("sraddons.command.rt.formats.gradient")
                     )
                     1
                 }
                 .then(
-                    ClientCommandManager.literal("add")
+                    ClientCommands.literal("add")
                         .then(
-                            ClientCommandManager.argument("word", StringArgumentType.string())
+                            ClientCommands.argument("word", StringArgumentType.string())
                                 .then(
-                                    ClientCommandManager.argument("replacement", StringArgumentType.string())
+                                    ClientCommands.argument("replacement", StringArgumentType.string())
                                         .executes { context ->
                                             val word = StringArgumentType.getString(context, "word")
                                             val replacement = StringArgumentType.getString(context, "replacement")
@@ -207,7 +204,7 @@ object SRACommand {
                                             TextReplacer.add(word, replacement)
                                             context.source.sendFeedback(
                                                 prefix.copy()
-                                                    .append(Component.literal("Added replacement: \"$word\" → \"$replacement\"").withColor(0x55FF55))
+                                                    .append(Component.translatable("sraddons.command.rt.added", word, replacement).withColor(0x55FF55))
                                             )
                                             1
                                         }
@@ -215,9 +212,9 @@ object SRACommand {
                         )
                 )
                 .then(
-                    ClientCommandManager.literal("remove")
+                    ClientCommands.literal("remove")
                         .then(
-                            ClientCommandManager.argument("word", StringArgumentType.string())
+                            ClientCommands.argument("word", StringArgumentType.string())
                                 .suggests { _, builder ->
                                     TextReplacer.getCustoms().keys.forEach { builder.suggest("\"$it\"") }
                                     builder.buildFuture()
@@ -228,12 +225,12 @@ object SRACommand {
                                     if (TextReplacer.remove(word)) {
                                         context.source.sendFeedback(
                                             prefix.copy()
-                                                .append(Component.literal("Removed replacement: \"$word\"").withColor(0x55FF55))
+                                                .append(Component.translatable("sraddons.command.rt.removed", word).withColor(0x55FF55))
                                         )
                                     } else {
                                         context.source.sendFeedback(
                                             prefix.copy()
-                                                .append(Component.literal("Replacement not found: \"$word\"").withColor(0xFF5555))
+                                                .append(Component.translatable("sraddons.command.rt.not_found", word).withColor(0xFF5555))
                                         )
                                     }
                                     1
@@ -241,23 +238,23 @@ object SRACommand {
                         )
                 )
                 .then(
-                    ClientCommandManager.literal("list")
+                    ClientCommands.literal("list")
                         .executes { context ->
                             val prefix = Constants.makePrefix()
                             val customs = TextReplacer.getCustoms()
                             if (customs.isEmpty()) {
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("No custom replacements configured.").withColor(0xAAAAAA))
+                                        .append(Component.translatable("sraddons.command.rt.no_custom").withColor(0xAAAAAA))
                                 )
                             } else {
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("Custom Replacements (${customs.size}):").withColor(0x55FFFF))
+                                        .append(Component.translatable("sraddons.command.rt.custom_count", customs.size).withColor(0x55FFFF))
                                 )
                                 customs.entries.forEachIndexed { i, (k, v) ->
                                     context.source.sendFeedback(
-                                        prefix.copy().append(Component.literal("§7${i + 1}. §f$k §8→ §f$v"))
+                                        prefix.copy().append(Component.translatable("sraddons.command.rt.list_entry", i + 1, k, v))
                                     )
                                 }
                             }
@@ -276,10 +273,10 @@ object SRACommand {
                 .then(buildAlertNode())
                 .also { dispatcher.register(it) }
 
-            // Standalone /calc command (with TAB completion; Mixin ensures priority over other mods)
-            val calcRoot = ClientCommandManager.literal("calc")
+            // Standalone /calc command (with TAB completion)
+            val calcRoot = ClientCommands.literal("calc")
                 .then(
-                    ClientCommandManager.argument("expression", StringArgumentType.greedyString())
+                    ClientCommands.argument("expression", StringArgumentType.greedyString())
                         .executes { context ->
                             if (!SRConfig.settings.general.enableStandaloneCalc) {
                                 context.source.sendFeedback(
@@ -306,7 +303,7 @@ object SRACommand {
             val result = CalcUtil.evaluate(expr)
             source.sendFeedback(
                 prefix.copy()
-                    .append(Component.literal("§7$expr = §a${CalcUtil.format(result)}"))
+                    .append(Component.translatable("sraddons.command.calc.result", expr, CalcUtil.format(result)))
             )
         } catch (e: Exception) {
             source.sendFeedback(
@@ -316,22 +313,22 @@ object SRACommand {
         }
     }
 
-    private fun buildAlertNode() = ClientCommandManager.literal("alert")
+    private fun buildAlertNode() = ClientCommands.literal("alert")
         .executes { context ->
             val prefix = Constants.makePrefix()
-            context.source.sendFeedback(prefix.copy().append(Component.literal("Chat Alert commands:").withColor(0x55FFFF)))
-            context.source.sendFeedback(Component.literal("§7/sra alert add \"keyword\" \"subtitle\" [cooldown] §8- §fAdd alert (cooldown in seconds, default 5)"))
-            context.source.sendFeedback(Component.literal("§7/sra alert remove \"keyword\" §8- §fRemove alert"))
-            context.source.sendFeedback(Component.literal("§7/sra alert list §8- §fList all alerts"))
-            context.source.sendFeedback(Component.literal("§7/sra alert clear §8- §fRemove all alerts"))
+            context.source.sendFeedback(prefix.copy().append(Component.translatable("sraddons.command.alert.title").withColor(0x55FFFF)))
+            context.source.sendFeedback(Component.translatable("sraddons.command.alert.help_add"))
+            context.source.sendFeedback(Component.translatable("sraddons.command.alert.help_remove"))
+            context.source.sendFeedback(Component.translatable("sraddons.command.alert.help_list"))
+            context.source.sendFeedback(Component.translatable("sraddons.command.alert.help_clear"))
             1
         }
         .then(
-            ClientCommandManager.literal("add")
+            ClientCommands.literal("add")
                 .then(
-                    ClientCommandManager.argument("keyword", StringArgumentType.string())
+                    ClientCommands.argument("keyword", StringArgumentType.string())
                         .then(
-                            ClientCommandManager.argument("subtitle", StringArgumentType.string())
+                            ClientCommands.argument("subtitle", StringArgumentType.string())
                                 .executes { context ->
                                     val keyword = StringArgumentType.getString(context, "keyword")
                                     val subtitle = StringArgumentType.getString(context, "subtitle")
@@ -340,12 +337,12 @@ object SRACommand {
                                     SRConfig.save()
                                     context.source.sendFeedback(
                                         prefix.copy()
-                                            .append(Component.literal("Added alert: \"$keyword\" → \"$subtitle\" (cooldown: 5s)").withColor(0x55FF55))
+                                            .append(Component.translatable("sraddons.command.alert.added_default", keyword, subtitle).withColor(0x55FF55))
                                     )
                                     1
                                 }
                                 .then(
-                                    ClientCommandManager.argument("cooldown", IntegerArgumentType.integer(0))
+                                    ClientCommands.argument("cooldown", IntegerArgumentType.integer(0))
                                         .executes { context ->
                                             val keyword = StringArgumentType.getString(context, "keyword")
                                             val subtitle = StringArgumentType.getString(context, "subtitle")
@@ -355,7 +352,7 @@ object SRACommand {
                                             SRConfig.save()
                                             context.source.sendFeedback(
                                                 prefix.copy()
-                                                    .append(Component.literal("Added alert: \"$keyword\" → \"$subtitle\" (cooldown: ${cooldown}s)").withColor(0x55FF55))
+                                                    .append(Component.translatable("sraddons.command.alert.added", keyword, subtitle, cooldown).withColor(0x55FF55))
                                             )
                                             1
                                         }
@@ -364,9 +361,9 @@ object SRACommand {
                 )
         )
         .then(
-            ClientCommandManager.literal("remove")
+            ClientCommands.literal("remove")
                 .then(
-                    ClientCommandManager.argument("keyword", StringArgumentType.string())
+                    ClientCommands.argument("keyword", StringArgumentType.string())
                         .suggests { _, builder ->
                             SRConfig.settings.chatAlert.entries.forEach { entry ->
                                 val kw = entry.split(" | ").getOrElse(0) { entry }
@@ -384,12 +381,12 @@ object SRACommand {
                                 SRConfig.save()
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("Removed alert: \"$keyword\"").withColor(0x55FF55))
+                                        .append(Component.translatable("sraddons.command.alert.removed", keyword).withColor(0x55FF55))
                                 )
                             } else {
                                 context.source.sendFeedback(
                                     prefix.copy()
-                                        .append(Component.literal("Alert not found: \"$keyword\"").withColor(0xFF5555))
+                                        .append(Component.translatable("sraddons.command.alert.not_found", keyword).withColor(0xFF5555))
                                 )
                             }
                             1
@@ -397,14 +394,14 @@ object SRACommand {
                 )
         )
         .then(
-            ClientCommandManager.literal("list")
+            ClientCommands.literal("list")
                 .executes { context ->
                     val prefix = Constants.makePrefix()
                     val entries = SRConfig.settings.chatAlert.entries
                     if (entries.isEmpty()) {
-                        context.source.sendFeedback(prefix.copy().append(Component.literal("No alerts configured.").withColor(0xAAAAAA)))
+                        context.source.sendFeedback(prefix.copy().append(Component.translatable("sraddons.command.alert.no_alerts").withColor(0xAAAAAA)))
                     } else {
-                        context.source.sendFeedback(prefix.copy().append(Component.literal("Chat Alerts (${entries.size}):").withColor(0x55FFFF)))
+                        context.source.sendFeedback(prefix.copy().append(Component.translatable("sraddons.command.alert.list_count", entries.size).withColor(0x55FFFF)))
                         entries.forEachIndexed { i, raw ->
                             val parts = raw.split(" | ", limit = 5)
                             val kw = parts.getOrElse(0) { "" }
@@ -419,7 +416,7 @@ object SRACommand {
                                 else -> "contains"
                             }
                             context.source.sendFeedback(
-                                prefix.copy().append(Component.literal("§7${i + 1}. §f\"$kw\" §8→ §f\"$sub\" §7(${cd}s, $flags)"))
+                                prefix.copy().append(Component.translatable("sraddons.command.alert.list_entry", i + 1, kw, sub, cd, flags))
                             )
                         }
                     }
@@ -427,12 +424,12 @@ object SRACommand {
                 }
         )
         .then(
-            ClientCommandManager.literal("clear")
+            ClientCommands.literal("clear")
                 .executes { context ->
                     val prefix = Constants.makePrefix()
                     SRConfig.settings.chatAlert.entries.clear()
                     SRConfig.save()
-                    context.source.sendFeedback(prefix.copy().append(Component.literal("All alerts cleared.").withColor(0x55FF55)))
+                    context.source.sendFeedback(prefix.copy().append(Component.translatable("sraddons.command.alert.cleared").withColor(0x55FF55)))
                     1
                 }
         )

@@ -2,7 +2,7 @@ package com.sraddons.feature.carry
 
 import com.mojang.brigadier.arguments.*
 import com.mojang.brigadier.suggestion.SuggestionProvider
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.network.chat.Component
@@ -11,7 +11,7 @@ object CarryCommand {
 
     fun register() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
-            val root = ClientCommandManager.literal("cm")
+            val root = ClientCommands.literal("cm")
 
             root.executes { context -> showHelp(context.source); 1 }
 

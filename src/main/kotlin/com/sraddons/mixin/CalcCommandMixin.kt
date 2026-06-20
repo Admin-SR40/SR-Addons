@@ -33,14 +33,14 @@ class CalcCommandMixin {
         try {
             val result = CalcUtil.evaluate(expr)
             val prefix = Constants.makePrefix()
-            Minecraft.getInstance().gui.chat.addMessage(
+            Minecraft.getInstance().gui.chat.addClientSystemMessage(
                 prefix.copy()
-                    .append(Component.literal("§7$expr = §a${CalcUtil.format(result)}"))
+                    .append(Component.translatable("sraddons.command.calc.result", expr, CalcUtil.format(result)))
             )
         } catch (e: Exception) {
             LOGGER.warn("Failed to evaluate /calc expression: $expr", e)
             val prefix = Constants.makePrefix()
-            Minecraft.getInstance().gui.chat.addMessage(
+            Minecraft.getInstance().gui.chat.addClientSystemMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.calc.error").withColor(0xFF5555))
             )

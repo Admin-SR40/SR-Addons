@@ -9,6 +9,7 @@ import com.sraddons.feature.partycommands.commands.PartyCommandHandler
 import com.sraddons.feature.partycommands.utils.AutoPartyListUpdater
 import com.sraddons.feature.partycommands.utils.ChatListener
 import com.sraddons.feature.partycommands.utils.CommandKeyBinding
+import com.sraddons.feature.hud.HudElementHider
 import com.sraddons.feature.helper.ChatKeywordAlert
 import com.sraddons.feature.helper.PingTpsAlertNotifier
 import com.sraddons.feature.helper.RagnarockNotifier
@@ -52,6 +53,7 @@ class SRAddonsMod : ClientModInitializer {
         safeInit("alert notifier") { PingTpsAlertNotifier.init() }
         safeInit("text replacer") { TextReplacer.init() }
         safeInit("chat alert") { ChatKeywordAlert.init() }
+        safeInit("hud element hider") { HudElementHider.init() }
 
         if (SRConfig.settings.general.autoCheckUpdates) {
             startAutoUpdateCheck()
@@ -83,11 +85,11 @@ class SRAddonsMod : ClientModInitializer {
             .withClickEvent(ClickEvent.OpenUrl(URI.create(result.downloadUrl)))
 
         mc.execute {
-            mc.gui.chat.addMessage(
+            mc.gui.chat.addClientSystemMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.update.available", result.latestVersion, Constants.MOD_VERSION).withColor(0x55FF55))
             )
-            mc.gui.chat.addMessage(
+            mc.gui.chat.addClientSystemMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.update.click").withColor(0xFFFFFF))
                     .append(Component.translatable("sraddons.command.update.here").withColor(0x55FFFF).withStyle(clickStyle))

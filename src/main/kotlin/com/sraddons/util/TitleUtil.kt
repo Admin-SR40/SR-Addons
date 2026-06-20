@@ -11,28 +11,11 @@ object TitleUtil {
         mc.gui.setSubtitle(Component.literal(parseColorCodes(text)))
     }
 
+    private val colorCodeRegex = Regex("&(&|[0-9a-fk-orA-FK-OR])")
+
     fun parseColorCodes(text: String): String {
-        val sb = StringBuilder(text.length)
-        var i = 0
-        while (i < text.length) {
-            val c = text[i]
-            if (c == '&' && i + 1 < text.length) {
-                val next = text[i + 1]
-                if (next == '&') {
-                    sb.append('&')
-                    i += 2
-                } else if (next in "0123456789abcdefklmnorABCDEFKLMNOR") {
-                    sb.append('§').append(next)
-                    i += 2
-                } else {
-                    sb.append('&')
-                    i++
-                }
-            } else {
-                sb.append(c)
-                i++
-            }
+        return colorCodeRegex.replace(text) { mr ->
+            if (mr.groupValues[1] == "&") "&" else "§${mr.groupValues[1]}"
         }
-        return sb.toString()
     }
 }

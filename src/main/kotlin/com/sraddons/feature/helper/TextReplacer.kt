@@ -5,46 +5,50 @@ import com.sraddons.feature.partycommands.utils.COLOR_CODE_REGEX
 import com.sraddons.util.GradientText
 import com.sraddons.util.TitleUtil
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
 import net.minecraft.util.FormattedCharSequence
 import net.minecraft.network.chat.Style
+import java.util.BitSet
 
 object TextReplacer {
 
     private val gradientPrefix = ":g:"
 
     val defaults = linkedMapOf(
-        "[MVP++] Admin_SR40" to "&b[&cDEV&b] :g:cyanToLightBlue:Admin_SR40",
-        "[MVP+] Admin_SR40" to "&b[&cDEV&b] :g:cyanToLightBlue:Admin_SR40",
         "Admin_SR40" to ":g:cyanToLightBlue:Admin_SR40"
     )
 
+    private val replacing = ThreadLocal.withInitial { false }
+
     private val customs: LinkedHashMap<String, String> = linkedMapOf()
 
-    fun getCustoms(): Map<String, String> = customs.toMap()
+    fun getCustoms(): Map<String, String> = synchronized(this) { customs.toMap() }
 
     val activePatterns: List<Pair<String, String>>
         get() = patternSet.patterns.toList()
 
     private data class PatternSet(
         val patterns: List<Pair<String, String>>,
-        val compiled: List<Pair<Regex, String>>
+        val compiled: List<Pair<Regex, String>>,
+        val minLen: Int
     )
 
     @Volatile
-    private var patternSet = PatternSet(emptyList(), emptyList())
+    private var patternSet = PatternSet(emptyList(), emptyList(), Int.MAX_VALUE)
 
     val gradientNames = listOf(
         "cyanToLightBlue", "goldToYellow", "aquaToGreen", "redToOrange", "purpleToPink"
     )
 
     fun init() {
-        customs.clear()
-        customs.putAll(ReplaceTextsData.load())
-        rebuild()
+        synchronized(this) {
+            customs.clear()
+            customs.putAll(ReplaceTextsData.load())
+            rebuild()
+        }
     }
 
     fun rebuild() {
+        synchronized(this) {
         val newPatterns = mutableListOf<Pair<String, String>>()
 
         if (SRConfig.settings.general.highlightDevName) {
@@ -56,19 +60,25 @@ object TextReplacer {
         newPatterns.sortByDescending { it.first.length }
 
         val newCompiled = newPatterns.map { (k, v) -> Regex(Regex.escape(k)) to v }
+        val newMinLen = if (newPatterns.isEmpty()) Int.MAX_VALUE else newPatterns.minOf { it.first.length }
 
-        patternSet = PatternSet(newPatterns, newCompiled)
+        patternSet = PatternSet(newPatterns, newCompiled, newMinLen)
+        }
     }
 
     fun add(key: String, value: String) {
-        customs[key] = value
-        save()
+        synchronized(this) {
+            customs[key] = value
+            save()
+        }
     }
 
     fun remove(key: String): Boolean {
-        val existed = customs.remove(key) != null
-        if (existed) save()
-        return existed
+        synchronized(this) {
+            val existed = customs.remove(key) != null
+            if (existed) save()
+            return existed
+        }
     }
 
     private fun save() {
@@ -81,46 +91,58 @@ object TextReplacer {
         if (isModMessage(text)) return text
 
         val stripped = stripColorCodes(text)
-        var result = stripped
+        if (stripped.length < patternSet.minLen) return text
 
+        var result = stripped
+        var matched = false
         for ((regex, value) in patternSet.compiled) {
-            val plainReplacement = stripGradientAndColors(value)
-            result = result.replace(regex, TitleUtil.parseColorCodes(plainReplacement) + "§r")
+            if (regex.containsMatchIn(result)) {
+                matched = true
+                result = result.replace(regex, stripGradientAndColors(value) + "§r")
+            }
         }
 
-        return result
+        return if (matched) result else text
     }
 
     fun replaceFormattedSeq(seq: FormattedCharSequence): FormattedCharSequence {
         if (!SRConfig.settings.general.replaceTextsEnabled || patternSet.patterns.isEmpty()) return seq
+        if (replacing.get()) return seq
 
-        val chars = mutableListOf<Int>()
-        val styles = mutableListOf<Style>()
-        seq.accept { _, style, cp -> chars.add(cp); styles.add(style); true }
+        replacing.set(true)
+        try {
+            val chars = mutableListOf<Int>()
+            val styles = mutableListOf<Style>()
+            seq.accept { _, style, cp -> chars.add(cp); styles.add(style); true }
 
-        if (chars.isEmpty()) return seq
+            if (chars.isEmpty()) return seq
+            if (chars.size < patternSet.minLen) return seq
 
-        val clean = buildString { chars.forEach { appendCodePoint(it) } }
+            val clean = buildString { chars.forEach { appendCodePoint(it) } }
 
-        if (isModMessage(clean)) return seq
+            if (isModMessage(clean)) return seq
 
-        val matches = findMatches(clean)
-        if (matches.isEmpty()) return seq
+            val matches = findMatches(clean)
 
-        val segments = mutableListOf<FormattedCharSequence>()
-        var pos = 0
-        for ((start, end, replacement) in matches) {
-            if (pos < start) {
-                segments.add(subSequence(chars, styles, pos, start))
+            if (matches.isEmpty()) return seq
+
+            val segments = mutableListOf<FormattedCharSequence>()
+            var pos = 0
+            for ((start, end, replacement) in matches) {
+                if (pos < start) {
+                    segments.add(subSequence(chars, styles, pos, start))
+                }
+                segments.add(buildReplacementComponent(replacement).visualOrderText)
+                pos = end
             }
-            segments.add(buildReplacementComponent(replacement).visualOrderText)
-            pos = end
-        }
-        if (pos < chars.size) {
-            segments.add(subSequence(chars, styles, pos, chars.size))
-        }
+            if (pos < chars.size) {
+                segments.add(subSequence(chars, styles, pos, chars.size))
+            }
 
-        return FormattedCharSequence.composite(segments)
+            return FormattedCharSequence.composite(segments)
+        } finally {
+            replacing.set(false)
+        }
     }
 
     private fun subSequence(
@@ -168,7 +190,7 @@ object TextReplacer {
 
     private fun findMatches(clean: String): List<Triple<Int, Int, String>> {
         val matches = mutableListOf<Triple<Int, Int, String>>()
-        val occupied = BooleanArray(clean.length)
+        val occupied = BitSet(clean.length)
 
         for ((key, value) in patternSet.patterns) {
             var searchFrom = 0
@@ -177,10 +199,10 @@ object TextReplacer {
                 if (idx < 0) break
 
                 val end = idx + key.length
-                val alreadyOccupied = (idx until end).any { occupied[it] }
+                val alreadyOccupied = occupied.nextSetBit(idx) in idx until end
                 if (!alreadyOccupied) {
                     matches.add(Triple(idx, end, value))
-                    for (i in idx until end) occupied[i] = true
+                    occupied.set(idx, end)
                 }
                 searchFrom = idx + 1
             }

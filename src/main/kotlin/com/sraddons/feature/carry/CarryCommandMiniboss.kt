@@ -2,7 +2,7 @@ package com.sraddons.feature.carry
 
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.sraddons.feature.carry.CarryCommand.suggestMinibossNames
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.minecraft.network.chat.Component
 
 internal object CarryCommandMiniboss {
@@ -17,9 +17,9 @@ internal object CarryCommandMiniboss {
         return StringArgumentType.getString(context, "name")
     }
 
-    fun addMinibossNode() = ClientCommandManager.literal("add-miniboss")
+    fun addMinibossNode() = ClientCommands.literal("add-miniboss")
         .then(
-            ClientCommandManager.argument("name", StringArgumentType.string())
+            ClientCommands.argument("name", StringArgumentType.string())
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1
                     val name = getQuotedName(context) ?: return@executes 1
@@ -36,9 +36,9 @@ internal object CarryCommandMiniboss {
                 }
         )
 
-    fun removeMinibossNode() = ClientCommandManager.literal("remove-miniboss")
+    fun removeMinibossNode() = ClientCommands.literal("remove-miniboss")
         .then(
-            ClientCommandManager.argument("name", StringArgumentType.string())
+            ClientCommands.argument("name", StringArgumentType.string())
                 .suggests(suggestMinibossNames)
                 .executes { context ->
                     if (!context.source.requireEnabled()) return@executes 1

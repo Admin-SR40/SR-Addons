@@ -1,7 +1,8 @@
 package com.sraddons.render
 
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.platform.DepthTestFunction
+import com.mojang.blaze3d.pipeline.DepthStencilState
+import com.mojang.blaze3d.platform.CompareOp
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
@@ -31,8 +32,10 @@ object HighlightUtil {
             RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
                 .withLocation(Identifier.fromNamespaceAndPath("sraddons", "${id}_filled"))
                 .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
-                .withDepthWrite(true)
-                .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
+                .withDepthStencilState(DepthStencilState(
+                    CompareOp.LESS_THAN_OR_EQUAL,
+                    true
+                ))
                 .build()
         )
         return RenderType.create(
@@ -46,8 +49,10 @@ object HighlightUtil {
             RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
                 .withLocation(Identifier.fromNamespaceAndPath("sraddons", "${id}_lines"))
                 .withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL_LINE_WIDTH, VertexFormat.Mode.LINES)
-                .withDepthWrite(true)
-                .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
+                .withDepthStencilState(DepthStencilState(
+                    CompareOp.LESS_THAN_OR_EQUAL,
+                    true
+                ))
                 .build()
         )
         return RenderType.create(
@@ -258,7 +263,6 @@ object HighlightUtil {
         r: Int, g: Int, b: Int, a: Int,
         lineWidth: Float
     ) {
-        // Normal unused by line shader; use constant to avoid per-line sqrt
         buffer.addVertex(pose, x1, y1, z1).setColor(r, g, b, a).setNormal(0f, 1f, 0f).setLineWidth(lineWidth)
         buffer.addVertex(pose, x2, y2, z2).setColor(r, g, b, a).setNormal(0f, 1f, 0f).setLineWidth(lineWidth)
     }

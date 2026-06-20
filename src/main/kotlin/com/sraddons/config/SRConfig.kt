@@ -1,17 +1,15 @@
 package com.sraddons.config
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.sraddons.util.GsonProvider
+import com.sraddons.util.saveJsonAtomic
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
 object SRConfig {
     private val LOGGER = LogManager.getLogger("SR-Addons-Config")
-    private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+    private val GSON = GsonProvider.PRETTY
     private val CONFIG_FILE = File(
         FabricLoader.getInstance().configDir.toFile(),
         "sraddons.json"
@@ -26,6 +24,8 @@ object SRConfig {
         var removeSeparator: Boolean = true,
         var autoCheckUpdates: Boolean = false,
         // Visual Tweaks
+        var hideArmorBar: Boolean = false,
+        var hideHungerBar: Boolean = false,
         var hideEntityFire: Boolean = false,
         var fullbright: Boolean = false,
         var betterFov: Boolean = false,
@@ -44,7 +44,12 @@ object SRConfig {
         var showResponseLocally: Boolean = true,
         var note: String = "",
         var countdownSound: Boolean = true,
-        var mod: Boolean = true
+        var mod: Boolean = true,
+        var autoReplyModDelayMs: Int = 500,
+        var autoReplyGithubDelayMs: Int = 800,
+        var partyListUpdateCooldownMs: Int = 60000,
+        var partyListInitialDelayMs: Int = 500,
+        var partyListUpdateDelayMs: Int = 1500
     )
 
     fun isCommandEnabled(cmd: String): Boolean = cmd !in settings.partyCommands.disabledCommands
@@ -83,7 +88,8 @@ object SRConfig {
         var bossSpawnNotificationText: String = "&cBOSS SPAWNED",
         var renderMode: String = "BOTH",
         var lineWidth: Int = 3,
-        var maxDistance: Int = 64
+        var maxDistance: Int = 64,
+        var bossUuidPruneInterval: Int = 1200
     )
 
     data class RagnarockConfigData(
@@ -166,24 +172,32 @@ object SRConfig {
         }
     }
 
+    // Migrate old "helper" { ... } block to top-level fields
     private fun migrateFromHelper(root: com.google.gson.JsonObject) {
         try {
 
             settings = SRConfigData()
 
+            // Preserve top-level fields that already exist in new format
             root["general"]?.let { GSON.fromJson(it, GeneralConfigData::class.java)?.let { d -> settings.general = d } }
             root["partyCommands"]?.let { GSON.fromJson(it, PartyCommandsConfigData::class.java)?.let { d -> settings.partyCommands = d } }
             root["starredMob"]?.let { GSON.fromJson(it, StarredMobConfigData::class.java)?.let { d -> settings.starredMob = d } }
             root["carry"]?.let { GSON.fromJson(it, CarryConfigData::class.java)?.let { d -> settings.carry = d } }
 
-            root["entityFire"]?.asJsonObject?.get("hiddenFire")?.let { settings.general.hideEntityFire = it.asBoolean }
+            // Migrate entityFire.hiddenFire → general.hideEntityFire
+            root["entityFire"]?.asJsonObject?.get("hiddenFire")?.let {
+                settings.general.hideEntityFire = it.asBoolean
+            }
 
+            // Migrate helper sub-objects
             val helper = root["helper"]?.asJsonObject
             if (helper != null) {
+                // Complex objects → top-level
                 helper["ragnarock"]?.let { GSON.fromJson(it, RagnarockConfigData::class.java)?.let { d -> settings.ragnarock = d } }
                 helper["pingAlert"]?.let { GSON.fromJson(it, PingAlertConfigData::class.java)?.let { d -> settings.pingAlert = d } }
                 helper["tpsAlert"]?.let { GSON.fromJson(it, TpsAlertConfigData::class.java)?.let { d -> settings.tpsAlert = d } }
 
+                // Simple booleans → general
                 helper["calculator"]?.asJsonObject?.get("enableStandaloneCalc")?.let { settings.general.enableStandaloneCalc = it.asBoolean }
                 helper["replaceTexts"]?.asJsonObject?.let { o ->
                     o["enabled"]?.let { settings.general.replaceTextsEnabled = it.asBoolean }
@@ -200,19 +214,12 @@ object SRConfig {
 
     fun save() {
         synchronized(this) {
-            val tmpFile = File(CONFIG_FILE.parentFile, "${CONFIG_FILE.name}.tmp")
-            try {
-                OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
-                    GSON.toJson(settings, writer)
-                }
-                if (!tmpFile.renameTo(CONFIG_FILE)) {
-                    LOGGER.warn("Failed to rename config tmp file")
-                }
-            } catch (e: Exception) {
-                LOGGER.error("Failed to save config", e)
-                tmpFile.delete()
-            }
+            saveJsonAtomic(CONFIG_FILE, GSON, settings, LOGGER)
         }
+    }
+
+    inline fun update(block: (SRConfigData) -> Unit) {
+        synchronized(this) { block(settings) }
     }
 }
 

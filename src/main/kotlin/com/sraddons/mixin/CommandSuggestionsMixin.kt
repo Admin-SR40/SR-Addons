@@ -3,14 +3,13 @@ package com.sraddons.mixin
 import com.mojang.brigadier.ParseResults
 import com.mojang.brigadier.StringReader
 import com.mojang.brigadier.context.StringRange
-import com.mojang.brigadier.suggestion.Suggestion
 import com.mojang.brigadier.suggestion.Suggestions
 import com.sraddons.config.SRConfig
 import com.sraddons.feature.partycommands.commands.Commands
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.CommandSuggestions
 import net.minecraft.client.gui.components.EditBox
-import net.minecraft.commands.SharedSuggestionProvider
+import net.minecraft.client.multiplayer.ClientSuggestionProvider
 import net.minecraft.util.FormattedCharSequence
 import org.spongepowered.asm.mixin.Final
 import org.spongepowered.asm.mixin.Mixin
@@ -25,7 +24,7 @@ abstract class CommandSuggestionsMixin {
 
     @Shadow
     @JvmField
-    var currentParse: ParseResults<SharedSuggestionProvider>? = null
+    var currentParse: ParseResults<ClientSuggestionProvider>? = null
 
     @Shadow
     @Final
@@ -50,13 +49,13 @@ abstract class CommandSuggestionsMixin {
 
     @Shadow
     @JvmField
-    var commandUsage: MutableList<FormattedCharSequence>? = null
+    var commandUsage: List<FormattedCharSequence>? = null
 
     @Shadow
     protected abstract fun showSuggestions(bl: Boolean)
 
     @Shadow
-    private fun updateUsageInfo() {}
+    private fun updateUsageInfo(parse: ParseResults<ClientSuggestionProvider>, suggestions: Suggestions?) {}
 
     @Inject(method = ["showSuggestions"], at = [At("HEAD")])
     private fun onShowSuggestions(bl: Boolean, ci: CallbackInfo) {
@@ -84,7 +83,7 @@ abstract class CommandSuggestionsMixin {
         }
     }
 
-    @Inject(method = ["updateCommandInfo"], at = [At("HEAD")], cancellable = true)
+    @Inject(method = ["updateCommandInfo"], at = [At("HEAD")], cancellable = true, require = 1)
     private fun onUpdateCommandInfo(ci: CallbackInfo) {
         val editBox = input ?: return
         val value = editBox.value
@@ -108,7 +107,8 @@ abstract class CommandSuggestionsMixin {
         if (currentParse == null) {
             val player = Minecraft.getInstance().player
             if (player != null) {
-                currentParse = Commands.DISPATCHER.parse(reader, player.connection.suggestionsProvider)
+                val raw = Commands.DISPATCHER.parse(reader, player.connection.suggestionsProvider)
+                currentParse = @Suppress("UNCHECKED_CAST") (raw as? ParseResults<ClientSuggestionProvider>) ?: return
             }
         }
 
@@ -120,7 +120,9 @@ abstract class CommandSuggestionsMixin {
                     Suggestions(StringRange.at(cursor), emptyList())
                 )
             } else {
-                pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(parse, cursor)
+                @Suppress("UNCHECKED_CAST")
+                pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(
+                    parse as? ParseResults<net.minecraft.commands.SharedSuggestionProvider>, cursor)
             }
 
             pendingSuggestions = pendingSuggestions?.thenApply { s ->
@@ -135,10 +137,11 @@ abstract class CommandSuggestionsMixin {
             }
         }
 
-        if (currentParse?.exceptions?.isNotEmpty() == true) {
-            updateUsageInfo()
+        val parse = currentParse
+        if (parse?.exceptions?.isNotEmpty() == true) {
+            updateUsageInfo(parse, pendingSuggestions?.getNow(null))
         } else {
-            commandUsage?.clear()
+            (commandUsage as? MutableList<*>)?.clear()
         }
 
         ci.cancel()

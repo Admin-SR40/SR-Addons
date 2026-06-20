@@ -3,6 +3,7 @@ package com.sraddons.gui
 import com.sraddons.config.SRConfig
 import com.sraddons.config.toColor
 import com.sraddons.util.Scheduler
+import dev.isxander.yacl3.api.Binding
 import dev.isxander.yacl3.api.*
 import dev.isxander.yacl3.api.controller.*
 import net.minecraft.client.Minecraft
@@ -106,6 +107,8 @@ object SRConfigGui {
             .name(Component.translatable(guiKey("general.visual_tweaks")))
             .description(OptionDescription.of(Component.translatable(guiKey("general.visual_tweaks.desc"))))
             .collapsed(true)
+            .option(boolOpt("general.hide_armor_bar", false, { g.hideArmorBar }, { g.hideArmorBar = it }))
+            .option(boolOpt("general.hide_hunger_bar", false, { g.hideHungerBar }, { g.hideHungerBar = it }))
             .option(boolOpt("general.hide_entity_fire", false, { g.hideEntityFire }, { g.hideEntityFire = it }))
             .option(boolOpt("general.fullbright", false, { g.fullbright }, { g.fullbright = it }))
             .option(boolOpt("general.better_fov", false, { g.betterFov }, { g.betterFov = it }))
@@ -160,6 +163,7 @@ object SRConfigGui {
             .tooltip(Component.translatable(guiKey("partycommands.desc")))
             .group(createPCBasicSettingsGroup())
             .group(createPCResponseGroup())
+            .group(createPCDelaysGroup())
             .also { category -> PC_TOGGLE_GROUPS.forEach { group -> category.group(createPCToggleGroup(group)) } }
             .group(createPCNoteGroup())
             .build()
@@ -185,6 +189,20 @@ object SRConfigGui {
             .option(boolOpt("pc.respond_party", true, { pc.respondInPartyChat }, { pc.respondInPartyChat = it }))
             .option(boolOpt("pc.respond_local", true, { pc.showResponseLocally }, { pc.showResponseLocally = it }))
             .option(boolOpt("pc.auto_reply_mod", true, { pc.mod }, { pc.mod = it }))
+            .build()
+    }
+
+    private fun createPCDelaysGroup(): OptionGroup {
+        val pc = SRConfig.settings.partyCommands
+        return OptionGroup.createBuilder()
+            .name(Component.translatable(guiKey("pc.delays")))
+            .description(OptionDescription.of(Component.translatable(guiKey("pc.delays.desc"))))
+            .collapsed(true)
+            .option(intOpt("pc.reply_mod_delay", 500, 100, 5000, 100, { pc.autoReplyModDelayMs }, { pc.autoReplyModDelayMs = it }))
+            .option(intOpt("pc.reply_github_delay", 800, 100, 5000, 100, { pc.autoReplyGithubDelayMs }, { pc.autoReplyGithubDelayMs = it }))
+            .option(intOpt("pc.update_cooldown", 60000, 5000, 300000, 5000, { pc.partyListUpdateCooldownMs }, { pc.partyListUpdateCooldownMs = it }))
+            .option(intOpt("pc.update_init_delay", 500, 100, 5000, 100, { pc.partyListInitialDelayMs }, { pc.partyListInitialDelayMs = it }))
+            .option(intOpt("pc.update_delay", 1500, 100, 10000, 100, { pc.partyListUpdateDelayMs }, { pc.partyListUpdateDelayMs = it }))
             .build()
     }
 
@@ -303,6 +321,7 @@ object SRConfigGui {
             .collapsed(true)
             .option(boolOpt("carry.boss_notification_enabled", true, { c.bossSpawnNotification }, { c.bossSpawnNotification = it }))
             .option(strOpt("carry.boss_notification_text", "&cBOSS SPAWNED", { c.bossSpawnNotificationText }, { c.bossSpawnNotificationText = it }))
+            .option(intOpt("carry.boss_uuid_prune", 1200, 100, 72000, 100, { c.bossUuidPruneInterval }, { c.bossUuidPruneInterval = it }))
             .build()
     }
 
@@ -339,16 +358,6 @@ object SRConfigGui {
             .group(createTpsAlertGroup())
             .group(createChatAlertGroup())
             .group(createChatAlertList())
-            .build()
-    }
-
-    private fun createChatAlertGroup(): OptionGroup {
-        val ca = SRConfig.settings.chatAlert
-        return OptionGroup.createBuilder()
-            .name(Component.translatable(guiKey("alerts.chat_alert")))
-            .description(OptionDescription.of(Component.translatable(guiKey("alerts.chat_alert.desc"))))
-            .collapsed(true)
-            .option(boolOpt("alerts.chat_alert.enabled", true, { ca.enabled }, { ca.enabled = it }))
             .build()
     }
 
@@ -412,6 +421,16 @@ object SRConfigGui {
             .option(intOpt("alerts.tps_alert.delay", 3, 1, 30, 1, { t.delaySeconds }, { t.delaySeconds = it.coerceIn(1, 30) }))
             .option(strOpt("alerts.tps_alert.message", "&cLow TPS", { t.message }, { t.message = it }))
             .option(boolOpt("alerts.tps_alert.play_sound", true, { t.playSound }, { t.playSound = it }))
+            .build()
+    }
+
+    private fun createChatAlertGroup(): OptionGroup {
+        val ca = SRConfig.settings.chatAlert
+        return OptionGroup.createBuilder()
+            .name(Component.translatable(guiKey("alerts.chat_alert")))
+            .description(OptionDescription.of(Component.translatable(guiKey("alerts.chat_alert.desc"))))
+            .collapsed(true)
+            .option(boolOpt("alerts.chat_alert.enabled", true, { ca.enabled }, { ca.enabled = it }))
             .build()
     }
 

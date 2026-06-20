@@ -4,7 +4,7 @@ import com.sraddons.config.SRConfig
 import com.sraddons.gui.SRConfigGui
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.network.chat.Component
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.gui.screens.ChatScreen
 import net.minecraft.resources.Identifier
@@ -22,7 +22,7 @@ object CommandKeyBinding {
     )
 
     fun init() {
-        commandKey = KeyBindingHelper.registerKeyBinding(
+        commandKey = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.sraddons.open",
                 InputConstants.Type.KEYSYM,
@@ -31,7 +31,7 @@ object CommandKeyBinding {
             )
         )
 
-        guiKey = KeyBindingHelper.registerKeyBinding(
+        guiKey = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.sraddons.gui",
                 InputConstants.Type.KEYSYM,
@@ -40,7 +40,7 @@ object CommandKeyBinding {
             )
         )
 
-        toggleKey = KeyBindingHelper.registerKeyBinding(
+        toggleKey = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.sraddons.toggle",
                 InputConstants.Type.KEYSYM,

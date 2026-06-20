@@ -1,6 +1,7 @@
 package com.sraddons.feature.helper
 
 import com.sraddons.config.SRConfig
+import com.sraddons.feature.partycommands.utils.COLOR_CODE_REGEX
 import com.sraddons.util.TitleUtil
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
@@ -15,7 +16,7 @@ object ChatKeywordAlert {
     fun init() {
         ClientReceiveMessageEvents.GAME.register { message, _ ->
             if (!SRConfig.settings.chatAlert.enabled) return@register
-            val text = message.string.trim()
+            val text = message.string.replace(COLOR_CODE_REGEX, "").trim()
 
             for (entry in SRConfig.settings.chatAlert.entries) {
                 val parts = entry.split(" | ", limit = 5)
