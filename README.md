@@ -9,7 +9,7 @@
   <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.5.1-02303A" alt="Gradle"></a>
   <a href="https://fabricmc.net"><img src="https://img.shields.io/badge/Loom-1.17.11-ECD2A0" alt="Fabric Loom"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
-  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.7.2-orange" alt="Version"></a>
+  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.7.3-orange" alt="Version"></a>
 </p>
 
 ---
@@ -22,7 +22,7 @@
 4. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
 5. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
 6. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-7. Download `SR-Addons-1.7.2.jar` and place it in `.minecraft/mods/`
+7. Download `SR-Addons-1.7.3.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -58,9 +58,12 @@
 - Auto price calculation (no player name needed when only 1 client)
 
 ### Visual Tweaks
+- **Hide Armor Bar** — hide vanilla armor bar above the hotbar
+- **Hide Hunger Bar** — hide vanilla food/hunger bar above the hotbar
 - **Hide Entity Fire** — hide fire animation on burning entities
 - **Fullbright** — maximum global brightness, ignoring ambient light
 - **Better FOV** — disable Speed/Aiming/Submerged FOV changes, keeping sprint FOV untouched
+- **Pin Tooltip** — pin item tooltips on screen for comparison (left-drag to move, right-click to close, scroll to navigate, Ctrl+scroll to resize)
 
 ### Text & Tools
 - **Replace Texts** — replace text patterns in all rendered text, with Developer's Name highlight
@@ -222,6 +225,7 @@ Add a countdown: `!f7 30` — enters in 30 seconds.
 | `` ` `` (Grave) | Open chat with `!` prefix |
 | Unbound | Open config GUI |
 | Unbound | Toggle PartyCommands on/off |
+| Unbound | Pin Tooltip |
 
 </details>
 
@@ -236,7 +240,7 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 
 | Tab | Settings |
 |-----|----------|
-| **General** | Display (own nametag, separator, update check), Visual Tweaks (entity fire, fullbright, better FOV), Text (replace texts, dev name highlight), Quick Tools (`/calc` command) |
+| **General** | Display (own nametag, separator, update check), Visual Tweaks (armor, hunger, entity fire, fullbright, better FOV), Text (replace texts, dev name highlight), Quick Tools (`/calc` command, pin tooltip) |
 | **PartyCommands** | Prefix, 40+ individual command toggles, response routing, auto !mod reply, note, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode, line width, max distance |
 | **Carry** | Master toggle, highlight profiles (client/boss/miniboss colors), boss notification, render settings |
@@ -257,7 +261,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 25  
-**Output:** `build/libs/SR-Addons-1.7.2.jar`
+**Output:** `build/libs/SR-Addons-1.7.3.jar`
 
 ---
 

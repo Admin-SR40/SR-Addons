@@ -33,7 +33,8 @@ object SRConfig {
         var replaceTextsEnabled: Boolean = false,
         var highlightDevName: Boolean = true,
         // Quick Tools
-        var enableStandaloneCalc: Boolean = false
+        var enableStandaloneCalc: Boolean = false,
+        var pinTooltip: Boolean = true
     )
 
     data class PartyCommandsConfigData(

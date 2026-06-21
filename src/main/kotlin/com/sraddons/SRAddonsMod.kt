@@ -10,6 +10,7 @@ import com.sraddons.feature.partycommands.utils.AutoPartyListUpdater
 import com.sraddons.feature.partycommands.utils.ChatListener
 import com.sraddons.feature.partycommands.utils.CommandKeyBinding
 import com.sraddons.feature.hud.HudElementHider
+import com.sraddons.feature.tooltip.PinnedTooltipManager
 import com.sraddons.feature.helper.ChatKeywordAlert
 import com.sraddons.feature.helper.PingTpsAlertNotifier
 import com.sraddons.feature.helper.RagnarockNotifier
@@ -54,6 +55,7 @@ class SRAddonsMod : ClientModInitializer {
         safeInit("text replacer") { TextReplacer.init() }
         safeInit("chat alert") { ChatKeywordAlert.init() }
         safeInit("hud element hider") { HudElementHider.init() }
+        safeInit("pinned tooltip") { PinnedTooltipManager.init() }
 
         if (SRConfig.settings.general.autoCheckUpdates) {
             startAutoUpdateCheck()

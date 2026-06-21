@@ -133,6 +133,7 @@ object SRConfigGui {
             .description(OptionDescription.of(Component.translatable(guiKey("general.quick_tools.desc"))))
             .collapsed(true)
             .option(boolOpt("general.enable_calc", false, { g.enableStandaloneCalc }, { g.enableStandaloneCalc = it }))
+            .option(boolOpt("general.pin_tooltip", true, { g.pinTooltip }, { g.pinTooltip = it }))
             .build()
     }
 

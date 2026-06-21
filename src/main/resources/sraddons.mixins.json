@@ -14,7 +14,8 @@
     "BetterFovCameraMixin",
     "BetterFovPlayerMixin",
     "FullbrightMixin",
-    "YACLListEntryFocusMixin"
+    "YACLListEntryFocusMixin",
+    "TooltipCaptureMixin"
   ],
   "injectors": {
     "defaultRequire": 1

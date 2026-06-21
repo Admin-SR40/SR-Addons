@@ -17,7 +17,7 @@ object CommandKeyBinding {
     private lateinit var guiKey: KeyMapping
     private lateinit var toggleKey: KeyMapping
 
-    private val CATEGORY_SR_ADDONS = KeyMapping.Category.register(
+    val CATEGORY_SR_ADDONS = KeyMapping.Category.register(
         Identifier.fromNamespaceAndPath("sraddons", "general")
     )
 
