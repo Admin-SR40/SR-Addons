@@ -64,6 +64,10 @@ object PinnedTooltipManager {
                 if (!SRConfig.settings.general.pinTooltip || tooltips.isEmpty()) return@register true
                 val hit = tooltips.findLast { it.contains(event.x, event.y) } ?: return@register true
 
+                if (event.buttonInfo.button == 2) {
+                    hit.toggleCollapsed()
+                    return@register false
+                }
                 if (event.buttonInfo.button == 1) {
                     tooltips.remove(hit)
                     return@register false
@@ -94,7 +98,7 @@ object PinnedTooltipManager {
                             GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS
 
                 when {
-                    ctrl -> hit.adjustScale(scrollY)
+                    ctrl -> hit.adjustScale(scrollY.toFloat() * 0.1f)
                     shift -> hit.scroll(scrollY * 10.0)
                     else -> hit.scroll(scrollY * 40.0)
                 }

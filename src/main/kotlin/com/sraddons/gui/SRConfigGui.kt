@@ -134,6 +134,14 @@ object SRConfigGui {
             .collapsed(true)
             .option(boolOpt("general.enable_calc", false, { g.enableStandaloneCalc }, { g.enableStandaloneCalc = it }))
             .option(boolOpt("general.pin_tooltip", true, { g.pinTooltip }, { g.pinTooltip = it }))
+            .option(
+                Option.createBuilder<Float>()
+                    .name(Component.translatable(guiKey("general.pin_tooltip_scale")))
+                    .description(OptionDescription.of(Component.translatable(guiKey("general.pin_tooltip_scale.desc"))))
+                    .binding(1.0f, { g.pinTooltipScale }, { g.pinTooltipScale = it })
+                    .controller { opt -> FloatSliderControllerBuilder.create(opt).range(0.5f, 3.0f).step(0.1f) }
+                    .build()
+            )
             .build()
     }
 

@@ -34,7 +34,8 @@ object SRConfig {
         var highlightDevName: Boolean = true,
         // Quick Tools
         var enableStandaloneCalc: Boolean = false,
-        var pinTooltip: Boolean = true
+        var pinTooltip: Boolean = true,
+        var pinTooltipScale: Float = 1.0f
     )
 
     data class PartyCommandsConfigData(
