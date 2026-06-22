@@ -70,21 +70,23 @@ class PinnedTooltip(
         val xi = x.toInt()
         val yi = y.toInt()
 
-        val pose = extractor.pose()
-        pose.pushMatrix()
-        val m = pose as org.joml.Matrix3x2f
-        m.translate(xi.toFloat(), yi.toFloat())
-        m.scale(s, s)
-        m.translate(-xi.toFloat(), -yi.toFloat())
+        if (s != 1.0f) {
+            val pose = extractor.pose()
+            pose.pushMatrix()
+            val m = pose as org.joml.Matrix3x2f
+            m.translate(xi.toFloat(), yi.toFloat())
+            m.scale(s, s)
+            m.translate(-xi.toFloat(), -yi.toFloat())
+        }
 
         if (collapsed) {
             val firstW = if (lines.isNotEmpty()) font.width(lines[0]) + 4 else font.width("…") + 4
-            val barW = firstW.coerceIn(40, rawWidth)
+            val barW = firstW.coerceIn(40, maxOf(40, rawWidth))
             val barColor = 0xFF3A3A3A.toInt()
             extractor.fill(xi, yi, xi + barW, yi + collapsedH, barColor)
             if (lines.isNotEmpty()) extractor.text(font, lines[0], xi + 2, yi + 2, 0xFFFFFFFF.toInt())
             else extractor.text(font, Component.literal("…"), xi + 2, yi + 2, 0xFFFFFFFF.toInt())
-            pose.popMatrix()
+            if (s != 1.0f) extractor.pose().popMatrix()
             return
         }
 
@@ -116,6 +118,6 @@ class PinnedTooltip(
             extractor.fill(xi + width - 2, barY, xi + width, barY + barH, 0x60FFFFFF.toInt())
         }
 
-        pose.popMatrix()
+        if (s != 1.0f) extractor.pose().popMatrix()
     }
 }

@@ -60,6 +60,17 @@ object PinnedTooltipManager {
                 }
             }
 
+            ScreenMouseEvents.beforeMouseClick(screen).register { _, event ->
+                if (!SRConfig.settings.general.pinTooltip || tooltips.isEmpty()) return@register
+                if (event.buttonInfo.button != 0) return@register
+                val hit = tooltips.findLast { it.contains(event.x, event.y) } ?: return@register
+                hit.isDragging = true
+                val mouse = Minecraft.getInstance().mouseHandler
+                val win = Minecraft.getInstance().window
+                hit.dragStartX = mouse.getScaledXPos(win) - hit.x
+                hit.dragStartY = mouse.getScaledYPos(win) - hit.y
+            }
+
             ScreenMouseEvents.allowMouseClick(screen).register { _, event ->
                 if (!SRConfig.settings.general.pinTooltip || tooltips.isEmpty()) return@register true
                 val hit = tooltips.findLast { it.contains(event.x, event.y) } ?: return@register true
@@ -70,14 +81,6 @@ object PinnedTooltipManager {
                 }
                 if (event.buttonInfo.button == 1) {
                     tooltips.remove(hit)
-                    return@register false
-                }
-                if (event.buttonInfo.button == 0) {
-                    hit.isDragging = true
-                    val mouse = Minecraft.getInstance().mouseHandler
-                    val win = Minecraft.getInstance().window
-                    hit.dragStartX = mouse.getScaledXPos(win) - hit.x
-                    hit.dragStartY = mouse.getScaledYPos(win) - hit.y
                     return@register false
                 }
                 true
@@ -115,13 +118,12 @@ object PinnedTooltipManager {
         val mc = Minecraft.getInstance()
         val screenH = mc.window.guiScaledHeight
 
-        tooltips.clear()
-
         val tt = PinnedTooltip(lines.toList(), 0.0, 0.0)
         tt.recalculate(font)
 
         tt.x = 8.0
-        tt.y = ((screenH - tt.height) / 2.0).coerceAtLeast(8.0)
+        val offset = tooltips.sumOf { it.height + 4 }
+        tt.y = (((screenH - tt.height) / 2.0) + offset).coerceAtLeast(8.0)
 
         tooltips.add(tt)
     }
