@@ -34,7 +34,7 @@ object UpdateChecker {
             val release = GSON.fromJson(body, GithubRelease::class.java)
             val latestVersion = release.tagName.removePrefix("v")
 
-            if (latestVersion != Constants.MOD_VERSION) {
+            if (VersionComparator.compare(latestVersion, Constants.MOD_VERSION) > 0) {
                 UpdateResult(latestVersion, release.htmlUrl)
             } else {
                 UpdateResult(latestVersion)

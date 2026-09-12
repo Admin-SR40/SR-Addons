@@ -5,7 +5,7 @@ import com.mojang.blaze3d.textures.GpuTexture
 import com.sraddons.config.SRConfig
 import net.minecraft.client.renderer.Lightmap
 import net.minecraft.client.renderer.state.LightmapRenderState
-import net.minecraft.util.ARGB
+import org.joml.Vector4f
 import org.spongepowered.asm.mixin.Mixin
 import org.spongepowered.asm.mixin.gen.Accessor
 import org.spongepowered.asm.mixin.injection.At
@@ -22,7 +22,7 @@ abstract class FullbrightMixin {
     private fun onRender(state: LightmapRenderState, ci: CallbackInfo) {
         if (SRConfig.settings.general.fullbright) {
             RenderSystem.getDevice().createCommandEncoder()
-                .clearColorTexture(getLightmapTexture(), ARGB.color(255, 255, 255, 255))
+                .clearColorTexture(getLightmapTexture(), Vector4f(1f, 1f, 1f, 1f))
         }
     }
 }

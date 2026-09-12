@@ -8,6 +8,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 fun <T> saveJsonAtomic(file: File, gson: Gson, data: T, logger: Logger) {
     val tmpFile = File(file.parentFile, "${file.name}.tmp")
@@ -15,8 +18,13 @@ fun <T> saveJsonAtomic(file: File, gson: Gson, data: T, logger: Logger) {
         OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
             gson.toJson(data, writer)
         }
-        if (!tmpFile.renameTo(file)) {
-            logger.warn("Failed to rename tmp file for ${file.name}")
+        try {
+            Files.move(
+                tmpFile.toPath(), file.toPath(),
+                StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE
+            )
+        } catch (e: AtomicMoveNotSupportedException) {
+            Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
     } catch (e: Exception) {
         logger.error("Failed to save ${file.name}", e)
@@ -31,7 +39,7 @@ object Constants {
     val MOD_VERSION: String by lazy {
         FabricLoader.getInstance().getModContainer(MOD_ID)
             .map { it.metadata.version.friendlyString }
-            .orElse("1.7.4")
+            .orElse("1.7.5")
     }
 
     val PREFIX: Component by lazy { GradientText.cyanToLightBlue("[SR-Addons] ") }

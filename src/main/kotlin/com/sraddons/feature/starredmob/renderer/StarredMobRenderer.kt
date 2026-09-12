@@ -46,18 +46,17 @@ object StarredMobRenderer {
             val maxDistance = SRConfig.settings.starredMob.maxDistance.coerceIn(10, 128)
             val partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)
 
-            val camera = mc.gameRenderer.mainCamera
+            val camera = mc.gameRenderer.mainCamera()
             val cameraPos = camera.position()
             val poseStack = context.poseStack()
 
             poseStack.pushPose()
             poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
-            val pose = poseStack.last()
 
             val boxes = HighlightUtil.collectBoxes(starredMobs, player, maxDistance, partialTicks, LOGGER)
 
             if (boxes.isNotEmpty()) {
-                HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth,
+                HighlightUtil.drawBoxes(context.submitNodeCollector(), poseStack, boxes, color, renderMode, lineWidth,
                     filledType, linesType, LOGGER)
             }
 

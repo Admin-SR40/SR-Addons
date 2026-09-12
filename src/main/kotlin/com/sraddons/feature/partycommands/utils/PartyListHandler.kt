@@ -96,7 +96,7 @@ object PartyListHandler {
             if (lastMessageWasNotInParty) {
                 isWaitingForList = false
                 lastMessageWasNotInParty = false
-                    return true
+                return true
             }
             if (collectedLines.isEmpty()) {
                 return true
@@ -108,7 +108,7 @@ object PartyListHandler {
                     parseAndDisplay()
                 }
                 isWaitingForList = false
-                    return true
+                return true
             }
         }
 

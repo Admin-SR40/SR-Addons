@@ -3,13 +3,13 @@
 <p align="center">Unified client-side Fabric mod for Hypixel SkyBlock — combines PartyCommands, StarredMobHighlighter, CarryModule, visual tweaks, and in-game alerts into a single addon.</p>
 
 <p align="center">
-  <a href="https://minecraft.net"><img src="https://img.shields.io/badge/Minecraft-26.1.2-green" alt="Minecraft"></a>
+  <a href="https://minecraft.net"><img src="https://img.shields.io/badge/Minecraft-26.2-green" alt="Minecraft"></a>
   <a href="#"><img src="https://img.shields.io/badge/Java-25-red" alt="Java"></a>
-  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.4.0-purple" alt="Kotlin"></a>
-  <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.5.1-02303A" alt="Gradle"></a>
-  <a href="https://fabricmc.net"><img src="https://img.shields.io/badge/Loom-1.17.11-ECD2A0" alt="Fabric Loom"></a>
+  <a href="https://kotlinlang.org"><img src="https://img.shields.io/badge/Kotlin-2.4.20-purple" alt="Kotlin"></a>
+  <a href="https://gradle.org"><img src="https://img.shields.io/badge/Gradle-9.7.1-02303A" alt="Gradle"></a>
+  <a href="https://fabricmc.net"><img src="https://img.shields.io/badge/Loom-1.17.20-ECD2A0" alt="Fabric Loom"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
-  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.7.4-orange" alt="Version"></a>
+  <a href="https://github.com/Admin-SR40/SR-Addons/releases/latest"><img src="https://img.shields.io/badge/Version-1.7.5-orange" alt="Version"></a>
 </p>
 
 ---
@@ -17,12 +17,12 @@
 ## Installation
 
 1. Install **Java 25** (LTS).
-2. Install [Fabric Loader](https://fabricmc.net/) >= 0.19.0 for Minecraft 26.1.2
+2. Install [Fabric Loader](https://fabricmc.net/) >= 0.19.0 for Minecraft 26.2
 3. Install [Fabric API](https://modrinth.com/mod/fabric-api)
-4. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.13.0
-5. Install [YACL](https://modrinth.com/mod/yacl) >= 3.8.0
+4. Install [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin) >= 1.14.0
+5. Install [YACL](https://modrinth.com/mod/yacl) >= 3.9.0
 6. (Optional) Install [ModMenu](https://modrinth.com/mod/modmenu) to open config directly from the Mods screen
-7. Download `SR-Addons-1.7.4.jar` and place it in `.minecraft/mods/`
+7. Download `SR-Addons-1.7.5.jar` and place it in `.minecraft/mods/`
 
 ---
 
@@ -44,6 +44,9 @@
 - Fun commands (coinflip, 8ball, dice, boop, random)
 - Countdown timer with sound, note message, auto `!mod` reply
 - Configurable response routing (party chat / local), separator line removal
+- Configurable **Send Interval** — commands and their party-chat replies are queued so they never
+  reach Hypixel in the same tick (which used to make one of them silently fail)
+- Party-chat replies are sent as clean text: `§`/`&` color codes and hex codes are stripped
 - Auto party list updater with member online/offline tracking
 
 ### CarryModule
@@ -241,7 +244,7 @@ All settings managed through the YACL config GUI (`/sra gui` or via ModMenu) wit
 | Tab | Settings |
 |-----|----------|
 | **General** | Display (own nametag, separator, update check), Visual Tweaks (armor, hunger, entity fire, fullbright, better FOV), Text (replace texts, dev name highlight), Quick Tools (`/calc` command, pin tooltip) |
-| **PartyCommands** | Prefix, 40+ individual command toggles, response routing, auto !mod reply, note, countdown sound |
+| **PartyCommands** | Prefix, 40+ individual command toggles, response routing, send interval, auto !mod reply, note, countdown sound |
 | **StarredMob** | Enabled, highlight color (RGBA), render mode, line width, max distance |
 | **Carry** | Master toggle, highlight profiles (client/boss/miniboss colors), boss notification, render settings |
 | **Alerts** | Ragnarock Notifier, Ping Alert, TPS Alert, Chat Keywords Alert |
@@ -261,7 +264,7 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ```
 
 **Requirements:** JDK 25  
-**Output:** `build/libs/SR-Addons-1.7.4.jar`
+**Output:** `build/libs/SR-Addons-1.7.5.jar`
 
 ---
 

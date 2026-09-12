@@ -1,10 +1,10 @@
 plugins {
-    id("net.fabricmc.fabric-loom") version "1.17.11"
-    kotlin("jvm") version "2.4.0"
+    id("net.fabricmc.fabric-loom") version "1.17.20"
+    kotlin("jvm") version "2.4.20"
 }
 
 group = "com.sraddons"
-version = "1.7.4"
+version = "1.7.5"
 
 repositories {
     mavenCentral()
@@ -15,16 +15,18 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:26.1.2")
-    implementation("net.fabricmc:fabric-loader:0.19.2")
-    implementation("net.fabricmc:fabric-language-kotlin:1.13.12+kotlin.2.4.0")
-    implementation("net.fabricmc.fabric-api:fabric-api:0.149.1+26.1.2")
+    minecraft("com.mojang:minecraft:26.2")
+    implementation("net.fabricmc:fabric-loader:0.19.5")
+    implementation("net.fabricmc:fabric-language-kotlin:1.14.1+kotlin.2.4.20")
+    implementation("net.fabricmc.fabric-api:fabric-api:0.160.0+26.2")
 
     // YACL - Yet Another Config Lib
-    implementation("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric")
+    implementation("dev.isxander:yet-another-config-lib:3.9.6+26.2-fabric")
 
     // ModMenu
-    compileOnly("com.terraformersmc:modmenu:18.0.0-beta.1")
+    compileOnly("com.terraformersmc:modmenu:20.0.2")
+
+    testImplementation(kotlin("test"))
 }
 
 loom {
@@ -51,6 +53,10 @@ tasks {
         sourceCompatibility = "25"
         targetCompatibility = "25"
         options.encoding = "UTF-8"
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }
 

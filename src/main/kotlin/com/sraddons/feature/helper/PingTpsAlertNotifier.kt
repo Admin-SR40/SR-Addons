@@ -81,7 +81,10 @@ object PingTpsAlertNotifier {
     }
 
     private fun tickTps(cfg: SRConfig.TpsAlertConfigData, deltaMs: Long) {
-        val tpsLow = ServerUtils.averageTps < cfg.threshold
+        val tps = ServerUtils.currentTps
+        // Negative = still calculating, no fresh ticks = server is not ticking this world
+        // (limbo, disconnect, …). Neither should raise a low-TPS alert.
+        val tpsLow = tps >= 0.0 && ServerUtils.hasFreshTps && tps < cfg.threshold
 
         if (tpsLow) {
             if (tpsFired) {

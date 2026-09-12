@@ -15,7 +15,8 @@
     "BetterFovPlayerMixin",
     "FullbrightMixin",
     "YACLListEntryFocusMixin",
-    "TooltipCaptureMixin"
+    "TooltipCaptureMixin",
+    "PingPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

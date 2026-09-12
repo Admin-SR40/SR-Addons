@@ -114,24 +114,24 @@ object CarryHighlightRenderer {
             val maxDistance = cfg.maxDistance.coerceIn(10, 128)
             val partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)
 
-            val camera = mc.gameRenderer.mainCamera
+            val camera = mc.gameRenderer.mainCamera()
             val cameraPos = camera.position()
             val poseStack = context.poseStack()
 
             poseStack.pushPose()
             poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
-            val pose = poseStack.last()
+            val collector = context.submitNodeCollector()
 
             if (clientEnabled && clientPlayers.isNotEmpty()) {
-                renderGroup(pose, clientPlayers, cfg.clientHighlight, maxDistance, partialTicks, renderMode, lineWidth,
+                renderGroup(collector, poseStack, clientPlayers, cfg.clientHighlight, maxDistance, partialTicks, renderMode, lineWidth,
                     clientFilled, clientLines)
             }
             if (bossMobs.isNotEmpty()) {
-                renderGroup(pose, bossMobs, cfg.bossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
+                renderGroup(collector, poseStack, bossMobs, cfg.bossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
                     bossFilled, bossLines)
             }
             if (minibosses.isNotEmpty()) {
-                renderGroup(pose, minibosses, cfg.minibossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
+                renderGroup(collector, poseStack, minibosses, cfg.minibossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
                     minibossFilled, minibossLines)
             }
 
@@ -140,7 +140,8 @@ object CarryHighlightRenderer {
     }
 
     private fun renderGroup(
-        pose: com.mojang.blaze3d.vertex.PoseStack.Pose,
+        collector: net.minecraft.client.renderer.SubmitNodeCollector,
+        poseStack: com.mojang.blaze3d.vertex.PoseStack,
         entities: List<LivingEntity>,
         config: SRConfig.CarryHighlightConfig,
         maxDistance: Int, partialTicks: Float,
@@ -151,7 +152,7 @@ object CarryHighlightRenderer {
         val color = config.toARGB()
         val boxes = HighlightUtil.collectBoxes(entities, Minecraft.getInstance().player ?: return, maxDistance, partialTicks, LOGGER)
         if (boxes.isNotEmpty()) {
-            HighlightUtil.drawBoxes(pose, boxes, color, renderMode, lineWidth,
+            HighlightUtil.drawBoxes(collector, poseStack, boxes, color, renderMode, lineWidth,
                 filledType, linesType, LOGGER)
         }
     }

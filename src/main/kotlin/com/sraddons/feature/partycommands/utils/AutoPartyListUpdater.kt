@@ -36,7 +36,7 @@ object AutoPartyListUpdater {
     }
 
     private fun shouldUpdate(): Boolean {
-        if (mc.isSingleplayer) return false
+        if (mc.hasSingleplayerServer()) return false
         return mc.connection != null
     }
 
@@ -47,7 +47,7 @@ object AutoPartyListUpdater {
 
         Scheduler.schedule(SRConfig.settings.partyCommands.partyListUpdateDelayMs.toLong()) {
             mc.execute {
-                if (mc.player != null && !mc.isSingleplayer) {
+                if (mc.player != null && !mc.hasSingleplayerServer()) {
                     PartyListHandler.startAutoWaiting()
                     sendCommand("p list")
                 }
@@ -56,7 +56,7 @@ object AutoPartyListUpdater {
     }
 
     fun refresh() {
-        if (!mc.isSingleplayer && mc.player != null) {
+        if (!mc.hasSingleplayerServer() && mc.player != null) {
             scheduleUpdate()
         }
     }

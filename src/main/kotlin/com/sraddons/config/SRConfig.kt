@@ -49,6 +49,7 @@ object SRConfig {
         var mod: Boolean = true,
         var autoReplyModDelayMs: Int = 500,
         var autoReplyGithubDelayMs: Int = 800,
+        var chatSendIntervalMs: Int = 500,
         var partyListUpdateCooldownMs: Int = 60000,
         var partyListInitialDelayMs: Int = 500,
         var partyListUpdateDelayMs: Int = 1500
@@ -169,8 +170,24 @@ object SRConfig {
                 }
             } catch (e: Exception) {
                 LOGGER.error("Failed to load config, resetting to defaults", e)
+                backupUnreadableConfig()
+                settings = SRConfigData()
                 save()
             }
+        }
+    }
+
+    /**
+     * Keeps a copy of a config file that could not be parsed so that the reset
+     * below never destroys user data without a trace.
+     */
+    private fun backupUnreadableConfig() {
+        try {
+            val backup = File(CONFIG_FILE.parentFile, "${CONFIG_FILE.name}.bak")
+            CONFIG_FILE.copyTo(backup, overwrite = true)
+            LOGGER.warn("Copied unreadable config to {}", backup.name)
+        } catch (e: Exception) {
+            LOGGER.error("Failed to back up unreadable config", e)
         }
     }
 

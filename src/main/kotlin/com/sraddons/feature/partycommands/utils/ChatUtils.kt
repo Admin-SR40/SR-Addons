@@ -2,6 +2,7 @@ package com.sraddons.feature.partycommands.utils
 
 import com.sraddons.config.SRConfig
 import com.sraddons.util.Constants
+import com.sraddons.util.Scheduler
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 
@@ -11,46 +12,67 @@ val mc: Minecraft
 fun modMessage(message: Component) {
     mc.execute {
         val prefix = Constants.makePrefix()
-        mc.gui.chat.addClientSystemMessage(prefix.copy().append(message))
+        mc.gui.hud.chat.addClientSystemMessage(prefix.copy().append(message))
     }
 }
 
 fun rawMessage(message: Component) {
     mc.execute {
-        mc.gui.chat.addClientSystemMessage(message)
+        mc.gui.hud.chat.addClientSystemMessage(message)
+    }
+}
+
+/**
+ * Spacing between two messages sent by the mod.
+ *
+ * A command such as `/party warp` used to be followed by its party-chat feedback
+ * in the very same tick. Hypixel only processes one command per tick, so one of
+ * the two silently failed. Everything the mod sends now goes through
+ * [queueSend], which keeps at least this much distance between two sends.
+ */
+private val sendQueueLock = Any()
+private var nextSendAt = 0L
+
+private fun queueSend(action: () -> Unit) {
+    val delayMs: Long
+    synchronized(sendQueueLock) {
+        val now = System.currentTimeMillis()
+        val interval = SRConfig.settings.partyCommands.chatSendIntervalMs.coerceIn(0, 2000).toLong()
+        val sendAt = maxOf(now, nextSendAt)
+        nextSendAt = sendAt + interval
+        delayMs = sendAt - now
+    }
+    if (delayMs <= 0L) {
+        mc.execute(action)
+    } else {
+        Scheduler.schedule(delayMs) { mc.execute(action) }
     }
 }
 
 fun sendPartyChat(message: String) {
-    mc.execute {
-        mc.player?.connection?.sendCommand("pc $message")
-    }
+    val clean = message.toPlainChatMessage()
+    if (clean.isEmpty()) return
+    queueSend { mc.player?.connection?.sendCommand("pc $clean") }
 }
 
 fun sendChatMessage(message: String) {
-    mc.execute {
-        mc.player?.connection?.sendChat(message)
-    }
+    val clean = message.toPlainChatMessage()
+    if (clean.isEmpty()) return
+    queueSend { mc.player?.connection?.sendChat(clean) }
 }
 
 fun sendCommand(command: String) {
-    mc.execute {
-        mc.player?.connection?.sendCommand(command)
-    }
+    queueSend { mc.player?.connection?.sendCommand(command) }
 }
 
 fun getPositionString(): String {
-    val player = mc.player ?: return "\u672a\u77e5\u4f4d\u7f6e"
+    val player = mc.player
+        ?: return Component.translatable("sraddons.pc.position.unknown").string
     val pos = player.blockPosition()
     return "x: ${pos.x}, y: ${pos.y}, z: ${pos.z}"
 }
 
 fun Double.toFixed(decimals: Int = 1): String = String.format("%.${decimals}f", this)
-
-val COLOR_CODE_REGEX = Regex("\u00a7[0-9a-fk-or]")
-
-val String.noControlCodes: String
-    get() = this.replace(COLOR_CODE_REGEX, "")
 
 fun respond(component: Component) {
     if (SRConfig.settings.partyCommands.respondInPartyChat && PartyUtils.isInParty) {

@@ -42,11 +42,14 @@ object InfoCommands {
             override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
                 builder.executes {
                     if (SRConfig.isCommandEnabled("tps")) {
-                        val tps = ServerUtils.averageTps
+                        val tps = ServerUtils.currentTps
                         if (tps < 0) {
                             respond(formatResponse(
                                 Component.translatable("sraddons.pc.tps.response"),
-                                Component.translatable("sraddons.pc.tps.updating").withColor(0xAAAAAA)
+                                Component.translatable(
+                                    "sraddons.pc.tps.updating",
+                                    Component.literal(ServerUtils.tpsCalculatingSeconds().toString())
+                                ).withColor(0xAAAAAA)
                             ))
                         } else {
                             respond(formatResponse(

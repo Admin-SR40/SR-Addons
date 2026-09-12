@@ -21,7 +21,7 @@ class ChatScreenMixin {
         val prefix = SRConfig.settings.partyCommands.prefix
         if (message.startsWith(prefix)) {
             if (addToHistory && message.isNotEmpty()) {
-                Minecraft.getInstance().gui.chat.addRecentChat(message)
+                Minecraft.getInstance().gui.hud.chat.addRecentChat(message)
             }
 
             try {

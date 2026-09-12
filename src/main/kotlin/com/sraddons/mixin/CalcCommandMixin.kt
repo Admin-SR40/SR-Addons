@@ -27,20 +27,20 @@ class CalcCommandMixin {
         if (expr.isEmpty()) return
 
         if (addToHistory) {
-            Minecraft.getInstance().gui.chat.addRecentChat(message)
+            Minecraft.getInstance().gui.hud.chat.addRecentChat(message)
         }
 
         try {
             val result = CalcUtil.evaluate(expr)
             val prefix = Constants.makePrefix()
-            Minecraft.getInstance().gui.chat.addClientSystemMessage(
+            Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.calc.result", expr, CalcUtil.format(result)))
             )
         } catch (e: Exception) {
             LOGGER.warn("Failed to evaluate /calc expression: $expr", e)
             val prefix = Constants.makePrefix()
-            Minecraft.getInstance().gui.chat.addClientSystemMessage(
+            Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.calc.error").withColor(0xFF5555))
             )

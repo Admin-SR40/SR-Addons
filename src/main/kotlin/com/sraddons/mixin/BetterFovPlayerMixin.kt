@@ -15,10 +15,12 @@ abstract class BetterFovPlayerMixin {
 
     @ModifyArg(
         method = ["getFieldOfViewModifier"],
-        at = At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/util/Mth;lerp(FFF)F"
-        ),
+        at = [
+            At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/util/Mth;lerp(FFF)F"
+            )
+        ],
         index = 2
     )
     @Suppress("CAST_NEVER_SUCCEEDS")

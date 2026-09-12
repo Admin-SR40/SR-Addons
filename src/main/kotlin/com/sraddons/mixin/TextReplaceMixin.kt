@@ -12,7 +12,7 @@ abstract class TextReplaceMixin {
 
     @ModifyVariable(
         method = ["prepareText(Lnet/minecraft/util/FormattedCharSequence;FFIZZI)Lnet/minecraft/client/gui/Font${'$'}PreparedText;"],
-        at = At("HEAD"),
+        at = [At("HEAD")],
         argsOnly = true
     )
     private fun onPrepareTextSequence(seq: FormattedCharSequence): FormattedCharSequence {
@@ -21,7 +21,7 @@ abstract class TextReplaceMixin {
 
     @ModifyVariable(
         method = ["width(Lnet/minecraft/util/FormattedCharSequence;)I"],
-        at = At("HEAD"),
+        at = [At("HEAD")],
         argsOnly = true
     )
     private fun onWidthSequence(seq: FormattedCharSequence): FormattedCharSequence {

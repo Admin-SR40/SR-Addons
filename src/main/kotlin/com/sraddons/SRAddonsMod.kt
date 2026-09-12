@@ -9,6 +9,7 @@ import com.sraddons.feature.partycommands.commands.PartyCommandHandler
 import com.sraddons.feature.partycommands.utils.AutoPartyListUpdater
 import com.sraddons.feature.partycommands.utils.ChatListener
 import com.sraddons.feature.partycommands.utils.CommandKeyBinding
+import com.sraddons.feature.partycommands.utils.ServerUtils
 import com.sraddons.feature.hud.HudElementHider
 import com.sraddons.feature.tooltip.PinnedTooltipManager
 import com.sraddons.feature.helper.ChatKeywordAlert
@@ -47,6 +48,7 @@ class SRAddonsMod : ClientModInitializer {
         safeInit("carry renderer") { CarryHighlightRenderer.init() }
         safeInit("starred mob renderer") { StarredMobRenderer.init() }
         safeInit("party commands") { PartyCommandHandler.init() }
+        safeInit("server utils") { ServerUtils.init() }
         safeInit("chat listener") { ChatListener.init() }
         safeInit("party list updater") { AutoPartyListUpdater.init() }
         safeInit("key bindings") { CommandKeyBinding.init() }
@@ -87,11 +89,11 @@ class SRAddonsMod : ClientModInitializer {
             .withClickEvent(ClickEvent.OpenUrl(URI.create(result.downloadUrl)))
 
         mc.execute {
-            mc.gui.chat.addClientSystemMessage(
+            mc.gui.hud.chat.addClientSystemMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.update.available", result.latestVersion, Constants.MOD_VERSION).withColor(0x55FF55))
             )
-            mc.gui.chat.addClientSystemMessage(
+            mc.gui.hud.chat.addClientSystemMessage(
                 prefix.copy()
                     .append(Component.translatable("sraddons.command.update.click").withColor(0xFFFFFF))
                     .append(Component.translatable("sraddons.command.update.here").withColor(0x55FFFF).withStyle(clickStyle))

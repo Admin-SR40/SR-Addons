@@ -52,7 +52,7 @@ object CommandKeyBinding {
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             while (commandKey.consumeClick()) {
                 val prefix = SRConfig.settings.partyCommands.prefix
-                client.setScreen(ChatScreen(prefix, false))
+                client.gui.setScreen(ChatScreen(prefix, false))
             }
 
             while (guiKey.consumeClick()) {

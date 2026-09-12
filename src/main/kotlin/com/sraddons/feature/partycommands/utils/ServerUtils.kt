@@ -1,17 +1,15 @@
 package com.sraddons.feature.partycommands.utils
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.Minecraft
 
 object ServerUtils {
     private val mc = Minecraft.getInstance()
-
-    private val tpsHistory = mutableListOf<Double>()
-    private var lastTime = System.nanoTime()
-    private var lastGameTime = 0L
+    private val tickRate = TickRateTracker()
 
     val currentPing: Int
         get() {
-            val pingLog = mc.gui.debugOverlay.pingLogger
+            val pingLog = mc.debugOverlay.pingLogger
             val size = pingLog.size()
             return if (size > 0) pingLog.get(size - 1).toInt() else 0
         }
@@ -19,45 +17,32 @@ object ServerUtils {
     val currentFps: Int
         get() = mc.fps
 
-    val averageTps: Double
-        get() {
-            return if (tpsHistory.isNotEmpty()) {
-                tpsHistory.average()
-            } else {
-                20.0
-            }
-        }
+    /**
+     * Server TPS, or a negative value while the tracker is still calculating.
+     *
+     * A value of `0.0` means no server ticks arrived for at least a second (limbo,
+     * connection loss, …), matching SkyHanni's behaviour.
+     */
+    val currentTps: Double
+        get() = tickRate.tps()
 
-    fun updateTps() {
-        val now = System.nanoTime()
-        val elapsedNs = now - lastTime
+    /** True while the tracker has tick data that is less than a second old. */
+    val hasFreshTps: Boolean
+        get() = tickRate.hasFreshData()
 
-        if (elapsedNs >= 1_000_000_000L) {
-            // Ignore if elapsed exceeds 5s — likely paused or tabbed out
-            if (elapsedNs > 5_000_000_000L) {
-                lastTime = now
-                return
-            }
-            val level = mc.level
-            if (level != null) {
-                val gameTime = level.gameTime
-                if (lastGameTime != 0L) {
-                    val timeDiff = gameTime - lastGameTime
-                    // Skip if no server ticks arrived in this window
-                    if (timeDiff > 0) {
-                        val tps = (timeDiff * 1_000_000_000.0 / elapsedNs).coerceAtMost(20.0)
-                        synchronized(this) {
-                            tpsHistory.add(tps)
-                            if (tpsHistory.size > 10) {
-                                tpsHistory.removeFirst()
-                            }
-                        }
-                    }
-                }
-                lastGameTime = gameTime
-            }
-            lastTime = now
-        }
+    /** Seconds until [currentTps] stops being negative; 0 when a value is available. */
+    fun tpsCalculatingSeconds(): Int = tickRate.calculatingRemainingSeconds()
+
+    /**
+     * Called once per received [net.minecraft.network.protocol.common.ClientboundPingPacket]
+     * — that is, once per server tick. Invoked from the network thread.
+     */
+    fun onServerTick(pingId: Int) {
+        tickRate.onServerTick(pingId)
     }
 
+    fun init() {
+        ClientPlayConnectionEvents.JOIN.register { _, _, _ -> tickRate.onWorldChange() }
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> tickRate.onWorldChange() }
+    }
 }

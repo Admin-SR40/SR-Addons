@@ -11,10 +11,11 @@ fun getPingColor(ping: Int): Int = when {
 }
 
 fun getTpsColor(tps: Double): Int = when {
-    tps >= 19.5 -> 0x55FF55
-    tps >= 18.0 -> 0xFFFF55
-    tps >= 15.0 -> 0xFFAA00
-    else -> 0xFF5555
+    tps > 19.8 -> 0x00AA00
+    tps > 19.0 -> 0x55FF55
+    tps > 17.5 -> 0xFFAA00
+    tps > 12.0 -> 0xFF5555
+    else -> 0xAA0000
 }
 
 fun getFpsColor(fps: Int): Int = when {

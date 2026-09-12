@@ -198,6 +198,7 @@ object SRConfigGui {
             .option(boolOpt("pc.respond_party", true, { pc.respondInPartyChat }, { pc.respondInPartyChat = it }))
             .option(boolOpt("pc.respond_local", true, { pc.showResponseLocally }, { pc.showResponseLocally = it }))
             .option(boolOpt("pc.auto_reply_mod", true, { pc.mod }, { pc.mod = it }))
+            .option(intOpt("pc.send_interval", 500, 0, 2000, 50, { pc.chatSendIntervalMs }, { pc.chatSendIntervalMs = it }))
             .build()
     }
 
@@ -448,7 +449,7 @@ object SRConfigGui {
     fun open() {
         val mc = Minecraft.getInstance()
         Scheduler.schedule(GUI_OPEN_DELAY_MS) {
-            mc.execute { mc.setScreen(createScreen(mc.screen)) }
+            mc.execute { mc.gui.setScreen(createScreen(mc.gui.screen())) }
         }
     }
 }
