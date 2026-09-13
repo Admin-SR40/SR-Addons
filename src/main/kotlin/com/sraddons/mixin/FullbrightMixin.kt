@@ -14,14 +14,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 @Mixin(Lightmap::class)
 abstract class FullbrightMixin {
-
     @Accessor("texture")
     abstract fun getLightmapTexture(): GpuTexture
 
     @Inject(method = ["render"], at = [At("TAIL")])
-    private fun onRender(state: LightmapRenderState, ci: CallbackInfo) {
+    private fun onRender(
+        state: LightmapRenderState,
+        ci: CallbackInfo,
+    ) {
         if (SRConfig.settings.general.fullbright) {
-            RenderSystem.getDevice().createCommandEncoder()
+            RenderSystem
+                .getDevice()
+                .createCommandEncoder()
                 .clearColorTexture(getLightmapTexture(), Vector4f(1f, 1f, 1f, 1f))
         }
     }

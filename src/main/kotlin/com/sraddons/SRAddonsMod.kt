@@ -5,18 +5,18 @@ import com.sraddons.config.SRConfig
 import com.sraddons.feature.carry.CarryCommand
 import com.sraddons.feature.carry.CarryHighlightRenderer
 import com.sraddons.feature.carry.CarryState
+import com.sraddons.feature.helper.ChatKeywordAlert
+import com.sraddons.feature.helper.PingTpsAlertNotifier
+import com.sraddons.feature.helper.RagnarockNotifier
+import com.sraddons.feature.helper.TextReplacer
+import com.sraddons.feature.hud.HudElementHider
 import com.sraddons.feature.partycommands.commands.PartyCommandHandler
 import com.sraddons.feature.partycommands.utils.AutoPartyListUpdater
 import com.sraddons.feature.partycommands.utils.ChatListener
 import com.sraddons.feature.partycommands.utils.CommandKeyBinding
 import com.sraddons.feature.partycommands.utils.ServerUtils
-import com.sraddons.feature.hud.HudElementHider
-import com.sraddons.feature.tooltip.PinnedTooltipManager
-import com.sraddons.feature.helper.ChatKeywordAlert
-import com.sraddons.feature.helper.PingTpsAlertNotifier
-import com.sraddons.feature.helper.RagnarockNotifier
-import com.sraddons.feature.helper.TextReplacer
 import com.sraddons.feature.starredmob.renderer.StarredMobRenderer
+import com.sraddons.feature.tooltip.PinnedTooltipManager
 import com.sraddons.update.UpdateChecker
 import com.sraddons.util.Constants
 import kotlinx.coroutines.Dispatchers
@@ -29,14 +29,22 @@ import net.minecraft.network.chat.Style
 import java.net.URI
 
 class SRAddonsMod : ClientModInitializer {
-
     @Volatile
     private var updateResult: UpdateChecker.UpdateResult? = null
     private var notificationShown = false
-    private val logger = org.apache.logging.log4j.LogManager.getLogger("SR-Addons")
+    private val logger =
+        org.apache.logging.log4j.LogManager
+            .getLogger("SR-Addons")
 
-    private fun safeInit(name: String, block: () -> Unit) {
-        try { block() } catch (e: Exception) { logger.error("Failed to init $name", e) }
+    private fun safeInit(
+        name: String,
+        block: () -> Unit,
+    ) {
+        try {
+            block()
+        } catch (e: Exception) {
+            logger.error("Failed to init $name", e)
+        }
     }
 
     override fun onInitializeClient() {
@@ -82,22 +90,34 @@ class SRAddonsMod : ClientModInitializer {
         val result = updateResult ?: return
         if (result.downloadUrl == null) return
 
-        val mc = net.minecraft.client.Minecraft.getInstance()
+        val mc =
+            net.minecraft.client.Minecraft
+                .getInstance()
         val prefix = Constants.makePrefix()
-        val clickStyle = Style.EMPTY
-            .withUnderlined(true)
-            .withClickEvent(ClickEvent.OpenUrl(URI.create(result.downloadUrl)))
+        val clickStyle =
+            Style.EMPTY
+                .withUnderlined(true)
+                .withClickEvent(ClickEvent.OpenUrl(URI.create(result.downloadUrl)))
 
         mc.execute {
             mc.gui.hud.chat.addClientSystemMessage(
-                prefix.copy()
-                    .append(Component.translatable("sraddons.command.update.available", result.latestVersion, Constants.MOD_VERSION).withColor(0x55FF55))
+                prefix
+                    .copy()
+                    .append(
+                        Component
+                            .translatable(
+                                "sraddons.command.update.available",
+                                result.latestVersion,
+                                Constants.MOD_VERSION,
+                            ).withColor(0x55FF55),
+                    ),
             )
             mc.gui.hud.chat.addClientSystemMessage(
-                prefix.copy()
+                prefix
+                    .copy()
                     .append(Component.translatable("sraddons.command.update.click").withColor(0xFFFFFF))
                     .append(Component.translatable("sraddons.command.update.here").withColor(0x55FFFF).withStyle(clickStyle))
-                    .append(Component.translatable("sraddons.command.update.check_out").withColor(0xFFFFFF))
+                    .append(Component.translatable("sraddons.command.update.check_out").withColor(0xFFFFFF)),
             )
         }
     }

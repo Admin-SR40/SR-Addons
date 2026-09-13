@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class VersionComparatorTest {
-
     @Test
     fun `compares patch numbers numerically`() {
         assertTrue(VersionComparator.compare("1.7.10", "1.7.9") > 0)

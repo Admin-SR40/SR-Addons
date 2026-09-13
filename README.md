@@ -263,6 +263,9 @@ Old configs from EntityFire, PartyCommands, and StarredMobHighlighter are auto-m
 ./gradlew clean build
 ```
 
+The build also runs ktlint and the unit tests, and the Kotlin compiler is configured with
+`allWarningsAsErrors`, so a warning fails the build. Use `./gradlew ktlintFormat` to fix style issues.
+
 **Requirements:** JDK 25  
 **Output:** `build/libs/SR-Addons-1.7.5.jar`
 

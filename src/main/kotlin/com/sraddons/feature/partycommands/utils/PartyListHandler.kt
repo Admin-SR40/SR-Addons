@@ -4,7 +4,6 @@ import com.sraddons.config.SRConfig
 import net.minecraft.network.chat.Component
 
 object PartyListHandler {
-
     var isWaitingForList = false
     private var silentMode = false
     private var waitTicks = 0
@@ -18,11 +17,13 @@ object PartyListHandler {
     private val membersPattern = Regex("^Party Members: (.+)$")
     private val memberWithBulletPattern = Regex("((?:\\[.+?])?\\s*[a-zA-Z0-9_]+)(?:\\s*(§[0-9a-f])?●)?")
     private val separatorLinePattern = Regex("^[\\-▬─══=\\s]+\$")
+    private val rankPattern = Regex("^(\\[.+?])?\\s*(.+?)$")
 
-    private val interceptSeparatorPatterns = listOf(
-        Regex("^Party Finder > .+ joined the dungeon group!"),
-        Regex("^\\[.+?] .+ joined the party\\.$")
-    )
+    private val interceptSeparatorPatterns =
+        listOf(
+            Regex("^Party Finder > .+ joined the dungeon group!"),
+            Regex("^\\[.+?] .+ joined the party\\.$"),
+        )
 
     fun startWaiting() {
         synchronized(this) {
@@ -53,11 +54,13 @@ object PartyListHandler {
                 isWaitingForList = false
                 lastMessageWasNotInParty = false
                 silentMode = false
-                    if (!wasSilent) {
-                    modMessage(formatResponse(
-                        Component.translatable("sraddons.pc.party_list.title"),
-                        Component.translatable("sraddons.pc.party_list.timeout").withColor(0xFF5555)
-                    ))
+                if (!wasSilent) {
+                    modMessage(
+                        formatResponse(
+                            Component.translatable("sraddons.pc.party_list.title"),
+                            Component.translatable("sraddons.pc.party_list.timeout").withColor(0xFF5555),
+                        ),
+                    )
                 }
             }
         }
@@ -65,73 +68,75 @@ object PartyListHandler {
 
     fun handleMessage(text: String): Boolean {
         synchronized(this) {
-        val trimmed = text.trim()
+            val trimmed = text.trim()
 
-        for (pattern in interceptSeparatorPatterns) {
-            if (pattern.containsMatchIn(trimmed)) {
-                shouldInterceptNextSeparator = true
+            for (pattern in interceptSeparatorPatterns) {
+                if (pattern.containsMatchIn(trimmed)) {
+                    shouldInterceptNextSeparator = true
+                    return false
+                }
+            }
+
+            if (shouldInterceptNextSeparator && isSeparatorLine(trimmed)) {
+                shouldInterceptNextSeparator = false
+                if (SRConfig.settings.general.removeSeparator) {
+                    return true
+                }
+            }
+
+            if (!isWaitingForList && isSeparatorLine(trimmed)) {
+                if (SRConfig.settings.general.removeSeparator) {
+                    return true
+                }
                 return false
             }
-        }
 
-        if (shouldInterceptNextSeparator && isSeparatorLine(trimmed)) {
-            shouldInterceptNextSeparator = false
-            if (SRConfig.settings.general.removeSeparator) {
+            if (!isWaitingForList) {
+                return false
+            }
+
+            if (isSeparatorLine(trimmed)) {
+                if (lastMessageWasNotInParty) {
+                    isWaitingForList = false
+                    lastMessageWasNotInParty = false
                     return true
-            }
-        }
-
-        if (!isWaitingForList && isSeparatorLine(trimmed)) {
-            if (SRConfig.settings.general.removeSeparator) {
-                    return true
-            }
-            return false
-        }
-
-        if (!isWaitingForList) {
-            return false
-        }
-
-        if (isSeparatorLine(trimmed)) {
-            if (lastMessageWasNotInParty) {
-                isWaitingForList = false
-                lastMessageWasNotInParty = false
-                return true
-            }
-            if (collectedLines.isEmpty()) {
-                return true
-            } else {
-                if (silentMode) {
-                    parseSilently()
-                    silentMode = false
-                } else {
-                    parseAndDisplay()
                 }
-                isWaitingForList = false
+                if (collectedLines.isEmpty()) {
+                    return true
+                } else {
+                    if (silentMode) {
+                        parseSilently()
+                        silentMode = false
+                    } else {
+                        parseAndDisplay()
+                    }
+                    isWaitingForList = false
+                    return true
+                }
+            }
+
+            if (notInPartyPattern.matches(trimmed)) {
+                lastMessageWasNotInParty = true
+                PartyUtils.disband()
+                if (!silentMode) {
+                    modMessage(
+                        formatResponse(
+                            Component.translatable("sraddons.pc.party_list.title"),
+                            Component.translatable("sraddons.pc.party_list.not_in_party").withColor(0xFF5555),
+                        ),
+                    )
+                } else {
+                    silentMode = false
+                }
                 return true
             }
-        }
 
-        if (notInPartyPattern.matches(trimmed)) {
-            lastMessageWasNotInParty = true
-            PartyUtils.disband()
-            if (!silentMode) {
-                modMessage(formatResponse(
-                    Component.translatable("sraddons.pc.party_list.title"),
-                    Component.translatable("sraddons.pc.party_list.not_in_party").withColor(0xFF5555)
-                ))
-            } else {
-                silentMode = false
+            if (collectedLines.isNotEmpty() || trimmed.startsWith("Party Members")) {
+                collectedLines.add(trimmed)
+                return true
             }
-            return true
-        }
 
-        if (collectedLines.isNotEmpty() || trimmed.startsWith("Party Members")) {
-            collectedLines.add(trimmed)
-            return true
-        }
-
-        return false
+            return false
         }
     }
 
@@ -141,7 +146,10 @@ object PartyListHandler {
         var memberCount = 0
 
         for (line in collectedLines) {
-            partySizePattern.find(line)?.let { memberCount = it.groupValues[1].toInt(); return@let }
+            partySizePattern.find(line)?.let {
+                memberCount = it.groupValues[1].toInt()
+                return@let
+            }
             leaderPattern.find(line)?.let {
                 val leaderName = it.groupValues[1]
                 leader = formatMember(leaderName)
@@ -196,22 +204,28 @@ object PartyListHandler {
 
     private fun formatMember(text: String): String {
         val cleaned = text.replace("\u25cf", "").trim()
-        val rankPattern = Regex("^(\\[.+?])?\\s*(.+?)$")
         val match = rankPattern.find(cleaned) ?: return "\u00a77$cleaned"
         val rank = match.groupValues[1]
         val name = match.groupValues[2]
-        val nameColor = when {
-            rank.contains("YOUTUBE") || rank.contains("ADMIN") -> "\u00a7c"
-            rank.contains("MVP++") -> "\u00a76"
-            rank.contains("MVP+") || rank.contains("MVP") -> "\u00a7b"
-            rank.contains("VIP+") || rank.contains("VIP") -> "\u00a7a"
-            else -> "\u00a77"
-        }
+        val nameColor =
+            when {
+                rank.contains("YOUTUBE") || rank.contains("ADMIN") -> "\u00a7c"
+                rank.contains("MVP++") -> "\u00a76"
+                rank.contains("MVP+") || rank.contains("MVP") -> "\u00a7b"
+                rank.contains("VIP+") || rank.contains("VIP") -> "\u00a7a"
+                else -> "\u00a77"
+            }
         return "$nameColor$name"
     }
 
-    private fun displayResult(leader: String?, members: List<String>, count: Int) {
-        val mc = net.minecraft.client.Minecraft.getInstance()
+    private fun displayResult(
+        leader: String?,
+        members: List<String>,
+        count: Int,
+    ) {
+        val mc =
+            net.minecraft.client.Minecraft
+                .getInstance()
         val myName = mc.player?.name?.string ?: ""
         val isLeader = leader?.noControlCodes == myName
 
@@ -222,41 +236,56 @@ object PartyListHandler {
             val isLeaderOffline = PartyUtils.isOffline(leaderClean)
             val offlineText = Component.translatable("sraddons.pc.party_list.offline").withColor(0xFF5555)
             val displayLeader = if (isLeaderOffline) "$leader §c(${offlineText.string})" else leader
-            rawMessage(Component.literal("§e§l").append(Component.translatable("sraddons.pc.party_list.leader"))
-                .append(Component.literal(":")))
+            rawMessage(
+                Component
+                    .literal("§e§l")
+                    .append(Component.translatable("sraddons.pc.party_list.leader"))
+                    .append(Component.literal(":")),
+            )
             rawMessage(Component.literal(" §7- $displayLeader"))
         } else {
-            rawMessage(Component.literal("§e§l")
-                .append(Component.translatable("sraddons.pc.party_list.leader"))
-                .append(Component.literal(": §7"))
-                .append(Component.translatable("sraddons.pc.party_list.unknown")))
+            rawMessage(
+                Component
+                    .literal("§e§l")
+                    .append(Component.translatable("sraddons.pc.party_list.leader"))
+                    .append(Component.literal(": §7"))
+                    .append(Component.translatable("sraddons.pc.party_list.unknown")),
+            )
         }
 
-        val otherMembers = members.filter {
-            val memberClean = it.noControlCodes
-            val isLdr = leader != null && memberClean.equals(leader.noControlCodes, ignoreCase = true)
-            val isSelf = memberClean.equals(myName, ignoreCase = true)
-            !isLdr && !isSelf
-        }.toMutableList()
+        val otherMembers =
+            members
+                .filter {
+                    val memberClean = it.noControlCodes
+                    val isLdr = leader != null && memberClean.equals(leader.noControlCodes, ignoreCase = true)
+                    val isSelf = memberClean.equals(myName, ignoreCase = true)
+                    !isLdr && !isSelf
+                }.toMutableList()
 
         if (!isLeader && myName.isNotEmpty()) {
             otherMembers.addFirst("§d${Component.translatable("sraddons.pc.party_list.you").string}")
         }
 
         val totalMembers = otherMembers.size
-        val onlineMembers = otherMembers.count { member ->
-            val memberClean = member.noControlCodes
-            memberClean == myName || !PartyUtils.isOffline(memberClean)
-        }
+        val onlineMembers =
+            otherMembers.count { member ->
+                val memberClean = member.noControlCodes
+                memberClean == myName || !PartyUtils.isOffline(memberClean)
+            }
         val offlineMembers = totalMembers - onlineMembers
 
-        val membersCountStr = if (offlineMembers > 0) {
-            "§7(§a$onlineMembers§7/§f$totalMembers§7)"
-        } else {
-            "§7(§f$totalMembers§7)"
-        }
-        rawMessage(Component.literal("§e§l").append(Component.translatable("sraddons.pc.party_list.members"))
-            .append(Component.literal(" $membersCountStr:")))
+        val membersCountStr =
+            if (offlineMembers > 0) {
+                "§7(§a$onlineMembers§7/§f$totalMembers§7)"
+            } else {
+                "§7(§f$totalMembers§7)"
+            }
+        rawMessage(
+            Component
+                .literal("§e§l")
+                .append(Component.translatable("sraddons.pc.party_list.members"))
+                .append(Component.literal(" $membersCountStr:")),
+        )
 
         if (otherMembers.isEmpty()) {
             rawMessage(Component.literal(" §7- §c").append(Component.translatable("sraddons.pc.party_list.none")))
@@ -271,7 +300,5 @@ object PartyListHandler {
         }
     }
 
-    private fun isSeparatorLine(text: String): Boolean {
-        return text.matches(separatorLinePattern)
-    }
+    private fun isSeparatorLine(text: String): Boolean = text.matches(separatorLinePattern)
 }

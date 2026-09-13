@@ -1,6 +1,7 @@
 plugins {
     id("net.fabricmc.fabric-loom") version "1.17.20"
     kotlin("jvm") version "2.4.20"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
 group = "com.sraddons"
@@ -46,6 +47,24 @@ tasks {
     compileKotlin {
         compilerOptions {
             jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
+            // Keep the build honest: no warning is allowed to slip through.
+            allWarningsAsErrors = true
+            freeCompilerArgs.addAll(
+                "-Wextra",
+                // Catch silently dropped return values (e.g. a command result nobody checks).
+                "-Xreturn-value-checker=check",
+            )
+        }
+    }
+
+    compileTestKotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
+            allWarningsAsErrors = true
+            freeCompilerArgs.addAll(
+                "-Wextra",
+                "-Xreturn-value-checker=check",
+            )
         }
     }
 
@@ -58,6 +77,10 @@ tasks {
     test {
         useJUnitPlatform()
     }
+}
+
+ktlint {
+    version.set("1.8.0")
 }
 
 java {

@@ -8,7 +8,5 @@ import net.fabricmc.api.Environment
 
 @Environment(EnvType.CLIENT)
 class ModMenuIntegration : ModMenuApi {
-    override fun getModConfigScreenFactory(): ConfigScreenFactory<*> {
-        return ConfigScreenFactory { parent -> SRConfigGui.createScreen(parent) }
-    }
+    override fun getModConfigScreenFactory(): ConfigScreenFactory<*> = ConfigScreenFactory { parent -> SRConfigGui.createScreen(parent) }
 }

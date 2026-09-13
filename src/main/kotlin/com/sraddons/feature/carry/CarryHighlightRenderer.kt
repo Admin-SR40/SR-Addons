@@ -18,7 +18,6 @@ import java.util.LinkedHashSet
 import java.util.SequencedSet
 
 object CarryHighlightRenderer {
-
     private val LOGGER = LogManager.getLogger("SR-Addons-CarryHL")
     private const val BOSS_TAG = "Spawned by:"
     private val seenBossUUIDs = HashSet<java.util.UUID>()
@@ -63,11 +62,13 @@ object CarryHighlightRenderer {
                 for (entity in entities) {
                     when (entity) {
                         is Player if checkClient -> {
-                            val nameLower = entity.name.string.lowercase()
-                            if (CarryState.clients.containsKey(nameLower)) {
+                            // Case-insensitive lookup without allocating a lowercased copy every frame.
+                            val name = entity.name.string
+                            if (CarryState.clients.keys.any { it.equals(name, ignoreCase = true) }) {
                                 clientPlayers.add(entity)
                             }
                         }
+
                         is ArmorStand -> {
                             val name = entity.name.string
                             if (checkBoss) {
@@ -88,9 +89,12 @@ object CarryHighlightRenderer {
             }
 
             val bossMobs = if (bossArmorStands.isNotEmpty()) findBossMobs(bossArmorStands, entities) else emptyList()
-            val minibosses = if (minibossArmorStands.isNotEmpty())
-                resolveMinibosses(minibossArmorStands, entities, clientPlayers, cfg.minibossMaxDistance.coerceIn(4, 32))
-            else emptyList()
+            val minibosses =
+                if (minibossArmorStands.isNotEmpty()) {
+                    resolveMinibosses(minibossArmorStands, entities, clientPlayers, cfg.minibossMaxDistance.coerceIn(4, 32))
+                } else {
+                    emptyList()
+                }
 
             if (bossEnabled && cfg.bossSpawnNotification) {
                 for (stand in bossArmorStands) {
@@ -123,16 +127,49 @@ object CarryHighlightRenderer {
             val collector = context.submitNodeCollector()
 
             if (clientEnabled && clientPlayers.isNotEmpty()) {
-                renderGroup(collector, poseStack, clientPlayers, cfg.clientHighlight, maxDistance, partialTicks, renderMode, lineWidth,
-                    clientFilled, clientLines)
+                renderGroup(
+                    collector,
+                    poseStack,
+                    player,
+                    clientPlayers,
+                    cfg.clientHighlight,
+                    maxDistance,
+                    partialTicks,
+                    renderMode,
+                    lineWidth,
+                    clientFilled,
+                    clientLines,
+                )
             }
             if (bossMobs.isNotEmpty()) {
-                renderGroup(collector, poseStack, bossMobs, cfg.bossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
-                    bossFilled, bossLines)
+                renderGroup(
+                    collector,
+                    poseStack,
+                    player,
+                    bossMobs,
+                    cfg.bossHighlight,
+                    maxDistance,
+                    partialTicks,
+                    renderMode,
+                    lineWidth,
+                    bossFilled,
+                    bossLines,
+                )
             }
             if (minibosses.isNotEmpty()) {
-                renderGroup(collector, poseStack, minibosses, cfg.minibossHighlight, maxDistance, partialTicks, renderMode, lineWidth,
-                    minibossFilled, minibossLines)
+                renderGroup(
+                    collector,
+                    poseStack,
+                    player,
+                    minibosses,
+                    cfg.minibossHighlight,
+                    maxDistance,
+                    partialTicks,
+                    renderMode,
+                    lineWidth,
+                    minibossFilled,
+                    minibossLines,
+                )
             }
 
             poseStack.popPose()
@@ -142,22 +179,37 @@ object CarryHighlightRenderer {
     private fun renderGroup(
         collector: net.minecraft.client.renderer.SubmitNodeCollector,
         poseStack: com.mojang.blaze3d.vertex.PoseStack,
+        player: Player,
         entities: List<LivingEntity>,
         config: SRConfig.CarryHighlightConfig,
-        maxDistance: Int, partialTicks: Float,
-        renderMode: String, lineWidth: Float,
+        maxDistance: Int,
+        partialTicks: Float,
+        renderMode: String,
+        lineWidth: Float,
         filledType: net.minecraft.client.renderer.rendertype.RenderType,
-        linesType: net.minecraft.client.renderer.rendertype.RenderType
+        linesType: net.minecraft.client.renderer.rendertype.RenderType,
     ) {
         val color = config.toARGB()
-        val boxes = HighlightUtil.collectBoxes(entities, Minecraft.getInstance().player ?: return, maxDistance, partialTicks, LOGGER)
+        val boxes = HighlightUtil.collectBoxes(entities, player, maxDistance, partialTicks, LOGGER)
         if (boxes.isNotEmpty()) {
-            HighlightUtil.drawBoxes(collector, poseStack, boxes, color, renderMode, lineWidth,
-                filledType, linesType, LOGGER)
+            HighlightUtil.drawBoxes(
+                collector,
+                poseStack,
+                boxes,
+                color,
+                renderMode,
+                lineWidth,
+                filledType,
+                linesType,
+                LOGGER,
+            )
         }
     }
 
-    private fun findBossMobs(bossArmorStands: List<ArmorStand>, entities: Iterable<Entity>): List<LivingEntity> {
+    private fun findBossMobs(
+        bossArmorStands: List<ArmorStand>,
+        entities: Iterable<Entity>,
+    ): List<LivingEntity> {
         val result: SequencedSet<LivingEntity> = LinkedHashSet()
         for (armorStand in bossArmorStands) {
             val target = HighlightUtil.findNearestMobBelow(armorStand, entities)
@@ -167,14 +219,17 @@ object CarryHighlightRenderer {
     }
 
     private fun triggerBossSpawnNotification() {
-        TitleUtil.showSubtitle(SRConfig.settings.carry.bossSpawnNotificationText.trim())
+        TitleUtil.showSubtitle(
+            SRConfig.settings.carry.bossSpawnNotificationText
+                .trim(),
+        )
     }
 
     private fun resolveMinibosses(
         minibossArmorStands: List<ArmorStand>,
         entities: Iterable<Entity>,
         clientPlayers: List<LivingEntity>,
-        maxDistance: Int
+        maxDistance: Int,
     ): List<LivingEntity> {
         val maxDistSq = (maxDistance * maxDistance).toDouble()
         val result: SequencedSet<LivingEntity> = LinkedHashSet()

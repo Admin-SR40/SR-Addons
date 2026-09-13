@@ -6,45 +6,46 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.network.chat.Component
 
 object ChatListener {
-
     // ── Regex constants ──────────────────────────────────────────────
     // RANK: optional bracket rank like [MVP++], [ADMIN], etc.
     // NAME: player name (alphanumeric + underscore, 1-16 chars)
     private const val RANK = "(?:\\[[^]]+\\] )?"
     private const val NAME = "(\\w{1,16})"
-    private const val RN = "$RANK$NAME"   // captures name in group 1, full match includes rank
+    private const val RN = "$RANK$NAME" // captures name in group 1, full match includes rank
 
     // ── Party join / leave ───────────────────────────────────────────
-    private val invitedPattern = Regex("^${RN} invited ${RN} to the party! They have 60 seconds to accept\\.\$")
-    private val joinedPartyPattern = Regex("^${RN} joined the party\\.\$")
-    private val joinedSelfPattern = Regex("^You have joined ${RN}'s party!\$")
+    private val invitedPattern = Regex("^$RN invited $RN to the party! They have 60 seconds to accept\\.\$")
+    private val joinedPartyPattern = Regex("^$RN joined the party\\.\$")
+    private val joinedSelfPattern = Regex("^You have joined $RN's party!\$")
     private val partyingWithPattern = Regex("^You'll be partying with: (.+)\$")
-    private val leftPartyPattern = Regex("^${RN} has left the party\\.\$")
+    private val leftPartyPattern = Regex("^$RN has left the party\\.\$")
     private val leftSelfPattern = Regex("^You left the party\\.\$")
 
     // ── Disband ──────────────────────────────────────────────────────
-    private val disbandByPattern = Regex("^${RN} has disbanded the party!\$")
+    private val disbandByPattern = Regex("^$RN has disbanded the party!\$")
     private val disbandEmptyPattern = Regex("^The party was disbanded because all invites expired and the party was empty\\.\$")
     private val disbandLeaderOfflinePattern = Regex("^The party was disbanded because the party leader disconnected\\.\$")
     private val notInPartyPattern = Regex("^You are not currently in a party\\.\$")
 
     // ── Transfer / Promote ───────────────────────────────────────────
-    private val transferByPattern = Regex("^The party was transferred to ${RN} by ${RN}\$")
-    private val transferLeavePattern = Regex("^The party was transferred to ${RN} because ${RN} left\$")
-    private val promotedToLeaderPattern = Regex("^${RN} has promoted ${RN} to Party Leader\$")
-    private val promotedToModPattern = Regex("^${RN} is now a Party Moderator\$")
+    private val transferByPattern = Regex("^The party was transferred to $RN by ${RN}\$")
+    private val transferLeavePattern = Regex("^The party was transferred to $RN because $RN left\$")
+    private val promotedToLeaderPattern = Regex("^$RN has promoted $RN to Party Leader\$")
+    private val promotedToModPattern = Regex("^$RN is now a Party Moderator\$")
 
     // ── Kick ─────────────────────────────────────────────────────────
-    private val kickedPattern = Regex("^${RN} has been removed from the party\\.\$")
+    private val kickedPattern = Regex("^$RN has been removed from the party\\.\$")
     private val kickedSelfPattern = Regex("^You have been kicked from the party by ${RN}\\.?\$")
-    private val kickedOfflinePattern = Regex("^Kicked ${RN} because they were offline\\.\$")
-    private val kickedDisconnectedPattern = Regex("^${RN} was removed from your party because they disconnected\\.\$")
+    private val kickedOfflinePattern = Regex("^Kicked $RN because they were offline\\.\$")
+    private val kickedDisconnectedPattern = Regex("^$RN was removed from your party because they disconnected\\.\$")
 
     // ── Disconnect / Reconnect ───────────────────────────────────────
-    private val leaderDisconnectedPattern = Regex("^The party leader, ${RN} has disconnected, they have 5 minutes to rejoin before the party is disbanded\\.\$")
-    private val leaderReconnectedPattern = Regex("^The party leader ${RN} has rejoined\\.\$")
-    private val memberDisconnectedPattern = Regex("^${RN} has disconnected, they have 5 minutes to rejoin before they are removed from the party\\.\$")
-    private val memberReconnectedPattern = Regex("^${RN} has rejoined\\.\$")
+    private val leaderDisconnectedPattern =
+        Regex("^The party leader, $RN has disconnected, they have 5 minutes to rejoin before the party is disbanded\\.\$")
+    private val leaderReconnectedPattern = Regex("^The party leader $RN has rejoined\\.\$")
+    private val memberDisconnectedPattern =
+        Regex("^$RN has disconnected, they have 5 minutes to rejoin before they are removed from the party\\.\$")
+    private val memberReconnectedPattern = Regex("^$RN has rejoined\\.\$")
 
     // ── Party Finder ─────────────────────────────────────────────────
     private val pfQueuedPattern = Regex("^Party Finder > Your party has been queued in the (?:dungeon|party) finder!\$")
@@ -52,7 +53,7 @@ object ChatListener {
     private val pfRemovedPattern = Regex("^Party Finder > Your group has been removed from the party finder!\$")
 
     // ── Lobby join (triggers auto-update) ────────────────────────────
-    private val joinedLobbyPattern = Regex("^${RN} joined the lobby!\$")
+    private val joinedLobbyPattern = Regex("^$RN joined the lobby!\$")
 
     // ── Guild invite ─────────────────────────────────────────────────
     private val guildInvitePattern = Regex("^Invited (\\d+) to your party!\$")
@@ -60,12 +61,13 @@ object ChatListener {
     // ── Other utilities ──────────────────────────────────────────────
     private val rankStripRegex = Regex("\\[.+?]\\s*")
     private val partySenderRegex = Regex("^Party > (?:\\[.+?] )?(.+?):")
-    private val cancelPatterns = listOf(
-        Regex("^Party > (?:\\[.+?] )?(.+?):"),
-        Regex("^Guild > (?:\\[.+?] )?(.+?):"),
-        Regex("^\\[\\d+\\] (?:\\[.+?] )?(.+?):"),
-        Regex("^(?:\\[.+?] )?(.+?):")
-    )
+    private val cancelPatterns =
+        listOf(
+            Regex("^Party > (?:\\[.+?] )?(.+?):"),
+            Regex("^Guild > (?:\\[.+?] )?(.+?):"),
+            Regex("^\\[\\d+\\] (?:\\[.+?] )?(.+?):"),
+            Regex("^(?:\\[.+?] )?(.+?):"),
+        )
 
     fun init() {
         ClientReceiveMessageEvents.GAME.register { message: Component, _: Boolean ->
@@ -82,7 +84,6 @@ object ChatListener {
         // ── Join / Leave ─────────────────────────────────────────
         invitedPattern.find(clean)?.let { m ->
             val inviter = m.groupValues[1]
-            val invited = m.groupValues[2]
             val myName = mc.player?.name?.string ?: return
             if (!PartyUtils.isInParty) {
                 PartyUtils.addMember(inviter)
@@ -236,15 +237,14 @@ object ChatListener {
 
         // ── Auto-reply & cancel ──────────────────────────────────
         handleCancelCommand(clean)
-        handleModCommand(message)
+        handleModCommand(clean)
     }
 
     // ══════════════════════════════════════════════════════════════════
     // Auto-reply: !mod
     // ══════════════════════════════════════════════════════════════════
-    private fun handleModCommand(message: String) {
+    private fun handleModCommand(cleanMessage: String) {
         if (!SRConfig.settings.partyCommands.mod) return
-        val cleanMessage = message.replace(COLOR_CODE_REGEX, "")
         if (!cleanMessage.startsWith("Party >")) return
         if (!cleanMessage.contains("!mod")) return
 
@@ -254,10 +254,16 @@ object ChatListener {
         val myName = mc.player?.name?.string ?: return
         if (senderClean.equals(myName, ignoreCase = true)) return
 
-        Scheduler.schedule(SRConfig.settings.partyCommands.autoReplyModDelayMs.toLong()) {
+        Scheduler.schedule(
+            SRConfig.settings.partyCommands.autoReplyModDelayMs
+                .toLong(),
+        ) {
             mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.mod").string) }
         }
-        Scheduler.schedule(SRConfig.settings.partyCommands.autoReplyGithubDelayMs.toLong()) {
+        Scheduler.schedule(
+            SRConfig.settings.partyCommands.autoReplyGithubDelayMs
+                .toLong(),
+        ) {
             mc.execute { sendPartyChat(Component.translatable("sraddons.chat.autoreply.github").string) }
         }
     }

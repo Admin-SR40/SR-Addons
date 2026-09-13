@@ -10,10 +10,11 @@ import java.nio.charset.StandardCharsets
 object SRConfig {
     private val LOGGER = LogManager.getLogger("SR-Addons-Config")
     private val GSON = GsonProvider.PRETTY
-    private val CONFIG_FILE = File(
-        FabricLoader.getInstance().configDir.toFile(),
-        "sraddons.json"
-    )
+    private val CONFIG_FILE =
+        File(
+            FabricLoader.getInstance().configDir.toFile(),
+            "sraddons.json",
+        )
 
     @Volatile
     var settings = SRConfigData()
@@ -35,7 +36,7 @@ object SRConfig {
         // Quick Tools
         var enableStandaloneCalc: Boolean = false,
         var pinTooltip: Boolean = true,
-        var pinTooltipScale: Float = 1.0f
+        var pinTooltipScale: Float = 1.0f,
     )
 
     data class PartyCommandsConfigData(
@@ -52,7 +53,7 @@ object SRConfig {
         var chatSendIntervalMs: Int = 500,
         var partyListUpdateCooldownMs: Int = 60000,
         var partyListInitialDelayMs: Int = 500,
-        var partyListUpdateDelayMs: Int = 1500
+        var partyListUpdateDelayMs: Int = 1500,
     )
 
     fun isCommandEnabled(cmd: String): Boolean = cmd !in settings.partyCommands.disabledCommands
@@ -69,30 +70,44 @@ object SRConfig {
         override var colorRed: Int = 255,
         override var colorGreen: Int = 255,
         override var colorBlue: Int = 0,
-        override var colorAlpha: Int = 200
+        override var colorAlpha: Int = 200,
     ) : HighlightColorConfig
 
     data class CarryConfigData(
         var enabled: Boolean = true,
         var clientHighlight: CarryHighlightConfig = CarryHighlightConfig(colorRed = 57, colorGreen = 255, colorBlue = 20, colorAlpha = 200),
         var bossHighlight: CarryHighlightConfig = CarryHighlightConfig(colorRed = 255, colorGreen = 50, colorBlue = 50, colorAlpha = 200),
-        var minibossHighlight: CarryHighlightConfig = CarryHighlightConfig(colorRed = 255, colorGreen = 165, colorBlue = 0, colorAlpha = 200),
+        var minibossHighlight: CarryHighlightConfig =
+            CarryHighlightConfig(colorRed = 255, colorGreen = 165, colorBlue = 0, colorAlpha = 200),
         var minibossMaxDistance: Int = 16,
-        var minibossNames: List<String> = listOf(
-            "Revenant Sycophant", "Revenant Champion", "Deformed Revenant",
-            "Atoned Champion", "Atoned Revenant",
-            "Tarantula Vermin", "Tarantula Beast", "Mutant Tarantula",
-            "Primordial Jockey", "Primordial Viscount",
-            "Pack Enforcer", "Sven Follower", "Sven Alpha",
-            "Voidling Devotee", "Voidling Radical", "Voidcrazed Maniac",
-            "Flare Demon", "Kindleheart Demon", "Burningsoul Demon"
-        ),
+        var minibossNames: List<String> =
+            listOf(
+                "Revenant Sycophant",
+                "Revenant Champion",
+                "Deformed Revenant",
+                "Atoned Champion",
+                "Atoned Revenant",
+                "Tarantula Vermin",
+                "Tarantula Beast",
+                "Mutant Tarantula",
+                "Primordial Jockey",
+                "Primordial Viscount",
+                "Pack Enforcer",
+                "Sven Follower",
+                "Sven Alpha",
+                "Voidling Devotee",
+                "Voidling Radical",
+                "Voidcrazed Maniac",
+                "Flare Demon",
+                "Kindleheart Demon",
+                "Burningsoul Demon",
+            ),
         var bossSpawnNotification: Boolean = true,
         var bossSpawnNotificationText: String = "&cBOSS SPAWNED",
         var renderMode: String = "BOTH",
         var lineWidth: Int = 3,
         var maxDistance: Int = 64,
-        var bossUuidPruneInterval: Int = 1200
+        var bossUuidPruneInterval: Int = 1200,
     )
 
     data class RagnarockConfigData(
@@ -103,7 +118,7 @@ object SRConfig {
         var cancelMessage: String = "&cRagnarock Cancelled!",
         var showStrengthGained: Boolean = true,
         var announceStrengthInParty: Boolean = false,
-        var playSound: Boolean = true
+        var playSound: Boolean = true,
     )
 
     data class PingAlertConfigData(
@@ -111,7 +126,7 @@ object SRConfig {
         var threshold: Int = 400,
         var delaySeconds: Int = 3,
         var message: String = "&cHigh Ping",
-        var playSound: Boolean = true
+        var playSound: Boolean = true,
     )
 
     data class TpsAlertConfigData(
@@ -119,7 +134,7 @@ object SRConfig {
         var threshold: Double = 16.0,
         var delaySeconds: Int = 3,
         var message: String = "&cLow TPS",
-        var playSound: Boolean = true
+        var playSound: Boolean = true,
     )
 
     data class StarredMobConfigData(
@@ -130,12 +145,12 @@ object SRConfig {
         override var colorAlpha: Int = 200,
         var renderMode: String = "BOTH",
         var lineWidth: Int = 3,
-        var maxDistance: Int = 64
+        var maxDistance: Int = 64,
     ) : HighlightColorConfig
 
     data class ChatAlertConfigData(
         var enabled: Boolean = true,
-        var entries: MutableList<String> = mutableListOf()
+        var entries: MutableList<String> = mutableListOf(),
     )
 
     data class SRConfigData(
@@ -146,7 +161,7 @@ object SRConfig {
         var ragnarock: RagnarockConfigData = RagnarockConfigData(),
         var pingAlert: PingAlertConfigData = PingAlertConfigData(),
         var tpsAlert: TpsAlertConfigData = TpsAlertConfigData(),
-        var chatAlert: ChatAlertConfigData = ChatAlertConfigData()
+        var chatAlert: ChatAlertConfigData = ChatAlertConfigData(),
     )
 
     fun load() {
@@ -194,36 +209,37 @@ object SRConfig {
     // Migrate old "helper" { ... } block to top-level fields
     private fun migrateFromHelper(root: com.google.gson.JsonObject) {
         try {
-
             settings = SRConfigData()
 
             // Preserve top-level fields that already exist in new format
-            root["general"]?.let { GSON.fromJson(it, GeneralConfigData::class.java)?.let { d -> settings.general = d } }
-            root["partyCommands"]?.let { GSON.fromJson(it, PartyCommandsConfigData::class.java)?.let { d -> settings.partyCommands = d } }
-            root["starredMob"]?.let { GSON.fromJson(it, StarredMobConfigData::class.java)?.let { d -> settings.starredMob = d } }
-            root["carry"]?.let { GSON.fromJson(it, CarryConfigData::class.java)?.let { d -> settings.carry = d } }
+            settings.general = root.read("general", settings.general)
+            settings.partyCommands = root.read("partyCommands", settings.partyCommands)
+            settings.starredMob = root.read("starredMob", settings.starredMob)
+            settings.carry = root.read("carry", settings.carry)
 
             // Migrate entityFire.hiddenFire → general.hideEntityFire
-            root["entityFire"]?.asJsonObject?.get("hiddenFire")?.let {
-                settings.general.hideEntityFire = it.asBoolean
+            root["entityFire"]?.asJsonObject?.booleanOrNull("hiddenFire")?.let {
+                settings.general.hideEntityFire = it
             }
 
             // Migrate helper sub-objects
             val helper = root["helper"]?.asJsonObject
             if (helper != null) {
                 // Complex objects → top-level
-                helper["ragnarock"]?.let { GSON.fromJson(it, RagnarockConfigData::class.java)?.let { d -> settings.ragnarock = d } }
-                helper["pingAlert"]?.let { GSON.fromJson(it, PingAlertConfigData::class.java)?.let { d -> settings.pingAlert = d } }
-                helper["tpsAlert"]?.let { GSON.fromJson(it, TpsAlertConfigData::class.java)?.let { d -> settings.tpsAlert = d } }
+                settings.ragnarock = helper.read("ragnarock", settings.ragnarock)
+                settings.pingAlert = helper.read("pingAlert", settings.pingAlert)
+                settings.tpsAlert = helper.read("tpsAlert", settings.tpsAlert)
 
                 // Simple booleans → general
-                helper["calculator"]?.asJsonObject?.get("enableStandaloneCalc")?.let { settings.general.enableStandaloneCalc = it.asBoolean }
-                helper["replaceTexts"]?.asJsonObject?.let { o ->
-                    o["enabled"]?.let { settings.general.replaceTextsEnabled = it.asBoolean }
-                    o["highlightDevName"]?.let { settings.general.highlightDevName = it.asBoolean }
+                helper["calculator"]?.asJsonObject?.booleanOrNull("enableStandaloneCalc")?.let {
+                    settings.general.enableStandaloneCalc = it
                 }
-                helper["betterFov"]?.asJsonObject?.get("enabled")?.let { settings.general.betterFov = it.asBoolean }
-                helper["fullbright"]?.asJsonObject?.get("enabled")?.let { settings.general.fullbright = it.asBoolean }
+                helper["replaceTexts"]?.asJsonObject?.let { replaceTexts ->
+                    replaceTexts.booleanOrNull("enabled")?.let { settings.general.replaceTextsEnabled = it }
+                    replaceTexts.booleanOrNull("highlightDevName")?.let { settings.general.highlightDevName = it }
+                }
+                helper["betterFov"]?.asJsonObject?.booleanOrNull("enabled")?.let { settings.general.betterFov = it }
+                helper["fullbright"]?.asJsonObject?.booleanOrNull("enabled")?.let { settings.general.fullbright = it }
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to migrate old helper config, resetting to defaults", e)
@@ -231,23 +247,38 @@ object SRConfig {
         }
     }
 
+    /** Reads a nested config object, keeping [fallback] when the key is absent or malformed. */
+    private inline fun <reified T : Any> com.google.gson.JsonObject.read(
+        key: String,
+        fallback: T,
+    ): T = get(key)?.let { GSON.fromJson(it, T::class.java) } ?: fallback
+
+    private fun com.google.gson.JsonObject.booleanOrNull(key: String): Boolean? = get(key)?.asBoolean
+
     fun save() {
         synchronized(this) {
             saveJsonAtomic(CONFIG_FILE, GSON, settings, LOGGER)
         }
     }
 
+    /** Runs [block] while holding the config lock, so a mutation and a following [save] stay consistent. */
     inline fun update(block: (SRConfigData) -> Unit) {
         synchronized(this) { block(settings) }
     }
 }
 
-fun SRConfig.HighlightColorConfig.toColor() = java.awt.Color(
-    colorRed.coerceIn(0, 255), colorGreen.coerceIn(0, 255),
-    colorBlue.coerceIn(0, 255), colorAlpha.coerceIn(0, 255)
-)
+fun SRConfig.HighlightColorConfig.toColor() =
+    java.awt.Color(
+        colorRed.coerceIn(0, 255),
+        colorGreen.coerceIn(0, 255),
+        colorBlue.coerceIn(0, 255),
+        colorAlpha.coerceIn(0, 255),
+    )
 
-fun SRConfig.HighlightColorConfig.toARGB(): Int = net.minecraft.util.ARGB.color(
-    colorAlpha.coerceIn(0, 255), colorRed.coerceIn(0, 255),
-    colorGreen.coerceIn(0, 255), colorBlue.coerceIn(0, 255)
-)
+fun SRConfig.HighlightColorConfig.toARGB(): Int =
+    net.minecraft.util.ARGB.color(
+        colorAlpha.coerceIn(0, 255),
+        colorRed.coerceIn(0, 255),
+        colorGreen.coerceIn(0, 255),
+        colorBlue.coerceIn(0, 255),
+    )

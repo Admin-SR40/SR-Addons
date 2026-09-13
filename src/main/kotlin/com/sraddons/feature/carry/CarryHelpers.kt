@@ -17,28 +17,54 @@ fun FabricClientCommandSource.requireEnabled(): Boolean {
     return true
 }
 
-fun FabricClientCommandSource.lookupClient(name: String, saveUndo: Boolean = false): CarryClient? {
+fun FabricClientCommandSource.lookupClient(
+    name: String,
+    saveUndo: Boolean = false,
+): CarryClient? {
     if (saveUndo) CarryState.saveUndo()
     return CarryState.clients[name.lowercase()] ?: run {
-        feedback(Component.translatable("sraddons.carry.client_not_found",
-            Component.literal(name).withColor(0xFF55FF)).withColor(0xFF5555))
+        feedback(
+            Component
+                .translatable(
+                    "sraddons.carry.client_not_found",
+                    Component.literal(name).withColor(0xFF55FF),
+                ).withColor(0xFF5555),
+        )
         null
     }
 }
 
 fun FabricClientCommandSource.lookupType(name: String): CarryType? =
     CarryState.types[name.lowercase()] ?: run {
-        feedback(Component.translatable("sraddons.carry.type_not_found",
-            Component.literal(name).withColor(0x55FFFF)).withColor(0xFF5555))
+        feedback(
+            Component
+                .translatable(
+                    "sraddons.carry.type_not_found",
+                    Component.literal(name).withColor(0x55FFFF),
+                ).withColor(0xFF5555),
+        )
         null
     }
 
 inline fun FabricClientCommandSource.withSingleClient(action: (CarryClient) -> Unit) {
     val count = CarryState.clients.size
     when {
-        count == 0 -> feedback(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
-        count > 1 -> feedback(Component.translatable("sraddons.carry.specify_player",
-            Component.literal(count.toString()).withColor(0xFFFFFF)).withColor(0xFF5555))
-        else -> action(CarryState.clients.values.first())
+        count == 0 -> {
+            feedback(Component.translatable("sraddons.carry.client_zero").withColor(0xFF5555))
+        }
+
+        count > 1 -> {
+            feedback(
+                Component
+                    .translatable(
+                        "sraddons.carry.specify_player",
+                        Component.literal(count.toString()).withColor(0xFFFFFF),
+                    ).withColor(0xFF5555),
+            )
+        }
+
+        else -> {
+            action(CarryState.clients.values.first())
+        }
     }
 }

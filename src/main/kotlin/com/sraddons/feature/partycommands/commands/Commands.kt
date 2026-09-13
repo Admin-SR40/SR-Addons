@@ -12,7 +12,7 @@ object Commands {
 
     @Volatile
     @JvmField
-    var DISPATCHER = CommandDispatcher<SharedSuggestionProvider>()
+    var dispatcher = CommandDispatcher<SharedSuggestionProvider>()
 
     fun add(command: Command) {
         synchronized(this) {
@@ -25,14 +25,14 @@ object Commands {
     @Throws(CommandSyntaxException::class)
     fun dispatch(message: String) {
         val source = mc.player?.connection?.suggestionsProvider ?: return
-        DISPATCHER.execute(message, source)
+        dispatcher.execute(message, source)
     }
 
     fun rebuildDispatcher() {
         synchronized(this) {
             val newDispatcher = CommandDispatcher<SharedSuggestionProvider>()
             commandList.forEach { it.registerTo(newDispatcher) }
-            DISPATCHER = newDispatcher
+            dispatcher = newDispatcher
         }
     }
 }

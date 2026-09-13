@@ -11,14 +11,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 @Mixin(LivingEntityRenderer::class)
 abstract class HiddenEntityFireMixin {
-
     @Inject(method = ["submit"], at = [At("HEAD")])
     private fun onSubmit(
         state: LivingEntityRenderState,
         matrices: com.mojang.blaze3d.vertex.PoseStack,
         collector: net.minecraft.client.renderer.SubmitNodeCollector,
         cameraState: CameraRenderState,
-        ci: CallbackInfo
+        ci: CallbackInfo,
     ) {
         if (SRConfig.settings.general.hideEntityFire) {
             state.displayFireAnimation = false

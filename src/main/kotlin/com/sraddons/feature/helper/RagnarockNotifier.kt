@@ -9,9 +9,9 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.core.component.DataComponents
-import net.minecraft.network.protocol.game.ClientboundSoundPacket
-import net.minecraft.network.chat.Component
 import net.minecraft.core.registries.Registries
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
@@ -28,7 +28,13 @@ object RagnarockNotifier {
         val level = Minecraft.getInstance().level ?: return emptySet()
         val registry = level.registryAccess().lookupOrThrow(Registries.WOLF_SOUND_VARIANT)
         wolfDeathSoundsCache.addAll(
-            registry.entrySet().map { it.value.adultSounds().deathSound().value().location }
+            registry.entrySet().map {
+                it.value
+                    .adultSounds()
+                    .deathSound()
+                    .value()
+                    .location
+            },
         )
         return wolfDeathSoundsCache
     }
@@ -52,8 +58,16 @@ object RagnarockNotifier {
     private val ItemStack.strength: Int?
         get() {
             val lore = getOrDefault(DataComponents.LORE, ItemLore.EMPTY)
-            return lore.styledLines().firstOrNull { it.string.startsWith("Strength:") }
-                ?.let { line -> strengthRegex.find(line.string)?.groupValues?.get(1)?.toIntOrNull() }
+            return lore
+                .styledLines()
+                .firstOrNull { it.string.startsWith("Strength:") }
+                ?.let { line ->
+                    strengthRegex
+                        .find(line.string)
+                        ?.groupValues
+                        ?.get(1)
+                        ?.toIntOrNull()
+                }
         }
 
     fun init() {
@@ -104,7 +118,7 @@ object RagnarockNotifier {
         if (config.playSound) {
             val mc = Minecraft.getInstance()
             mc.soundManager.play(
-                SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING.value(), 1.0f, 1.0f)
+                SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING.value(), 1.0f, 1.0f),
             )
         }
     }

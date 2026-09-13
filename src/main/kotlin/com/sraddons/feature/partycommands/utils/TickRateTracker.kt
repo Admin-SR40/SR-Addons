@@ -14,7 +14,7 @@ package com.sraddons.feature.partycommands.utils
 class TickRateTracker(
     private val maxSamples: Int = 100,
     private val staleAfterNanos: Long = 1_000_000_000L,
-    private val worldSwitchDelayNanos: Long = 5_000_000_000L
+    private val worldSwitchDelayNanos: Long = 5_000_000_000L,
 ) {
     private val tickDurationsMs = ArrayDeque<Double>()
     private var lastTickNanos = 0L
@@ -25,7 +25,10 @@ class TickRateTracker(
      * Records one server tick. Duplicate ping ids are ignored, because the same ping
      * packet can be observed more than once while it is being handled.
      */
-    fun onServerTick(pingId: Int, nowNanos: Long = System.nanoTime()) {
+    fun onServerTick(
+        pingId: Int,
+        nowNanos: Long = System.nanoTime(),
+    ) {
         synchronized(this) {
             if (lastPingId == pingId) return
             lastPingId = pingId
@@ -61,9 +64,10 @@ class TickRateTracker(
     }
 
     /** True while fresh tick data is available (a tick arrived less than a second ago). */
-    fun hasFreshData(nowNanos: Long = System.nanoTime()): Boolean = synchronized(this) {
-        tickDurationsMs.isNotEmpty() && nowNanos - lastTickNanos < staleAfterNanos
-    }
+    fun hasFreshData(nowNanos: Long = System.nanoTime()): Boolean =
+        synchronized(this) {
+            tickDurationsMs.isNotEmpty() && nowNanos - lastTickNanos < staleAfterNanos
+        }
 
     private fun computeTps(nowNanos: Long): Double {
         if (worldSwitchNanos != 0L && nowNanos - worldSwitchNanos < worldSwitchDelayNanos) return CALCULATING

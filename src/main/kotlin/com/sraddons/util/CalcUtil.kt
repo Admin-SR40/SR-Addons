@@ -8,11 +8,16 @@ import kotlin.math.pow
 object CalcUtil {
     private val suffixRegex = Regex("""(\d+(?:\.\d+)?)([KkMmBb])""")
     private val tokenRegex = Regex("""\d+(\.\d+)?|[+\-*/x^%()]""")
-    private val priority = mapOf(
-        "+" to 1, "-" to 1,
-        "*" to 2, "x" to 2, "/" to 2, "%" to 2,
-        "^" to 3
-    )
+    private val priority =
+        mapOf(
+            "+" to 1,
+            "-" to 1,
+            "*" to 2,
+            "x" to 2,
+            "/" to 2,
+            "%" to 2,
+            "^" to 3,
+        )
 
     fun evaluate(expression: String): Double {
         val expanded = expandSuffixes(expression)
@@ -22,17 +27,27 @@ object CalcUtil {
 
         for (s in tokens) {
             when {
-                s.toDoubleOrNull() != null -> out += s
+                s.toDoubleOrNull() != null -> {
+                    out += s
+                }
+
                 s in priority -> {
                     while (ops.isNotEmpty() && ops.last() != "(") {
                         val t = priority[ops.last()] ?: break
                         val c = priority[s] ?: break
-                        if (t > c || (t == c && s != "^")) out += ops.removeLast()
-                        else break
+                        if (t > c || (t == c && s != "^")) {
+                            out += ops.removeLast()
+                        } else {
+                            break
+                        }
                     }
                     ops += s
                 }
-                s == "(" -> ops += s
+
+                s == "(" -> {
+                    ops += s
+                }
+
                 s == ")" -> {
                     while (ops.isNotEmpty() && ops.last() != "(") out += ops.removeLast()
                     if (ops.isNotEmpty() && ops.last() == "(") ops.removeLast()
@@ -44,18 +59,45 @@ object CalcUtil {
 
         val stack = ArrayDeque<Double>()
         for (o in out) {
-            o.toDoubleOrNull()?.let { stack += it; continue }
+            o.toDoubleOrNull()?.let {
+                stack += it
+                continue
+            }
             if (o in priority) {
                 val b = stack.removeLastOrNull() ?: return Double.NaN
                 val a = stack.removeLastOrNull() ?: return Double.NaN
-                stack += when (o) {
-                    "+" -> a + b
-                    "-" -> a - b
-                    "*", "x" -> a * b
-                    "/", "%" -> if (b == 0.0) Double.NaN else if (o == "/") a / b else a % b
-                    "^" -> a.pow(b)
-                    else -> 0.0
-                }
+                stack +=
+                    when (o) {
+                        "+" -> {
+                            a + b
+                        }
+
+                        "-" -> {
+                            a - b
+                        }
+
+                        "*", "x" -> {
+                            a * b
+                        }
+
+                        "/", "%" -> {
+                            if (b == 0.0) {
+                                Double.NaN
+                            } else if (o == "/") {
+                                a / b
+                            } else {
+                                a % b
+                            }
+                        }
+
+                        "^" -> {
+                            a.pow(b)
+                        }
+
+                        else -> {
+                            0.0
+                        }
+                    }
             }
         }
 
@@ -65,28 +107,31 @@ object CalcUtil {
     private val intFormat = DecimalFormat("#,###", DecimalFormatSymbols(Locale.US))
     private val decFormat = DecimalFormat("#,###.############", DecimalFormatSymbols(Locale.US))
 
-    fun format(result: Double): String {
-        return if (result == result.toLong().toDouble())
+    fun format(result: Double): String =
+        if (result == result.toLong().toDouble()) {
             intFormat.format(result.toLong())
-        else
+        } else {
             decFormat.format(result)
-    }
+        }
 
-    private fun expandSuffixes(expression: String): String {
-        return suffixRegex.replace(expression.replace(" ", "")) { match ->
+    private fun expandSuffixes(expression: String): String =
+        suffixRegex.replace(expression.replace(" ", "")) { match ->
             val value = match.groupValues[1].toDouble()
             val suffix = match.groupValues[2].uppercase()
-            val multiplier = when (suffix) {
-                "K" -> 1_000.0
-                "M" -> 1_000_000.0
-                "B" -> 1_000_000_000.0
-                else -> 1.0
-            }
+            val multiplier =
+                when (suffix) {
+                    "K" -> 1_000.0
+                    "M" -> 1_000_000.0
+                    "B" -> 1_000_000_000.0
+                    else -> 1.0
+                }
             val expanded = value * multiplier
-            if (expanded == expanded.toLong().toDouble()) expanded.toLong().toString()
-            else expanded.toString()
+            if (expanded == expanded.toLong().toDouble()) {
+                expanded.toLong().toString()
+            } else {
+                expanded.toString()
+            }
         }
-    }
 
     private fun tokenize(expression: String): List<String> {
         val str = tokenRegex.findAll(expression).map { it.value }.toMutableList()

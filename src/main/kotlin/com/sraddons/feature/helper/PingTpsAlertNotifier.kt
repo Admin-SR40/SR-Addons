@@ -10,7 +10,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.sounds.SoundEvents
 
 object PingTpsAlertNotifier {
-
     private var lastCheckTime = 0L
     private var pingTriggeredMs = 0L
     private var tpsTriggeredMs = 0L
@@ -53,7 +52,10 @@ object PingTpsAlertNotifier {
         if (tpsCfg.enabled) tickTps(tpsCfg, delta)
     }
 
-    private fun tickPing(cfg: SRConfig.PingAlertConfigData, deltaMs: Long) {
+    private fun tickPing(
+        cfg: SRConfig.PingAlertConfigData,
+        deltaMs: Long,
+    ) {
         val pingHigh = ServerUtils.currentPing > cfg.threshold
 
         if (pingHigh) {
@@ -80,7 +82,10 @@ object PingTpsAlertNotifier {
         }
     }
 
-    private fun tickTps(cfg: SRConfig.TpsAlertConfigData, deltaMs: Long) {
+    private fun tickTps(
+        cfg: SRConfig.TpsAlertConfigData,
+        deltaMs: Long,
+    ) {
         val tps = ServerUtils.currentTps
         // Negative = still calculating, no fresh ticks = server is not ticking this world
         // (limbo, disconnect, …). Neither should raise a low-TPS alert.
@@ -110,12 +115,15 @@ object PingTpsAlertNotifier {
         }
     }
 
-    private fun fireAlert(message: String, playSound: Boolean) {
+    private fun fireAlert(
+        message: String,
+        playSound: Boolean,
+    ) {
         TitleUtil.showSubtitle(message)
         if (playSound) {
             val mc = Minecraft.getInstance()
             mc.soundManager.play(
-                SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING.value(), 1.0f, 1.0f)
+                SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING.value(), 1.0f, 1.0f),
             )
         }
     }

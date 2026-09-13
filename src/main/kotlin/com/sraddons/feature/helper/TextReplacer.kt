@@ -5,17 +5,17 @@ import com.sraddons.feature.partycommands.utils.COLOR_CODE_REGEX
 import com.sraddons.util.GradientText
 import com.sraddons.util.TitleUtil
 import net.minecraft.network.chat.Component
-import net.minecraft.util.FormattedCharSequence
 import net.minecraft.network.chat.Style
+import net.minecraft.util.FormattedCharSequence
 import java.util.BitSet
 
 object TextReplacer {
-
     private val gradientPrefix = ":g:"
 
-    val defaults = linkedMapOf(
-        "Admin_SR40" to ":g:cyanToLightBlue:Admin_SR40"
-    )
+    private val defaults =
+        linkedMapOf(
+            "Admin_SR40" to ":g:cyanToLightBlue:Admin_SR40",
+        )
 
     private val replacing = ThreadLocal.withInitial { false }
 
@@ -23,21 +23,14 @@ object TextReplacer {
 
     fun getCustoms(): Map<String, String> = synchronized(this) { customs.toMap() }
 
-    val activePatterns: List<Pair<String, String>>
-        get() = patternSet.patterns.toList()
-
     private data class PatternSet(
         val patterns: List<Pair<String, String>>,
         val compiled: List<Pair<Regex, String>>,
-        val minLen: Int
+        val minLen: Int,
     )
 
     @Volatile
     private var patternSet = PatternSet(emptyList(), emptyList(), Int.MAX_VALUE)
-
-    val gradientNames = listOf(
-        "cyanToLightBlue", "goldToYellow", "aquaToGreen", "redToOrange", "purpleToPink"
-    )
 
     fun init() {
         synchronized(this) {
@@ -49,24 +42,25 @@ object TextReplacer {
 
     fun rebuild() {
         synchronized(this) {
-        val newPatterns = mutableListOf<Pair<String, String>>()
+            val newPatterns =
+                buildList {
+                    if (SRConfig.settings.general.highlightDevName) {
+                        defaults.forEach { (key, value) -> add(key to value) }
+                    }
+                    customs.forEach { (key, value) -> add(key to value) }
+                }.sortedByDescending { it.first.length }
 
-        if (SRConfig.settings.general.highlightDevName) {
-            defaults.forEach { (k, v) -> newPatterns.add(k to v) }
-        }
+            val newCompiled = newPatterns.map { (k, v) -> Regex(Regex.escape(k)) to v }
+            val newMinLen = if (newPatterns.isEmpty()) Int.MAX_VALUE else newPatterns.minOf { it.first.length }
 
-        customs.entries.forEach { (k, v) -> newPatterns.add(k to v) }
-
-        newPatterns.sortByDescending { it.first.length }
-
-        val newCompiled = newPatterns.map { (k, v) -> Regex(Regex.escape(k)) to v }
-        val newMinLen = if (newPatterns.isEmpty()) Int.MAX_VALUE else newPatterns.minOf { it.first.length }
-
-        patternSet = PatternSet(newPatterns, newCompiled, newMinLen)
+            patternSet = PatternSet(newPatterns, newCompiled, newMinLen)
         }
     }
 
-    fun add(key: String, value: String) {
+    fun add(
+        key: String,
+        value: String,
+    ) {
         synchronized(this) {
             customs[key] = value
             save()
@@ -86,45 +80,35 @@ object TextReplacer {
         rebuild()
     }
 
-    fun replace(text: String): String {
-        if (!SRConfig.settings.general.replaceTextsEnabled || patternSet.patterns.isEmpty()) return text
-        if (isModMessage(text)) return text
-
-        val stripped = stripColorCodes(text)
-        if (stripped.length < patternSet.minLen) return text
-
-        var result = stripped
-        var matched = false
-        for ((regex, value) in patternSet.compiled) {
-            if (regex.containsMatchIn(result)) {
-                matched = true
-                result = result.replace(regex, stripGradientAndColors(value) + "§r")
-            }
-        }
-
-        return if (matched) result else text
-    }
-
     fun replaceFormattedSeq(seq: FormattedCharSequence): FormattedCharSequence {
         if (!SRConfig.settings.general.replaceTextsEnabled || patternSet.patterns.isEmpty()) return seq
         if (replacing.get()) return seq
 
         replacing.set(true)
         try {
-            val chars = mutableListOf<Int>()
-            val styles = mutableListOf<Style>()
-            seq.accept { _, style, cp -> chars.add(cp); styles.add(style); true }
-
-            if (chars.isEmpty()) return seq
-            if (chars.size < patternSet.minLen) return seq
-
-            val clean = buildString { chars.forEach { appendCodePoint(it) } }
-
+            // The plain text is built first: the vast majority of drawn sequences contain nothing
+            // to replace, and this way they never allocate a style list or boxed code points.
+            val clean =
+                buildString {
+                    seq.accept { _, _, codePoint ->
+                        appendCodePoint(codePoint)
+                        true
+                    }
+                }
+            if (clean.length < patternSet.minLen) return seq
             if (isModMessage(clean)) return seq
 
             val matches = findMatches(clean)
-
             if (matches.isEmpty()) return seq
+
+            // Something will change — collect code points and styles for the sequence now.
+            val chars = ArrayList<Int>(clean.length)
+            val styles = ArrayList<Style>(clean.length)
+            seq.accept { _, style, codePoint ->
+                chars.add(codePoint)
+                styles.add(style)
+                true
+            }
 
             val segments = mutableListOf<FormattedCharSequence>()
             var pos = 0
@@ -146,14 +130,17 @@ object TextReplacer {
     }
 
     private fun subSequence(
-        chars: List<Int>, styles: List<Style>,
-        from: Int, to: Int
-    ): FormattedCharSequence = FormattedCharSequence { sink ->
-        for (i in from until to) {
-            sink.accept(i - from, styles[i], chars[i])
+        chars: List<Int>,
+        styles: List<Style>,
+        from: Int,
+        to: Int,
+    ): FormattedCharSequence =
+        FormattedCharSequence { sink ->
+            for (i in from until to) {
+                sink.accept(i - from, styles[i], chars[i])
+            }
+            true
         }
-        true
-    }
 
     private fun buildReplacementComponent(value: String): Component {
         val gradientIdx = value.indexOf(gradientPrefix)
@@ -175,16 +162,17 @@ object TextReplacer {
         if (plainBefore.isNotEmpty()) {
             result = result.append(Component.literal(TitleUtil.parseColorCodes(plainBefore)))
         }
-        result = result.append(
-            when (gradientName) {
-                "cyanToLightBlue" -> GradientText.cyanToLightBlue(text)
-                "goldToYellow" -> GradientText.goldToYellow(text)
-                "aquaToGreen" -> GradientText.aquaToGreen(text)
-                "redToOrange" -> GradientText.redToOrange(text)
-                "purpleToPink" -> GradientText.purpleToPink(text)
-                else -> Component.literal(text)
-            }
-        )
+        result =
+            result.append(
+                when (gradientName) {
+                    "cyanToLightBlue" -> GradientText.cyanToLightBlue(text)
+                    "goldToYellow" -> GradientText.goldToYellow(text)
+                    "aquaToGreen" -> GradientText.aquaToGreen(text)
+                    "redToOrange" -> GradientText.redToOrange(text)
+                    "purpleToPink" -> GradientText.purpleToPink(text)
+                    else -> Component.literal(text)
+                },
+            )
         return result.append(Component.literal("§r"))
     }
 
@@ -214,21 +202,18 @@ object TextReplacer {
 
     private fun stripGradientAndColors(value: String): String {
         val gIdx = value.indexOf(gradientPrefix)
-        val flat = if (gIdx >= 0) {
-            val before = value.substring(0, gIdx)
-            val after = value.substring(gIdx + gradientPrefix.length)
-            val ci = after.indexOf(':')
-            val text = if (ci > 0) after.substring(ci + 1) else after
-            before + text
-        } else {
-            value
-        }
+        val flat =
+            if (gIdx >= 0) {
+                val before = value.substring(0, gIdx)
+                val after = value.substring(gIdx + gradientPrefix.length)
+                val ci = after.indexOf(':')
+                val text = if (ci > 0) after.substring(ci + 1) else after
+                before + text
+            } else {
+                value
+            }
         return TitleUtil.parseColorCodes(flat).replace(COLOR_CODE_REGEX, "")
     }
 
-    private fun isModMessage(text: String): Boolean =
-        text.contains("[SR-Addons]") || text.contains("[ReplaceTexts]")
-
-    private fun stripColorCodes(text: String): String =
-        text.replace(COLOR_CODE_REGEX, "")
+    private fun isModMessage(text: String): Boolean = text.contains("[SR-Addons]") || text.contains("[ReplaceTexts]")
 }

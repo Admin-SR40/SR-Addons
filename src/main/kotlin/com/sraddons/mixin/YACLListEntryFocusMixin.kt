@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 
 @Mixin(ListEntryWidget::class)
 abstract class YACLListEntryFocusMixin {
-
     @Accessor("entryWidget")
     abstract fun getEntryWidget(): AbstractWidget
 
@@ -26,7 +25,7 @@ abstract class YACLListEntryFocusMixin {
     private fun beforeMouseClicked(
         mouseButton: net.minecraft.client.input.MouseButtonEvent,
         bl: Boolean,
-        cir: CallbackInfoReturnable<Boolean>
+        cir: CallbackInfoReturnable<Boolean>,
     ) {
         // mouseClicked is only called when the widget is clicked (hovered).
         // Ensure the inner entry widget receives focus so text input works.

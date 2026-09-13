@@ -12,13 +12,15 @@ val mc: Minecraft
 fun modMessage(message: Component) {
     mc.execute {
         val prefix = Constants.makePrefix()
-        mc.gui.hud.chat.addClientSystemMessage(prefix.copy().append(message))
+        mc.gui.hud.chat
+            .addClientSystemMessage(prefix.copy().append(message))
     }
 }
 
 fun rawMessage(message: Component) {
     mc.execute {
-        mc.gui.hud.chat.addClientSystemMessage(message)
+        mc.gui.hud.chat
+            .addClientSystemMessage(message)
     }
 }
 
@@ -37,7 +39,10 @@ private fun queueSend(action: () -> Unit) {
     val delayMs: Long
     synchronized(sendQueueLock) {
         val now = System.currentTimeMillis()
-        val interval = SRConfig.settings.partyCommands.chatSendIntervalMs.coerceIn(0, 2000).toLong()
+        val interval =
+            SRConfig.settings.partyCommands.chatSendIntervalMs
+                .coerceIn(0, 2000)
+                .toLong()
         val sendAt = maxOf(now, nextSendAt)
         nextSendAt = sendAt + interval
         delayMs = sendAt - now
@@ -55,19 +60,14 @@ fun sendPartyChat(message: String) {
     queueSend { mc.player?.connection?.sendCommand("pc $clean") }
 }
 
-fun sendChatMessage(message: String) {
-    val clean = message.toPlainChatMessage()
-    if (clean.isEmpty()) return
-    queueSend { mc.player?.connection?.sendChat(clean) }
-}
-
 fun sendCommand(command: String) {
     queueSend { mc.player?.connection?.sendCommand(command) }
 }
 
 fun getPositionString(): String {
-    val player = mc.player
-        ?: return Component.translatable("sraddons.pc.position.unknown").string
+    val player =
+        mc.player
+            ?: return Component.translatable("sraddons.pc.position.unknown").string
     val pos = player.blockPosition()
     return "x: ${pos.x}, y: ${pos.y}, z: ${pos.z}"
 }
@@ -86,15 +86,19 @@ fun respond(component: Component) {
 fun respondDisabled(command: String) {
     val hasResponsePath = SRConfig.settings.partyCommands.showResponseLocally || SRConfig.settings.partyCommands.respondInPartyChat
     if (hasResponsePath) {
-        respond(formatResponse(
-            Component.translatable("sraddons.pc.label.error"),
-            Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
-        ))
+        respond(
+            formatResponse(
+                Component.translatable("sraddons.pc.label.error"),
+                Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555),
+            ),
+        )
     } else {
-        modMessage(formatResponse(
-            Component.translatable("sraddons.pc.label.error"),
-            Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555)
-        ))
+        modMessage(
+            formatResponse(
+                Component.translatable("sraddons.pc.label.error"),
+                Component.translatable("sraddons.pc.error.disabled", Component.literal("!$command")).withColor(0xFF5555),
+            ),
+        )
     }
 }
 

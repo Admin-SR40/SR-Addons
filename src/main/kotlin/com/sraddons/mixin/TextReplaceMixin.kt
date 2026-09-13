@@ -9,22 +9,17 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable
 
 @Mixin(Font::class)
 abstract class TextReplaceMixin {
-
     @ModifyVariable(
         method = ["prepareText(Lnet/minecraft/util/FormattedCharSequence;FFIZZI)Lnet/minecraft/client/gui/Font${'$'}PreparedText;"],
         at = [At("HEAD")],
-        argsOnly = true
+        argsOnly = true,
     )
-    private fun onPrepareTextSequence(seq: FormattedCharSequence): FormattedCharSequence {
-        return TextReplacer.replaceFormattedSeq(seq)
-    }
+    private fun onPrepareTextSequence(seq: FormattedCharSequence): FormattedCharSequence = TextReplacer.replaceFormattedSeq(seq)
 
     @ModifyVariable(
         method = ["width(Lnet/minecraft/util/FormattedCharSequence;)I"],
         at = [At("HEAD")],
-        argsOnly = true
+        argsOnly = true,
     )
-    private fun onWidthSequence(seq: FormattedCharSequence): FormattedCharSequence {
-        return TextReplacer.replaceFormattedSeq(seq)
-    }
+    private fun onWidthSequence(seq: FormattedCharSequence): FormattedCharSequence = TextReplacer.replaceFormattedSeq(seq)
 }

@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 
 object HudElementHider {
-
     fun init() {
         hideArmorBar()
         hideHungerBar()

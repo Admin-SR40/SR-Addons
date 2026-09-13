@@ -11,9 +11,10 @@ package com.sraddons.feature.partycommands.utils
  * Hypixel keeps the letter behind a color code when a raw code reaches party chat,
  * which is why `§aTest` used to show up as `aTest`.
  */
-val COLOR_CODE_REGEX = Regex(
-    "(?i)[\u00a7&](?:#[0-9a-f]{6}|x(?:[\u00a7&][0-9a-f]){6}|[0-9a-fk-or])"
-)
+val COLOR_CODE_REGEX =
+    Regex(
+        "(?i)[\u00a7&](?:#[0-9a-f]{6}|x(?:[\u00a7&][0-9a-f]){6}|[0-9a-fk-or])",
+    )
 
 private val WHITESPACE_REGEX = Regex("\\s+")
 

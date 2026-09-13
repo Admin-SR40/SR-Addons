@@ -12,7 +12,12 @@ import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
-fun <T> saveJsonAtomic(file: File, gson: Gson, data: T, logger: Logger) {
+fun <T> saveJsonAtomic(
+    file: File,
+    gson: Gson,
+    data: T,
+    logger: Logger,
+) {
     val tmpFile = File(file.parentFile, "${file.name}.tmp")
     try {
         OutputStreamWriter(FileOutputStream(tmpFile), StandardCharsets.UTF_8).use { writer ->
@@ -20,8 +25,10 @@ fun <T> saveJsonAtomic(file: File, gson: Gson, data: T, logger: Logger) {
         }
         try {
             Files.move(
-                tmpFile.toPath(), file.toPath(),
-                StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE
+                tmpFile.toPath(),
+                file.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.ATOMIC_MOVE,
             )
         } catch (e: AtomicMoveNotSupportedException) {
             Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING)
@@ -37,7 +44,9 @@ object Constants {
     const val GITHUB_REPO = "Admin-SR40/SR-Addons"
 
     val MOD_VERSION: String by lazy {
-        FabricLoader.getInstance().getModContainer(MOD_ID)
+        FabricLoader
+            .getInstance()
+            .getModContainer(MOD_ID)
             .map { it.metadata.version.friendlyString }
             .orElse("1.7.5")
     }

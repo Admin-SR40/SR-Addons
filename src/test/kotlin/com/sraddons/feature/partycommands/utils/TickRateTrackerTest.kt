@@ -6,13 +6,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class TickRateTrackerTest {
-
     private val base = 1_000_000_000_000L
     private val ms = 1_000_000L
 
     /** A tracker whose world-switch delay has already elapsed. */
     private fun readyTracker(): TickRateTracker =
-        TickRateTracker().also { it.onWorldChange(base - 10_000 * ms) }
+        TickRateTracker().also {
+            it.onWorldChange(base - 10_000 * ms)
+        }
 
     @Test
     fun `reports 20 tps for 50 ms ticks`() {

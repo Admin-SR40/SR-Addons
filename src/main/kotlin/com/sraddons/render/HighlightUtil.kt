@@ -14,7 +14,6 @@ import net.minecraft.world.phys.shapes.Shapes
 import org.apache.logging.log4j.Logger
 
 object HighlightUtil {
-
     private const val MAX_HORIZONTAL_DIST_SQ = 9.0
     private const val MIN_VERTICAL_OFFSET = 0.0
     private const val MAX_VERTICAL_OFFSET = 6.0
@@ -22,30 +21,44 @@ object HighlightUtil {
     /** FILL 模式的填充 alpha 乘数 */
     private const val FILL_ALPHA = 0.3f
 
-    fun createFilledType(id: String): RenderType = RenderType.create(
-        "sraddons_${id}_filled",
-        RenderSetup.builder(RenderPipelines.DEBUG_FILLED_BOX).createRenderSetup()
-    )
+    fun createFilledType(id: String): RenderType =
+        RenderType.create(
+            "sraddons_${id}_filled",
+            RenderSetup.builder(RenderPipelines.DEBUG_FILLED_BOX).createRenderSetup(),
+        )
 
-    fun createLinesType(id: String): RenderType = RenderType.create(
-        "sraddons_${id}_lines",
-        RenderSetup.builder(RenderPipelines.LINES).createRenderSetup()
-    )
+    fun createLinesType(id: String): RenderType =
+        RenderType.create(
+            "sraddons_${id}_lines",
+            RenderSetup.builder(RenderPipelines.LINES).createRenderSetup(),
+        )
 
-    fun getEntityBoundingBox(entity: Entity, partialTicks: Float): AABB {
+    fun getEntityBoundingBox(
+        entity: Entity,
+        partialTicks: Float,
+    ): AABB {
         val x = entity.xOld + (entity.x - entity.xOld) * partialTicks
         val y = entity.yOld + (entity.y - entity.yOld) * partialTicks
         val z = entity.zOld + (entity.z - entity.zOld) * partialTicks
         return entity.boundingBox.move(x - entity.x, y - entity.y, z - entity.z)
     }
 
-    fun findNearestMobBelow(armorStand: ArmorStand, entities: Iterable<Entity>): LivingEntity? {
+    fun findNearestMobBelow(
+        armorStand: ArmorStand,
+        entities: Iterable<Entity>,
+    ): LivingEntity? {
         var closest: LivingEntity? = null
         var closestDist = Double.MAX_VALUE
         val asPos = armorStand.position()
 
         for (entity in entities) {
-            if (entity !is LivingEntity || entity is ArmorStand || entity === net.minecraft.client.Minecraft.getInstance().player) continue
+            if (entity !is LivingEntity || entity is ArmorStand || entity ===
+                net.minecraft.client.Minecraft
+                    .getInstance()
+                    .player
+            ) {
+                continue
+            }
             val pos = entity.position()
             val dx = pos.x - asPos.x
             val dz = pos.z - asPos.z
@@ -67,7 +80,7 @@ object HighlightUtil {
         player: net.minecraft.world.entity.player.Player,
         maxDistance: Int,
         partialTicks: Float,
-        logger: Logger
+        logger: Logger,
     ): List<AABB> {
         val boxes = mutableListOf<AABB>()
         for (entity in entities) {
@@ -95,7 +108,7 @@ object HighlightUtil {
         lineWidth: Float,
         filledType: RenderType,
         linesType: RenderType,
-        logger: Logger
+        logger: Logger,
     ) {
         try {
             for (box in boxes) {
@@ -119,15 +132,19 @@ object HighlightUtil {
         pose: PoseStack.Pose,
         vc: com.mojang.blaze3d.vertex.VertexConsumer,
         box: AABB,
-        color: Int
+        color: Int,
     ) {
         val m = pose.pose()
         val r = ARGB.red(color)
         val g = ARGB.green(color)
         val b = ARGB.blue(color)
         val a = (ARGB.alpha(color) * FILL_ALPHA).toInt().coerceIn(0, 255)
-        val x1 = box.minX.toFloat(); val y1 = box.minY.toFloat(); val z1 = box.minZ.toFloat()
-        val x2 = box.maxX.toFloat(); val y2 = box.maxY.toFloat(); val z2 = box.maxZ.toFloat()
+        val x1 = box.minX.toFloat()
+        val y1 = box.minY.toFloat()
+        val z1 = box.minZ.toFloat()
+        val x2 = box.maxX.toFloat()
+        val y2 = box.maxY.toFloat()
+        val z2 = box.maxZ.toFloat()
 
         // Bottom
         vc.addVertex(m, x1, y1, z1).setColor(r, g, b, a)

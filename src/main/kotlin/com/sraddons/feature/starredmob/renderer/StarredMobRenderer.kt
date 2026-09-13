@@ -15,9 +15,9 @@ import java.util.LinkedHashSet
 import java.util.SequencedSet
 
 object StarredMobRenderer {
-
     private val LOGGER = LogManager.getLogger("SR-Addons-StarredMob")
     private const val STAR_SYMBOL = "✯"
+    private const val STAR_SYMBOL_CHAR = '✯'
 
     private val filledType: RenderType by lazy { HighlightUtil.createFilledType("starredmob") }
     private val linesType: RenderType by lazy { HighlightUtil.createLinesType("starredmob") }
@@ -41,9 +41,16 @@ object StarredMobRenderer {
             if (starredMobs.isEmpty()) return@register
 
             val color = SRConfig.settings.starredMob.toARGB()
-            val renderMode = SRConfig.settings.starredMob.renderMode.uppercase()
-            val lineWidth = SRConfig.settings.starredMob.lineWidth.coerceIn(1, 10).toFloat()
-            val maxDistance = SRConfig.settings.starredMob.maxDistance.coerceIn(10, 128)
+            val renderMode =
+                SRConfig.settings.starredMob.renderMode
+                    .uppercase()
+            val lineWidth =
+                SRConfig.settings.starredMob.lineWidth
+                    .coerceIn(1, 10)
+                    .toFloat()
+            val maxDistance =
+                SRConfig.settings.starredMob.maxDistance
+                    .coerceIn(10, 128)
             val partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true)
 
             val camera = mc.gameRenderer.mainCamera()
@@ -56,8 +63,17 @@ object StarredMobRenderer {
             val boxes = HighlightUtil.collectBoxes(starredMobs, player, maxDistance, partialTicks, LOGGER)
 
             if (boxes.isNotEmpty()) {
-                HighlightUtil.drawBoxes(context.submitNodeCollector(), poseStack, boxes, color, renderMode, lineWidth,
-                    filledType, linesType, LOGGER)
+                HighlightUtil.drawBoxes(
+                    context.submitNodeCollector(),
+                    poseStack,
+                    boxes,
+                    color,
+                    renderMode,
+                    lineWidth,
+                    filledType,
+                    linesType,
+                    LOGGER,
+                )
             }
 
             poseStack.popPose()
@@ -65,12 +81,16 @@ object StarredMobRenderer {
     }
 
     private fun isDamageNumber(name: String): Boolean {
-        val cleaned = name
-            .replace(STAR_SYMBOL, "")
-            .replace(",", "")
-            .replace(" ", "")
-            .replace(".", "")
-        return cleaned.isNotEmpty() && cleaned.all { it.isDigit() }
+        // Allocation free: this runs for every armor stand of every frame.
+        var sawDigit = false
+        for (char in name) {
+            when {
+                char.isDigit() -> sawDigit = true
+                char == STAR_SYMBOL_CHAR || char == ',' || char == ' ' || char == '.' -> continue
+                else -> return false
+            }
+        }
+        return sawDigit
     }
 
     private fun findStarredMobs(entities: Iterable<Entity>): List<LivingEntity> {
@@ -85,6 +105,7 @@ object StarredMobRenderer {
                         starredArmorStands.add(entity)
                     }
                 }
+
                 is LivingEntity -> {
                     val name = entity.customName?.string ?: entity.name.string
                     if (name.contains(STAR_SYMBOL)) {

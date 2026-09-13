@@ -12,16 +12,15 @@ private const val SPRINT_MULTIPLIER = 1.30000001192092896
 
 @Mixin(AbstractClientPlayer::class)
 abstract class BetterFovPlayerMixin {
-
     @ModifyArg(
         method = ["getFieldOfViewModifier"],
         at = [
             At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/util/Mth;lerp(FFF)F"
-            )
+                target = "Lnet/minecraft/util/Mth;lerp(FFF)F",
+            ),
         ],
-        index = 2
+        index = 2,
     )
     @Suppress("CAST_NEVER_SUCCEEDS")
     private fun modifyFovModifierArg(f: Float): Float {
@@ -44,11 +43,12 @@ abstract class BetterFovPlayerMixin {
 
             result /= speedFactor
 
-            val cleanValue = if (player.isSprinting) {
-                walkingSpeed * SPRINT_MULTIPLIER
-            } else {
-                walkingSpeed
-            }
+            val cleanValue =
+                if (player.isSprinting) {
+                    walkingSpeed * SPRINT_MULTIPLIER
+                } else {
+                    walkingSpeed
+                }
             val cleanSpeedFactor = (cleanValue / walkingSpeed + 1.0) / 2.0
             result *= cleanSpeedFactor
         }

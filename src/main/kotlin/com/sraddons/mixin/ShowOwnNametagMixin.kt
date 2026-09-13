@@ -11,9 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 
 @Mixin(LivingEntityRenderer::class)
 abstract class ShowOwnNametagMixin {
-
     @Inject(method = ["shouldShowName"], at = [At("HEAD")], cancellable = true)
-    private fun onShouldShowName(entity: LivingEntity, distance: Double, cir: CallbackInfoReturnable<Boolean>) {
+    private fun onShouldShowName(
+        entity: LivingEntity,
+        distance: Double,
+        cir: CallbackInfoReturnable<Boolean>,
+    ) {
         if (!SRConfig.settings.general.showOwnNameInThirdPerson) return
         val mc = Minecraft.getInstance()
         if (entity === mc.cameraEntity && !mc.options.cameraType.isFirstPerson) {

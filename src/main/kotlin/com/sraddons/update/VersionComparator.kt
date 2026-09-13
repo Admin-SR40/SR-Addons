@@ -7,8 +7,10 @@ package com.sraddons.update
  * A release counts as newer than its pre-release: `1.7.5` > `1.7.5-beta1`.
  */
 internal object VersionComparator {
-
-    fun compare(left: String, right: String): Int {
+    fun compare(
+        left: String,
+        right: String,
+    ): Int {
         val a = parts(left)
         val b = parts(right)
         for (index in 0 until maxOf(a.size, b.size)) {
@@ -29,8 +31,9 @@ internal object VersionComparator {
         return 0
     }
 
-    private fun parts(version: String): List<String> = version
-        .removePrefix("v")
-        .split('.', '-', '+', '_')
-        .filter { it.isNotEmpty() }
+    private fun parts(version: String): List<String> =
+        version
+            .removePrefix("v")
+            .split('.', '-', '+', '_')
+            .filter { it.isNotEmpty() }
 }

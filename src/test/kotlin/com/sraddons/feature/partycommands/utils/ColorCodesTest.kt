@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ColorCodesTest {
-
     @Test
     fun `strips section sign color codes`() {
         assertEquals("Test", "\u00a7aTest".noControlCodes)

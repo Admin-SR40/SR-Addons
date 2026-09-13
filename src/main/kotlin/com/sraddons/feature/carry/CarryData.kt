@@ -16,7 +16,7 @@ data class CarryType(
     val name: String,
     var price: Long = 0L,
     var bulkPrice: Long? = null,
-    var bulkThreshold: Int = 10
+    var bulkThreshold: Int = 10,
 )
 
 data class CarryClient(
@@ -24,19 +24,19 @@ data class CarryClient(
     val typeName: String,
     var amount: Int,
     var completed: Int = 0,
-    var useBulk: Boolean = false
+    var useBulk: Boolean = false,
 )
 
 data class CarryStatus(
     var totalOrders: Int = 0,
     var totalCarries: Int = 0,
-    var totalEarned: Long = 0L
+    var totalEarned: Long = 0L,
 )
 
 private data class CarryDataFile(
     val types: List<CarryType>,
     val clients: List<CarryClient>,
-    val minibossNames: List<String>? = null
+    val minibossNames: List<String>? = null,
 )
 
 object CarryState {
@@ -50,6 +50,7 @@ object CarryState {
     val types = ConcurrentHashMap<String, CarryType>()
     val clients = ConcurrentHashMap<String, CarryClient>()
     val minibossNames: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
     @Volatile
     var status = CarryStatus()
 
@@ -80,11 +81,12 @@ object CarryState {
     fun saveData() {
         val snapshot: CarryDataFile
         synchronized(this) {
-            snapshot = CarryDataFile(
-                types = types.values.toList(),
-                clients = clients.values.toList(),
-                minibossNames = minibossNames.toList()
-            )
+            snapshot =
+                CarryDataFile(
+                    types = types.values.toList(),
+                    clients = clients.values.toList(),
+                    minibossNames = minibossNames.toList(),
+                )
         }
         java.util.concurrent.CompletableFuture.runAsync({
             saveJsonAtomic(DATA_FILE, GSON, snapshot, LOGGER)
@@ -129,7 +131,7 @@ object CarryState {
     private data class UndoSnapshot(
         val types: Map<String, CarryType>,
         val clients: Map<String, CarryClient>,
-        val status: CarryStatus
+        val status: CarryStatus,
     )
 
     @Volatile
@@ -137,11 +139,12 @@ object CarryState {
 
     fun saveUndo() {
         synchronized(this) {
-            undoSnapshot = UndoSnapshot(
-                types = types.mapValues { it.value.copy() },
-                clients = clients.mapValues { it.value.copy() },
-                status = status.copy()
-            )
+            undoSnapshot =
+                UndoSnapshot(
+                    types = types.mapValues { it.value.copy() },
+                    clients = clients.mapValues { it.value.copy() },
+                    status = status.copy(),
+                )
         }
     }
 

@@ -14,16 +14,17 @@ import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
 
 object PinnedTooltipManager {
-
     val tooltips = mutableListOf<PinnedTooltip>()
+
     @Volatile
     var captureNext = false
 
-    private val pinKey = KeyMapping(
-        "key.sraddons.pin_tooltip",
-        -1,
-        CommandKeyBinding.CATEGORY_SR_ADDONS
-    )
+    private val pinKey =
+        KeyMapping(
+            "key.sraddons.pin_tooltip",
+            -1,
+            CommandKeyBinding.CATEGORY_SR_ADDONS,
+        )
 
     fun init() {
         KeyMappingHelper.registerKeyMapping(pinKey)
@@ -46,7 +47,9 @@ object PinnedTooltipManager {
             }
 
             ScreenKeyboardEvents.allowKeyPress(screen).register { _, event ->
-                if (SRConfig.settings.general.pinTooltip && pinKey.matches(event) && screen is net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<*>) {
+                if (SRConfig.settings.general.pinTooltip && pinKey.matches(event) &&
+                    screen is net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<*>
+                ) {
                     captureNext = true
                 }
                 true
@@ -95,10 +98,12 @@ object PinnedTooltipManager {
                 if (!SRConfig.settings.general.pinTooltip) return@register true
                 val hit = tooltips.findLast { it.contains(mx, my) } ?: return@register true
 
-                val ctrl = GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS ||
-                           GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_RIGHT_CONTROL) == GLFW.GLFW_PRESS
-                val shift = GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS ||
-                            GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS
+                val ctrl =
+                    GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS ||
+                        GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_RIGHT_CONTROL) == GLFW.GLFW_PRESS
+                val shift =
+                    GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS ||
+                        GLFW.glfwGetKey(Minecraft.getInstance().window.handle(), GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS
 
                 when {
                     ctrl -> hit.adjustScale(scrollY.toFloat() * 0.1f)

@@ -10,10 +10,11 @@ import java.io.File
 object ReplaceTextsData {
     private val LOGGER = LogManager.getLogger("SR-Addons-ReplaceTexts")
     private val GSON = GsonProvider.PRETTY
-    private val FILE = File(
-        FabricLoader.getInstance().configDir.toFile(),
-        "sraddons-replace-texts.json"
-    )
+    private val FILE =
+        File(
+            FabricLoader.getInstance().configDir.toFile(),
+            "sraddons-replace-texts.json",
+        )
 
     fun load(): MutableMap<String, String> {
         if (!FILE.exists()) return mutableMapOf()

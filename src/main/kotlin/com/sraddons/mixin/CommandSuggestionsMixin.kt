@@ -21,7 +21,6 @@ import java.util.concurrent.CompletableFuture
 
 @Mixin(CommandSuggestions::class)
 abstract class CommandSuggestionsMixin {
-
     @Shadow
     @JvmField
     var currentParse: ParseResults<ClientSuggestionProvider>? = null
@@ -55,10 +54,16 @@ abstract class CommandSuggestionsMixin {
     protected abstract fun showSuggestions(bl: Boolean)
 
     @Shadow
-    private fun updateUsageInfo(parse: ParseResults<ClientSuggestionProvider>, suggestions: Suggestions?) {}
+    private fun updateUsageInfo(
+        parse: ParseResults<ClientSuggestionProvider>,
+        suggestions: Suggestions?,
+    ) {}
 
     @Inject(method = ["showSuggestions"], at = [At("HEAD")])
-    private fun onShowSuggestions(bl: Boolean, ci: CallbackInfo) {
+    private fun onShowSuggestions(
+        bl: Boolean,
+        ci: CallbackInfo,
+    ) {
         val editBox = input ?: return
         val pending = pendingSuggestions ?: return
         val value = editBox.value
@@ -71,13 +76,15 @@ abstract class CommandSuggestionsMixin {
                     val filtered = brigadierSuggestions.list.filter { !it.text.startsWith("!") }
 
                     if (filtered.size != brigadierSuggestions.list.size) {
-                        pendingSuggestions = CompletableFuture.completedFuture(
-                            Suggestions(brigadierSuggestions.range, filtered)
-                        )
+                        pendingSuggestions =
+                            CompletableFuture.completedFuture(
+                                Suggestions(brigadierSuggestions.range, filtered),
+                            )
                     }
                 }
             } catch (e: Exception) {
-                org.apache.logging.log4j.LogManager.getLogger("SR-Addons-Mixin")
+                org.apache.logging.log4j.LogManager
+                    .getLogger("SR-Addons-Mixin")
                     .warn("Failed to filter ! suggestions", e)
             }
         }
@@ -107,8 +114,10 @@ abstract class CommandSuggestionsMixin {
         if (currentParse == null) {
             val player = Minecraft.getInstance().player
             if (player != null) {
-                val raw = Commands.DISPATCHER.parse(reader, player.connection.suggestionsProvider)
-                currentParse = @Suppress("UNCHECKED_CAST") (raw as? ParseResults<ClientSuggestionProvider>) ?: return
+                val raw = Commands.dispatcher.parse(reader, player.connection.suggestionsProvider)
+                currentParse =
+                    @Suppress("UNCHECKED_CAST")
+                    (raw as? ParseResults<ClientSuggestionProvider>) ?: return
             }
         }
 
@@ -116,19 +125,24 @@ abstract class CommandSuggestionsMixin {
         if (cursor >= length && (suggestions == null || !keepSuggestions)) {
             val parse = currentParse
             if (parse != null && parse.exceptions.isNotEmpty()) {
-                pendingSuggestions = CompletableFuture.completedFuture(
-                    Suggestions(StringRange.at(cursor), emptyList())
-                )
+                pendingSuggestions =
+                    CompletableFuture.completedFuture(
+                        Suggestions(StringRange.at(cursor), emptyList()),
+                    )
             } else {
                 @Suppress("UNCHECKED_CAST")
-                pendingSuggestions = Commands.DISPATCHER.getCompletionSuggestions(
-                    parse as? ParseResults<net.minecraft.commands.SharedSuggestionProvider>, cursor)
+                pendingSuggestions =
+                    Commands.dispatcher.getCompletionSuggestions(
+                        parse as? ParseResults<net.minecraft.commands.SharedSuggestionProvider>,
+                        cursor,
+                    )
             }
 
-            pendingSuggestions = pendingSuggestions?.thenApply { s ->
-                val filtered = s.list.filter { !it.text.startsWith("!") }
-                Suggestions(s.range, filtered)
-            }
+            pendingSuggestions =
+                pendingSuggestions?.thenApply { s ->
+                    val filtered = s.list.filter { !it.text.startsWith("!") }
+                    Suggestions(s.range, filtered)
+                }
 
             if (pendingSuggestions?.isDone == true && allowSuggestions) {
                 if (currentParse?.reader?.string == value) {

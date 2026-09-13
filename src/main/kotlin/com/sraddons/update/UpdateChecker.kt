@@ -9,38 +9,38 @@ import java.net.HttpURLConnection
 import java.net.URI
 
 object UpdateChecker {
-
     private val GSON = GsonProvider.PLAIN
 
     data class GithubRelease(
         @SerializedName("tag_name") val tagName: String,
-        @SerializedName("html_url") val htmlUrl: String
+        @SerializedName("html_url") val htmlUrl: String,
     )
 
     data class UpdateResult(
         val latestVersion: String,
-        val downloadUrl: String? = null
+        val downloadUrl: String? = null,
     )
 
-    suspend fun check(): UpdateResult = withContext(Dispatchers.IO) {
-        try {
-            val url = URI.create("https://api.github.com/repos/${Constants.GITHUB_REPO}/releases/latest")
-            val connection = url.toURL().openConnection() as HttpURLConnection
-            connection.connectTimeout = 5000
-            connection.readTimeout = 5000
-            connection.setRequestProperty("Accept", "application/vnd.github+json")
+    suspend fun check(): UpdateResult =
+        withContext(Dispatchers.IO) {
+            try {
+                val url = URI.create("https://api.github.com/repos/${Constants.GITHUB_REPO}/releases/latest")
+                val connection = url.toURL().openConnection() as HttpURLConnection
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+                connection.setRequestProperty("Accept", "application/vnd.github+json")
 
-            val body = connection.inputStream.bufferedReader().use { it.readText() }
-            val release = GSON.fromJson(body, GithubRelease::class.java)
-            val latestVersion = release.tagName.removePrefix("v")
+                val body = connection.inputStream.bufferedReader().use { it.readText() }
+                val release = GSON.fromJson(body, GithubRelease::class.java)
+                val latestVersion = release.tagName.removePrefix("v")
 
-            if (VersionComparator.compare(latestVersion, Constants.MOD_VERSION) > 0) {
-                UpdateResult(latestVersion, release.htmlUrl)
-            } else {
-                UpdateResult(latestVersion)
+                if (VersionComparator.compare(latestVersion, Constants.MOD_VERSION) > 0) {
+                    UpdateResult(latestVersion, release.htmlUrl)
+                } else {
+                    UpdateResult(latestVersion)
+                }
+            } catch (e: Exception) {
+                UpdateResult("unknown")
             }
-        } catch (e: Exception) {
-            UpdateResult("unknown")
         }
-    }
 }

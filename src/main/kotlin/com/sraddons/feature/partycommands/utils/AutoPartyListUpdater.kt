@@ -21,7 +21,10 @@ object AutoPartyListUpdater {
         val isInGame = mc.player != null && mc.connection != null
 
         if (!wasInGame && isInGame && !hasDoneFirstUpdate) {
-            Scheduler.schedule(SRConfig.settings.partyCommands.partyListInitialDelayMs.toLong()) {
+            Scheduler.schedule(
+                SRConfig.settings.partyCommands.partyListInitialDelayMs
+                    .toLong(),
+            ) {
                 mc.execute {
                     if (shouldUpdate()) scheduleUpdate()
                 }
@@ -45,7 +48,10 @@ object AutoPartyListUpdater {
         if (currentTime - lastUpdateTime < SRConfig.settings.partyCommands.partyListUpdateCooldownMs) return
         lastUpdateTime = currentTime
 
-        Scheduler.schedule(SRConfig.settings.partyCommands.partyListUpdateDelayMs.toLong()) {
+        Scheduler.schedule(
+            SRConfig.settings.partyCommands.partyListUpdateDelayMs
+                .toLong(),
+        ) {
             mc.execute {
                 if (mc.player != null && !mc.hasSingleplayerServer()) {
                     PartyListHandler.startAutoWaiting()

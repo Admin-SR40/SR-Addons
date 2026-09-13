@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 
 @Mixin(Camera::class)
 abstract class BetterFovCameraMixin {
-
     @Inject(method = ["getFluidInCamera"], at = [At("TAIL")], cancellable = true)
     private fun onGetFluidInCamera(cir: CallbackInfoReturnable<FogType>) {
         if (SRConfig.settings.general.betterFov) {

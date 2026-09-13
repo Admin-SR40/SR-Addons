@@ -11,12 +11,16 @@ import org.spongepowered.asm.mixin.injection.Inject
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import java.util.Optional
 
+/** The tooltip sink every other overload eventually delegates to. Kept out of the annotation for readability. */
+private const val SET_TOOLTIP_METHOD =
+    "setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;" +
+        "IILnet/minecraft/resources/Identifier;)V"
+
 @Mixin(GuiGraphicsExtractor::class)
 abstract class TooltipCaptureMixin {
-
     @Inject(
-        method = ["setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;IILnet/minecraft/resources/Identifier;)V"],
-        at = [At("HEAD")]
+        method = [SET_TOOLTIP_METHOD],
+        at = [At("HEAD")],
     )
     private fun onSetTooltip(
         font: Font,
@@ -25,7 +29,7 @@ abstract class TooltipCaptureMixin {
         x: Int,
         y: Int,
         bg: Identifier?,
-        ci: CallbackInfo
+        ci: CallbackInfo,
     ) {
         if (PinnedTooltipManager.captureNext && lines.isNotEmpty()) {
             PinnedTooltipManager.capture(lines)

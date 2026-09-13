@@ -11,11 +11,19 @@ object PartyUtils {
 
     fun getMembers(): List<String> = synchronized(this) { members.toList() }
 
-    private val RANK_PREFIXES = listOf(
-        "[MVP++]", "[MVP+]", "[MVP]",
-        "[VIP+]", "[VIP]",
-        "[YOUTUBE]", "[ADMIN]", "[GM]", "[MOD]", "[HELPER]"
-    )
+    private val RANK_PREFIXES =
+        listOf(
+            "[MVP++]",
+            "[MVP+]",
+            "[MVP]",
+            "[VIP+]",
+            "[VIP]",
+            "[YOUTUBE]",
+            "[ADMIN]",
+            "[GM]",
+            "[MOD]",
+            "[HELPER]",
+        )
 
     fun cleanPlayerName(name: String): String {
         var clean = name.noControlCodes
@@ -27,17 +35,23 @@ object PartyUtils {
 
     var partyLeader: String? = null
         @Synchronized internal set
+
         @Synchronized get
 
     var isInParty: Boolean = false
         @Synchronized internal set
+
         @Synchronized get
 
-    fun isLeader(): Boolean = synchronized(this) {
-        partyLeader == mc.player?.name?.string
-    }
+    fun isLeader(): Boolean =
+        synchronized(this) {
+            partyLeader == mc.player?.name?.string
+        }
 
-    fun addMember(playerName: String, coloredName: String? = null) {
+    fun addMember(
+        playerName: String,
+        coloredName: String? = null,
+    ) {
         synchronized(this) {
             if (!isInParty) isInParty = true
             val cleanName = cleanPlayerName(playerName)
@@ -66,10 +80,10 @@ object PartyUtils {
     fun disband() {
         synchronized(this) {
             members.clear()
-        memberColors.clear()
-        offlineMembers.clear()
-        partyLeader = null
-        isInParty = false
+            memberColors.clear()
+            offlineMembers.clear()
+            partyLeader = null
+            isInParty = false
         }
     }
 
@@ -85,9 +99,10 @@ object PartyUtils {
         }
     }
 
-    fun isOffline(playerName: String): Boolean = synchronized(this) {
-        offlineMembers.contains(playerName.noControlCodes.lowercase())
-    }
+    fun isOffline(playerName: String): Boolean =
+        synchronized(this) {
+            offlineMembers.contains(playerName.noControlCodes.lowercase())
+        }
 
     fun removeMemberWithOffline(playerName: String) {
         synchronized(this) {
@@ -101,13 +116,15 @@ object PartyUtils {
         }
     }
 
-    fun findMember(partialName: String): String = synchronized(this) {
-        members.find { it.contains(partialName, ignoreCase = true) } ?: partialName
-    }
+    fun findMember(partialName: String): String =
+        synchronized(this) {
+            members.find { it.contains(partialName, ignoreCase = true) } ?: partialName
+        }
 
-    fun getMemberWithColor(cleanName: String): String = synchronized(this) {
-        memberColors[cleanName] ?: "\u00a77$cleanName"
-    }
+    fun getMemberWithColor(cleanName: String): String =
+        synchronized(this) {
+            memberColors[cleanName] ?: "\u00a77$cleanName"
+        }
 
     fun reset() {
         disband()

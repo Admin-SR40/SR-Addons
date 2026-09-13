@@ -3,8 +3,11 @@ package com.sraddons.util
 import net.minecraft.network.chat.Component
 
 object GradientText {
-
-    private fun create(start: Int, end: Int, text: String): Component {
+    private fun create(
+        start: Int,
+        end: Int,
+        text: String,
+    ): Component {
         val length = maxOf(text.length, 1)
         var result = Component.literal("")
 
@@ -28,11 +31,19 @@ object GradientText {
         return result
     }
 
-    private fun rgb(r: Int, g: Int, b: Int) = (r shl 16) or (g shl 8) or b
+    private fun rgb(
+        r: Int,
+        g: Int,
+        b: Int,
+    ) = (r shl 16) or (g shl 8) or b
 
     fun goldToYellow(text: String): Component = create(rgb(255, 170, 0), rgb(255, 255, 85), text)
+
     fun aquaToGreen(text: String): Component = create(rgb(85, 255, 255), rgb(85, 255, 85), text)
+
     fun cyanToLightBlue(text: String): Component = create(rgb(135, 206, 250), rgb(0, 100, 160), text)
+
     fun redToOrange(text: String): Component = create(rgb(255, 85, 85), rgb(255, 170, 0), text)
+
     fun purpleToPink(text: String): Component = create(rgb(170, 0, 170), rgb(255, 85, 255), text)
 }

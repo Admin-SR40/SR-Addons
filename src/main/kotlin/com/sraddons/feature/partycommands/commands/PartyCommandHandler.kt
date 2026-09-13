@@ -5,7 +5,6 @@ import com.sraddons.feature.partycommands.utils.PartyListHandler
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 
 object PartyCommandHandler {
-
     fun init() {
         ClientTickEvents.START_CLIENT_TICK.register { _ ->
             PartyListHandler.onTick()

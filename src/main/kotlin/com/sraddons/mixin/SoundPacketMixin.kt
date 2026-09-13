@@ -10,9 +10,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 @Mixin(ClientPacketListener::class)
 class SoundPacketMixin {
-
     @Inject(method = ["handleSoundEvent"], at = [At("HEAD")])
-    private fun onSoundEvent(packet: ClientboundSoundPacket, ci: CallbackInfo) {
+    private fun onSoundEvent(
+        packet: ClientboundSoundPacket,
+        ci: CallbackInfo,
+    ) {
         SoundPacketHandler.dispatch(packet)
     }
 }

@@ -16,7 +16,7 @@ class PinnedTooltip(
     var isDragging: Boolean = false,
     var dragStartX: Double = 0.0,
     var dragStartY: Double = 0.0,
-    var collapsed: Boolean = false
+    var collapsed: Boolean = false,
 ) {
     var totalTextHeight: Int = 0
         private set
@@ -50,7 +50,10 @@ class PinnedTooltip(
         height = if (collapsed) collapsedH else expandedHeight
     }
 
-    fun contains(mx: Double, my: Double): Boolean {
+    fun contains(
+        mx: Double,
+        my: Double,
+    ): Boolean {
         val h = if (collapsed) collapsedH else (height * scale).toInt()
         return mx >= x && mx <= x + (width * scale) && my >= y && my <= y + h
     }
@@ -65,7 +68,10 @@ class PinnedTooltip(
         recalculate(Minecraft.getInstance().font)
     }
 
-    fun render(font: Font, extractor: GuiGraphicsExtractor) {
+    fun render(
+        font: Font,
+        extractor: GuiGraphicsExtractor,
+    ) {
         val s = scale
         val xi = x.toInt()
         val yi = y.toInt()
@@ -84,8 +90,11 @@ class PinnedTooltip(
             val barW = firstW.coerceIn(40, maxOf(40, rawWidth))
             val barColor = 0xFF3A3A3A.toInt()
             extractor.fill(xi, yi, xi + barW, yi + collapsedH, barColor)
-            if (lines.isNotEmpty()) extractor.text(font, lines[0], xi + 2, yi + 2, 0xFFFFFFFF.toInt())
-            else extractor.text(font, Component.literal("…"), xi + 2, yi + 2, 0xFFFFFFFF.toInt())
+            if (lines.isNotEmpty()) {
+                extractor.text(font, lines[0], xi + 2, yi + 2, 0xFFFFFFFF.toInt())
+            } else {
+                extractor.text(font, Component.literal("…"), xi + 2, yi + 2, 0xFFFFFFFF.toInt())
+            }
             if (s != 1.0f) extractor.pose().popMatrix()
             return
         }

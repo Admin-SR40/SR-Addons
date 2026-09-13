@@ -14,11 +14,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 @Mixin(ChatScreen::class)
 class CalcCommandMixin {
-
-    private val LOGGER = LogManager.getLogger("SR-Addons-Calc")
+    private val logger = LogManager.getLogger("SR-Addons-Calc")
 
     @Inject(method = ["handleChatInput"], at = [At("HEAD")], cancellable = true)
-    private fun onChatInput(message: String, addToHistory: Boolean, ci: CallbackInfo) {
+    private fun onChatInput(
+        message: String,
+        addToHistory: Boolean,
+        ci: CallbackInfo,
+    ) {
         if (!SRConfig.settings.general.enableStandaloneCalc) return
         if (!message.startsWith("/calc")) return
         if (message.length > 5 && message[5] != ' ') return
@@ -27,22 +30,27 @@ class CalcCommandMixin {
         if (expr.isEmpty()) return
 
         if (addToHistory) {
-            Minecraft.getInstance().gui.hud.chat.addRecentChat(message)
+            Minecraft
+                .getInstance()
+                .gui.hud.chat
+                .addRecentChat(message)
         }
 
         try {
             val result = CalcUtil.evaluate(expr)
             val prefix = Constants.makePrefix()
             Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
-                prefix.copy()
-                    .append(Component.translatable("sraddons.command.calc.result", expr, CalcUtil.format(result)))
+                prefix
+                    .copy()
+                    .append(Component.translatable("sraddons.command.calc.result", expr, CalcUtil.format(result))),
             )
         } catch (e: Exception) {
-            LOGGER.warn("Failed to evaluate /calc expression: $expr", e)
+            logger.warn("Failed to evaluate /calc expression: $expr", e)
             val prefix = Constants.makePrefix()
             Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
-                prefix.copy()
-                    .append(Component.translatable("sraddons.command.calc.error").withColor(0xFF5555))
+                prefix
+                    .copy()
+                    .append(Component.translatable("sraddons.command.calc.error").withColor(0xFF5555)),
             )
         }
         ci.cancel()

@@ -2,7 +2,19 @@ package com.sraddons.feature.partycommands.commands
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.sraddons.config.SRConfig
-import com.sraddons.feature.partycommands.utils.*
+import com.sraddons.feature.partycommands.utils.PartyListHandler
+import com.sraddons.feature.partycommands.utils.ServerUtils
+import com.sraddons.feature.partycommands.utils.formatResponse
+import com.sraddons.feature.partycommands.utils.getFpsColor
+import com.sraddons.feature.partycommands.utils.getPingColor
+import com.sraddons.feature.partycommands.utils.getPositionString
+import com.sraddons.feature.partycommands.utils.getTpsColor
+import com.sraddons.feature.partycommands.utils.mc
+import com.sraddons.feature.partycommands.utils.rawMessage
+import com.sraddons.feature.partycommands.utils.respond
+import com.sraddons.feature.partycommands.utils.respondDisabled
+import com.sraddons.feature.partycommands.utils.sendCommand
+import com.sraddons.feature.partycommands.utils.toFixed
 import net.minecraft.client.Minecraft
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.network.chat.Component
@@ -14,152 +26,213 @@ object InfoCommands {
     private val TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
 
     fun register() {
-        Commands.add(object : Command("help", "Show help message", "h") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("help")) showHelp() else respondDisabled("help")
-                    Command.SINGLE_SUCCESS
+        Commands.add(
+            object : Command("help", "Show help message", "h") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("help")) showHelp() else respondDisabled("help")
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
 
-        Commands.add(object : Command("ping", "Show latency") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("ping")) {
-                        val ping = ServerUtils.currentPing
-                        respond(formatResponse(
-                            Component.translatable("sraddons.pc.ping.response"),
-                            Component.literal("${ping}ms").withColor(getPingColor(ping))
-                        ))
-                    } else { respondDisabled("ping") }
-                    Command.SINGLE_SUCCESS
-                }
-            }
-        })
-
-        Commands.add(object : Command("tps", "Show server TPS") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("tps")) {
-                        val tps = ServerUtils.currentTps
-                        if (tps < 0) {
-                            respond(formatResponse(
-                                Component.translatable("sraddons.pc.tps.response"),
-                                Component.translatable(
-                                    "sraddons.pc.tps.updating",
-                                    Component.literal(ServerUtils.tpsCalculatingSeconds().toString())
-                                ).withColor(0xAAAAAA)
-                            ))
+        Commands.add(
+            object : Command("ping", "Show latency") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("ping")) {
+                            val ping = ServerUtils.currentPing
+                            respond(
+                                formatResponse(
+                                    Component.translatable("sraddons.pc.ping.response"),
+                                    Component.literal("${ping}ms").withColor(getPingColor(ping)),
+                                ),
+                            )
                         } else {
-                            respond(formatResponse(
-                                Component.translatable("sraddons.pc.tps.response"),
-                                Component.literal(tps.toFixed(1)).withColor(getTpsColor(tps))
-                            ))
+                            respondDisabled("ping")
                         }
-                    } else { respondDisabled("tps") }
-                    Command.SINGLE_SUCCESS
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
 
-        Commands.add(object : Command("fps", "Show current FPS") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("fps")) {
-                        val fps = ServerUtils.currentFps
-                        respond(formatResponse(
-                            Component.translatable("sraddons.pc.fps.response"),
-                            Component.literal(fps.toString()).withColor(getFpsColor(fps))
-                        ))
-                    } else { respondDisabled("fps") }
-                    Command.SINGLE_SUCCESS
+        Commands.add(
+            object : Command("tps", "Show server TPS") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("tps")) {
+                            val tps = ServerUtils.currentTps
+                            if (tps < 0) {
+                                respond(
+                                    formatResponse(
+                                        Component.translatable("sraddons.pc.tps.response"),
+                                        Component
+                                            .translatable(
+                                                "sraddons.pc.tps.updating",
+                                                Component.literal(ServerUtils.tpsCalculatingSeconds().toString()),
+                                            ).withColor(0xAAAAAA),
+                                    ),
+                                )
+                            } else {
+                                respond(
+                                    formatResponse(
+                                        Component.translatable("sraddons.pc.tps.response"),
+                                        Component.literal(tps.toFixed(1)).withColor(getTpsColor(tps)),
+                                    ),
+                                )
+                            }
+                        } else {
+                            respondDisabled("tps")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
 
-        Commands.add(object : Command("time", "Show current time") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("time")) {
-                        val time = ZonedDateTime.now().format(TIME_FORMATTER)
-                        respond(formatResponse(
-                            Component.translatable("sraddons.pc.time.response"),
-                            Component.literal(time).withColor(0xFFFFFF)
-                        ))
-                    } else { respondDisabled("time") }
-                    Command.SINGLE_SUCCESS
+        Commands.add(
+            object : Command("fps", "Show current FPS") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("fps")) {
+                            val fps = ServerUtils.currentFps
+                            respond(
+                                formatResponse(
+                                    Component.translatable("sraddons.pc.fps.response"),
+                                    Component.literal(fps.toString()).withColor(getFpsColor(fps)),
+                                ),
+                            )
+                        } else {
+                            respondDisabled("fps")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
 
-        Commands.add(object : Command("location", "Show current coordinates", "loc") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("location")) {
-                        val pos = getPositionString()
-                        respond(formatResponse(
-                            Component.translatable("sraddons.pc.coords.response"),
-                            Component.literal(pos).withColor(0xFFFFFF)
-                        ))
-                    } else { respondDisabled("location") }
-                    Command.SINGLE_SUCCESS
+        Commands.add(
+            object : Command("time", "Show current time") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("time")) {
+                            val time = ZonedDateTime.now().format(TIME_FORMATTER)
+                            respond(
+                                formatResponse(
+                                    Component.translatable("sraddons.pc.time.response"),
+                                    Component.literal(time).withColor(0xFFFFFF),
+                                ),
+                            )
+                        } else {
+                            respondDisabled("time")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
 
-        Commands.add(object : Command("coords", "Show current coordinates", "co") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("coords")) {
-                        val pos = getPositionString()
-                        respond(formatResponse(
-                            Component.translatable("sraddons.pc.loc.response"),
-                            Component.literal(pos).withColor(0xFFFFFF)
-                        ))
-                    } else { respondDisabled("coords") }
-                    Command.SINGLE_SUCCESS
+        Commands.add(
+            object : Command("location", "Show current coordinates", "loc") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("location")) {
+                            val pos = getPositionString()
+                            respond(
+                                formatResponse(
+                                    Component.translatable("sraddons.pc.coords.response"),
+                                    Component.literal(pos).withColor(0xFFFFFF),
+                                ),
+                            )
+                        } else {
+                            respondDisabled("location")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
 
-        Commands.add(object : Command("holding", "Show held item", "hold") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("holding")) {
-                        val item = mc.player?.mainHandItem?.displayName?.string ?: "Air"
-                        respond(formatResponse(
-                            Component.translatable("sraddons.pc.holding.response"),
-                            Component.literal(item).withColor(0xFFFFFF)
-                        ))
-                    } else { respondDisabled("holding") }
-                    Command.SINGLE_SUCCESS
+        Commands.add(
+            object : Command("coords", "Show current coordinates", "co") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("coords")) {
+                            val pos = getPositionString()
+                            respond(
+                                formatResponse(
+                                    Component.translatable("sraddons.pc.loc.response"),
+                                    Component.literal(pos).withColor(0xFFFFFF),
+                                ),
+                            )
+                        } else {
+                            respondDisabled("coords")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
 
-        Commands.add(object : Command("status", "Show party status") {
-            override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
-                builder.executes {
-                    if (SRConfig.isCommandEnabled("status")) {
-                        PartyListHandler.startWaiting()
-                        sendCommand("p list")
-                    } else { respondDisabled("status") }
-                    Command.SINGLE_SUCCESS
+        Commands.add(
+            object : Command("holding", "Show held item", "hold") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("holding")) {
+                            val item =
+                                mc.player
+                                    ?.mainHandItem
+                                    ?.displayName
+                                    ?.string ?: "Air"
+                            respond(
+                                formatResponse(
+                                    Component.translatable("sraddons.pc.holding.response"),
+                                    Component.literal(item).withColor(0xFFFFFF),
+                                ),
+                            )
+                        } else {
+                            respondDisabled("holding")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
                 }
-            }
-        })
+            },
+        )
+
+        Commands.add(
+            object : Command("status", "Show party status") {
+                override fun build(builder: LiteralArgumentBuilder<SharedSuggestionProvider>) {
+                    builder.executes {
+                        if (SRConfig.isCommandEnabled("status")) {
+                            PartyListHandler.startWaiting()
+                            sendCommand("p list")
+                        } else {
+                            respondDisabled("status")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
+                }
+            },
+        )
     }
 
-    private fun buildHelpLine(command: String, descKey: String): Component {
-        return Component.literal("§e$command §7- ")
+    private fun buildHelpLine(
+        command: String,
+        descKey: String,
+    ): Component =
+        Component
+            .literal("§e$command §7- ")
             .append(Component.translatable(descKey).withColor(0xFFFFFF))
-    }
 
     private fun showHelp() {
-        rawMessage(Component.literal("§b§l===== ")
-            .append(Component.translatable("sraddons.pc.help.title"))
-            .append(Component.literal(" =====")))
+        rawMessage(
+            Component
+                .literal("§b§l===== ")
+                .append(Component.translatable("sraddons.pc.help.title"))
+                .append(Component.literal(" =====")),
+        )
         rawMessage(buildHelpLine("!help", "sraddons.pc.help.show_message_desc"))
         rawMessage(buildHelpLine("!warp", "sraddons.pc.help.warp_desc"))
         rawMessage(buildHelpLine("!allinvite", "sraddons.pc.help.allinvite_desc"))
